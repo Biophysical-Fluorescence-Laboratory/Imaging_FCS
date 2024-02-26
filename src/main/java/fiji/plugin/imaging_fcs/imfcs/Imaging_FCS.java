@@ -451,8 +451,8 @@ public class Imaging_FCS implements PlugIn {
     private double fitobsvol3;
 
     // GPU variables
-    private static boolean isCuda = false;
-    private boolean useGpu = false;
+    private final static boolean isCuda = GpufitImFCS.isCudaAvailable();
+    private boolean useGpu = isCuda;
 
     private int isdlawcalculatedingpu = 0;
     // variables to remember last settings in the ImFCS control panel
@@ -494,10 +494,6 @@ public class Imaging_FCS implements PlugIn {
     private int roi2StartY = 0;
     private int roi2WidthX = 0;
     private int roi2HeightY = 0;
-    private final char keyMoveRight = '6';            // control keys for cursor position used by this program
-    private final char keyMoveLeft = '4';             // the keys can be changed if required; they are then used by the key listener for the image window as defined below
-    private final char keyMoveUp = '8';               // the keys work on the number block of a PC but not on the general keyboard as some of the keys are already used by ImageJ
-    private final char keyMoveDown = '2';             // potentially this could be removed as the keys are not often used
 
     // arrays and parameters used for computation of correlations and storage of results
     private double[][] datac;				// temporary array which stores the values along two pixel columns to be correlated through the imsPVideoNDave
@@ -946,7 +942,6 @@ public class Imaging_FCS implements PlugIn {
     ImagePlus impParaCnnAcf1;
     ImageCanvas impParaCnnAcf1Can;
     ImageWindow impParaCnnAcf1Win;
-    private String $impParaCnnAcf1Title;
     boolean impParaCnnAcf1exists = false;
 
     HistogramWindow histWinCnnAcf;
@@ -958,7 +953,6 @@ public class Imaging_FCS implements PlugIn {
     ImagePlus impParaCnnImage1;
     ImageCanvas impParaCnnImage1Can;
     ImageWindow impParaCnnImage1Win;
-    private String $impParaCnnImage1Title;
     boolean impParaCnnImage1exists = false;
 
     HistogramWindow histWinCnnImage;
@@ -994,27 +988,12 @@ public class Imaging_FCS implements PlugIn {
     @Override
     public void run(String arg) {
         String tempmsg;
-        try {
-            if (GpufitImFCS.isCudaAvailable()) {
-                isCuda = true;
-                useGpu = true;
-                tempmsg = "NVIDIA GPU is detected.";
-            } else {
-                tempmsg = GpufitImFCS.ALERT;
-            }
-        } catch (Exception e) {
-            // NOTE: useGpu will not be set to true. In calculateRoi function, calculations will be done on a CPU instead of GPU.
-            tempmsg = "NVIDIA GPU is not detected.";
+        if (isCuda) {
+            tempmsg = "NVIDIA GPU is detected.";
+        } else {
+            tempmsg = GpufitImFCS.ALERT;
         }
 
-        /* check screen size and adapt the dimensions of the panels accordingly
-        if ( IJ.getScreenSize().getWidth() < 1900 ) {
-
-        }
-
-        if ( IJ.getScreenSize().getWidth() < 1400 ) {
-
-        } */
         // See: https://www.geeksforgeeks.org/java-swing-jdialog-examples/
         // See: https://stackoverflow.com/questions/19274329/automatically-closing-jdialog-without-user-action
         // See: https://stackoverflow.com/questions/26075366/java-how-to-make-a-popup-window-close-automatically
