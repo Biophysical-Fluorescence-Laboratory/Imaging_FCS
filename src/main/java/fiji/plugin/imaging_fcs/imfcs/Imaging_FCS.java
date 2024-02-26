@@ -7,11 +7,9 @@ import ai.onnxruntime.OrtSession;
 import ai.onnxruntime.OrtSession.Result;
 import ai.onnxruntime.OrtSession.SessionOptions;
 import ai.onnxruntime.OrtSession.SessionOptions.OptLevel;
-
 import fiji.plugin.imaging_fcs.directCameraReadout.DirectCapture;
 import fiji.plugin.imaging_fcs.gpufitImFCS.GpufitImFCS;
 import fiji.plugin.imaging_fcs.gpufitImFCS.GpufitImFCS.*;
-
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -40,6 +38,8 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
 
 import javax.swing.Timer;
 import javax.swing.*;
@@ -1093,45 +1093,39 @@ public class Imaging_FCS implements PlugIn {
             configValmap.put("plotBlockingCurve", plotBlockingCurve);
             configValmap.put("plotCovmats", plotCovmats);
         } catch (NullPointerException e) {
-            IJ.showMessage("No configurations defiend.");
+            IJ.showMessage("No configurations defined.");
             throw new NullPointerException("Null Pointer Exception.");
         }
 
         String userHomeDir = System.getProperty("user.home");
-        // you might wwant to check read/write permissions of that directory and send a warning to the user if we can't do the two
-        String configFileName = "ImFCSconfig";
+        String configFileName = "ImFCSconfig.yaml";
         String configFilePath = userHomeDir + System.getProperty("file.separator") + configFileName;
-        FileOutputStream configout = null;
-        ObjectOutputStream cfmapout = null;
 
-        try {
-            configout = new FileOutputStream(configFilePath);
-            cfmapout = new ObjectOutputStream(configout);
-            cfmapout.writeObject(configValmap);
-            cfmapout.close();
+        // set options for the yaml config file
+        DumperOptions options = new DumperOptions();
+        options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+        options.setPrettyFlow(true);
+
+        Yaml yaml = new Yaml(options);
+        try (FileWriter writer = new FileWriter(configFilePath)) {
+            yaml.dump(configValmap, writer);
         } catch (IOException e) {
             IJ.showMessage("Can't write ImFCSconfig file.");
-            //throw new IOException ("File writing problem.");
         }
     }
 
     public void readConfigFile() {
-        Map<String, Object> configValmap = new HashMap<>();
+        Map<String, Object> configValmap = null;
         String userHomeDir = System.getProperty("user.home");
         // you might want to check read/write permissions of that directory and send a warning to the user if we can't do the two
-        String configFileName = "ImFCSconfig";
+        String configFileName = "ImFCSconfig.yaml";
         String configFilePath = userHomeDir + System.getProperty("file.separator") + configFileName;
 
-        ObjectInputStream cfmapin = null;
-        try {
-            FileInputStream configin = new FileInputStream(configFilePath);
-            cfmapin = new ObjectInputStream(configin);
-            configValmap = (Map) cfmapin.readObject();
+        Yaml yaml = new Yaml();
+        try (FileInputStream inputStream = new FileInputStream(configFilePath)) {
+            configValmap = yaml.load(inputStream);
         } catch (IOException e) {
             IJ.log("Can't read ImFCSconfig file.");
-            return;
-        } catch (ClassNotFoundException e) {
-            IJ.log("Class not found.");
             return;
         }
 
