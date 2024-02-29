@@ -4,6 +4,7 @@ import fiji.plugin.imaging_fcs.imfcs.controller.listeners.MainPanelController;
 import ij.IJ;
 
 import javax.swing.*;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 
 import static fiji.plugin.imaging_fcs.version.VERSION.IMFCS_VERSION;
@@ -41,9 +42,9 @@ public class MainPanelView extends JFrame {
     public JComboBox<String> cbDCCF;
     public JComboBox<String> cbFitModel;
 
-    public MainPanelView() {
+    public MainPanelView(MainPanelController controller) {
         super("ImFCS " + IMFCS_VERSION); // items for ImFCS control panel;
-        controller = new MainPanelController(this);
+        this.controller = controller;
         initializeUI();
     }
 
@@ -71,28 +72,35 @@ public class MainPanelView extends JFrame {
     }
 
     private void initializeTextFields() {
-        tfFirstFrame = new JTextField("1", TEXT_FIELD_COLUMNS);
+        tfFirstFrame = createTextField("1", "", controller.tfFirstFrameChanged());
 
-        tfFrameTime = new JTextField("0.001", TEXT_FIELD_COLUMNS);
-        tfFrameTime.setToolTipText("Time per this. NOTE: Changing this value will reinitialize all arrays.");
+        tfFrameTime = createTextField(
+                "0.001", "Time per this. NOTE: Changing this value will reinitialize all arrays.", null);
 
-        tfLastFrame = new JTextField("0", TEXT_FIELD_COLUMNS);
+        tfLastFrame = createTextField("0", "", controller.tfLastFrameChanged());
 
-        tfBinning = new JTextField("1 x 1", TEXT_FIELD_COLUMNS);
-        tfBinning.setToolTipText(
-                "Pixel binning used in the evaluations. NOTE: Changing this value will reinitialize all arrays.");
+        tfBinning = createTextField("1 x 1",
+                "Pixel binning used in the evaluations. NOTE: Changing this value will reinitialize all arrays.",
+                controller.expSettingsChanged());
 
-        tfCCFDistance = new JTextField("0 x 0", TEXT_FIELD_COLUMNS);
-        tfCCFDistance.setToolTipText(
-                "Distance in x- and y-direction for spatial cross-correlation. NOTE: Changing this value will reinitialize all arrays.");
+        tfCCFDistance = createTextField("0 x 0",
+                "Distance in x- and y-direction for spatial cross-correlation. NOTE: Changing this value will reinitialize all arrays.",
+                controller.expSettingsChanged());
 
-        tfCorrelatorQ = new JTextField(CORREL_Q, TEXT_FIELD_COLUMNS);
+        tfCorrelatorQ = createTextField(CORREL_Q, "", null);
+    }
 
-        // add listeners
-        tfFirstFrame.getDocument().addDocumentListener(controller.tfFirstFrameChanged());
-        tfLastFrame.getDocument().addDocumentListener(controller.tfLastFrameChanged());
-        tfBinning.getDocument().addDocumentListener(controller.expSettingsChanged());
-        tfCCFDistance.getDocument().addDocumentListener(controller.expSettingsChanged());
+    private JTextField createTextField(String text, String toolTip, DocumentListener listener) {
+        JTextField textField = new JTextField(text, TEXT_FIELD_COLUMNS);
+        if (!toolTip.isEmpty()) {
+            textField.setToolTipText(toolTip);
+        }
+
+        if (listener != null) {
+            textField.getDocument().addDocumentListener(listener);
+        }
+
+        return textField;
     }
 
     private void initializeComboBoxes() {
