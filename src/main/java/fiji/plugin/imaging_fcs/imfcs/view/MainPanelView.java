@@ -9,8 +9,12 @@ import java.awt.*;
 
 import static fiji.plugin.imaging_fcs.version.VERSION.IMFCS_VERSION;
 
+/**
+ * The MainPanelView class defines the GUI for the Imaging FCS plugin in Fiji.
+ * It extends JFrame and uses a MainPanelController to handle events.
+ */
 public class MainPanelView extends JFrame {
-    // Constants
+    // Constants for UI design
     private static final String PANEL_FONT = "SansSerif";
     private static final Dimension PANEL_DIM = new Dimension(410, 370);
     private static final Point PANEL_POS = new Point(10, 125);
@@ -18,15 +22,15 @@ public class MainPanelView extends JFrame {
     private static final String CORREL_Q = "8";
     private static final int TEXT_FIELD_COLUMNS = 8;
 
-    // Colors
+    // Colors for buttons
     private static final Color SAVE_BUTTON_COLOR = Color.BLUE;
     private static final Color LOAD_BUTTON_COLOR = Color.BLUE;
     private static final Color EXIT_BUTTON_COLOR = Color.RED;
 
-    // controller
+    // controller for handling user actions
     private final MainPanelController controller;
 
-    // Text Fields
+    // Text Fields for user input
     public JTextField tfFirstFrame; // a detailed description is given in the accompanying documentation
     public JTextField tfLastFrame;
     public JTextField tfFrameTime;
@@ -34,7 +38,7 @@ public class MainPanelView extends JFrame {
     public JTextField tfCCFDistance;
     public JTextField tfCorrelatorQ;
 
-    // Combo boxes
+    // Combo boxes for selecting options
     public JComboBox<String> cbCorrelatorP;
     public JComboBox<String> cbBleachCor;
     public JComboBox<String> cbFilter;
@@ -42,12 +46,20 @@ public class MainPanelView extends JFrame {
     public JComboBox<String> cbDCCF;
     public JComboBox<String> cbFitModel;
 
+    /**
+     * Constructs the MainPanelView with a specified controller.
+     *
+     * @param controller The controller to handle actions performed on this panel.
+     */
     public MainPanelView(MainPanelController controller) {
         super("ImFCS " + IMFCS_VERSION); // items for ImFCS control panel;
         this.controller = controller;
         initializeUI();
     }
 
+    /**
+     * Initializes the user interface components and layout.
+     */
     private void initializeUI() {
         configureWindow();
         initializeTextFields();
@@ -62,6 +74,9 @@ public class MainPanelView extends JFrame {
         setVisible(true);
     }
 
+    /**
+     * Configures basic window properties.
+     */
     private void configureWindow() {
         setFocusable(true);
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -71,6 +86,12 @@ public class MainPanelView extends JFrame {
         setResizable(false);
     }
 
+    /**
+     * Initializes text fields with default values and adds document listeners where applicable.
+     * This method sets up the text fields used for user input in the main panel, including setting
+     * initial values and tooltips to guide the user. Listeners are attached to fields to handle
+     * changes in input, triggering appropriate actions in the application.
+     */
     private void initializeTextFields() {
         tfFirstFrame = createTextField("1", "", controller.tfFirstFrameChanged());
 
@@ -90,6 +111,14 @@ public class MainPanelView extends JFrame {
         tfCorrelatorQ = createTextField(CORREL_Q, "", null);
     }
 
+    /**
+     * Creates a text field with specified initial text, tooltip, and document listener.
+     *
+     * @param text     The initial text for the text field.
+     * @param toolTip  The tooltip to display when hovering over the text field.
+     * @param listener The document listener to attach to the text field, or null if no listener is needed.
+     * @return A new JTextField instance configured with the specified parameters.
+     */
     private JTextField createTextField(String text, String toolTip, DocumentListener listener) {
         JTextField textField = new JTextField(text, TEXT_FIELD_COLUMNS);
         if (!toolTip.isEmpty()) {
@@ -103,6 +132,11 @@ public class MainPanelView extends JFrame {
         return textField;
     }
 
+    /**
+     * Initializes combo boxes with options for various parameters and settings.
+     * This method sets up combo boxes used for selecting options in the main panel. It also
+     * attaches action listeners to some combo boxes to handle user selections.
+     */
     private void initializeComboBoxes() {
         cbFitModel = new JComboBox<>(new String[]{"ITIR-FCS (2D)", "SPIM-FCS (3D)", "DC-FCCS (2D)"});
         cbCorrelatorP = new JComboBox<>(new String[]{"16", "32"});
@@ -128,6 +162,14 @@ public class MainPanelView extends JFrame {
         cbFilter.addActionListener(controller.cbFilterChanged());
     }
 
+    /**
+     * Adds components to the frame, organizing them according to the specified layout.
+     * This method meticulously places labels, text fields, combo boxes, and buttons into the
+     * frame, utilizing a grid layout. It also configures action listeners for buttons to
+     * interact with the controller for executing actions based on user input.
+     *
+     * @throws Exception if there is an error adding components to the frame.
+     */
     private void addComponentsToFrame() throws Exception {
         // create the button factory
         ButtonFactory btnFact = new ButtonFactory();
