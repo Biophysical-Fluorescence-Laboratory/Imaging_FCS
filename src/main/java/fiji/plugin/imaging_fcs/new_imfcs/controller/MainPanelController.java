@@ -4,15 +4,17 @@ import fiji.plugin.imaging_fcs.new_imfcs.model.HardwareModel;
 import fiji.plugin.imaging_fcs.new_imfcs.view.MainPanelView;
 
 import javax.swing.event.DocumentListener;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
 
 public class MainPanelController {
-    private MainPanelView view;
-    private HardwareModel hardwareModel;
+    private final MainPanelView view;
+    private final HardwareModel hardwareModel;
 
     public MainPanelController(HardwareModel hardwareModel) {
         this.view = new MainPanelView(this);
+        this.hardwareModel = hardwareModel;
     }
 
     public DocumentListener expSettingsChanged() {
@@ -41,8 +43,7 @@ public class MainPanelController {
     }
 
     public ActionListener btnExitPressed() {
-        // TODO: FIXME
-        return null;
+        return (ActionEvent ev) -> view.dispose();
     }
 
     public ActionListener btnBtfPressed() {

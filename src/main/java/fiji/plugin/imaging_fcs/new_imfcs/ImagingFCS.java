@@ -5,7 +5,6 @@ import ij.ImageJ;
 import ij.plugin.PlugIn;
 
 public class ImagingFCS implements PlugIn {
-
     public static void main(final String[] args) {
         ImageJ.main(args);
         new ImagingFCS().run("");
@@ -13,6 +12,7 @@ public class ImagingFCS implements PlugIn {
 
     @Override
     public void run(String _arg) {
+        UIUtils.setUIFont();
         new SplashScreenController();
     }
 }
