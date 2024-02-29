@@ -1,4 +1,4 @@
-package fiji.plugin.imaging_fcs.imfcs.view;
+package fiji.plugin.imaging_fcs.new_imfcs.view;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,7 +26,7 @@ public class ButtonFactory {
      * @throws Exception if there is an error creating the button instance
      */
     private AbstractButton createButton(Class<? extends AbstractButton> buttonClass, String label, String toolTipText,
-            Font font) throws Exception {
+                                        Font font) throws Exception {
         AbstractButton button = buttonClass.getDeclaredConstructor(String.class).newInstance(label);
 
         if (!toolTipText.isEmpty()) {

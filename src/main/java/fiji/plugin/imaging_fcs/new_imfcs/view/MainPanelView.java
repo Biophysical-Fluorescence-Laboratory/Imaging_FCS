@@ -1,6 +1,7 @@
-package fiji.plugin.imaging_fcs.imfcs.view;
+package fiji.plugin.imaging_fcs.new_imfcs.view;
 
-import fiji.plugin.imaging_fcs.imfcs.controller.listeners.MainPanelController;
+import fiji.plugin.imaging_fcs.new_imfcs.constants.Constants;
+import fiji.plugin.imaging_fcs.new_imfcs.controller.listeners.MainPanelController;
 import ij.IJ;
 
 import javax.swing.*;
@@ -15,7 +16,6 @@ import static fiji.plugin.imaging_fcs.version.VERSION.IMFCS_VERSION;
  */
 public class MainPanelView extends JFrame {
     // Constants for UI design
-    private static final String PANEL_FONT = "SansSerif";
     private static final Dimension PANEL_DIM = new Dimension(410, 370);
     private static final Point PANEL_POS = new Point(10, 125);
     private static final GridLayout PANEL_LAYOUT = new GridLayout(14, 4);
@@ -210,7 +210,7 @@ public class MainPanelView extends JFrame {
                 controller.tbExpSettingsPressed()));
         add(btnFact.createJButton("Write Conf",
                 "Writes a configuration file int user.home that will be read at next ImFCS start",
-                new Font(PANEL_FONT, Font.BOLD, 11), controller.btnWriteConfigPressed()));
+                new Font(Constants.PANEL_FONT, Font.BOLD, 11), controller.btnWriteConfigPressed()));
 
         // row 4
         add(new JLabel("CCF distance: "));
@@ -227,9 +227,9 @@ public class MainPanelView extends JFrame {
         // row 6
         add(new JLabel("Fit Model: "));
         add(cbFitModel);
-        add(btnFact.createJToggleButton("FCCS Disp Off", "", new Font(PANEL_FONT, Font.BOLD, 9),
+        add(btnFact.createJToggleButton("FCCS Disp Off", "", new Font(Constants.PANEL_FONT, Font.BOLD, 9),
                 controller.tbFCCSDisplayPressed()));
-        add(btnFact.createJToggleButton("Overlap Off", "", new Font(PANEL_FONT, Font.BOLD, 11),
+        add(btnFact.createJToggleButton("Overlap Off", "", new Font(Constants.PANEL_FONT, Font.BOLD, 11),
                 controller.tbOverlapPressed()));
 
         // row 7
@@ -239,10 +239,10 @@ public class MainPanelView extends JFrame {
         add(new JLabel(""));
 
         // row 8
-        add(btnFact.createJButton("LiveReadout", "", new Font(PANEL_FONT, Font.BOLD, 10), controller.btnDCRPressed()));
+        add(btnFact.createJButton("LiveReadout", "", new Font(Constants.PANEL_FONT, Font.BOLD, 10), controller.btnDCRPressed()));
         add(btnFact.createJButton("PVideo", "Creates videos of parameter maps", null, controller.btnParamVideoPressed()));
         add(btnFact.createJToggleButton("Background", "Panel for different methods to perform background subtraction.",
-                new Font(PANEL_FONT, Font.BOLD, 10), controller.tbBackgroundPressed()));
+                new Font(Constants.PANEL_FONT, Font.BOLD, 10), controller.tbBackgroundPressed()));
         add(btnFact.createJButton("", "", null, controller.btnDebugPressed()));
 
         // row 9
