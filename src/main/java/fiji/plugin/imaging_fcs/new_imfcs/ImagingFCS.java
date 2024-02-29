@@ -1,6 +1,6 @@
 package fiji.plugin.imaging_fcs.new_imfcs;
 
-import fiji.plugin.imaging_fcs.new_imfcs.controller.listeners.MainPanelController;
+import fiji.plugin.imaging_fcs.new_imfcs.controller.SplashScreenController;
 import ij.ImageJ;
 import ij.plugin.PlugIn;
 
@@ -13,6 +13,6 @@ public class ImagingFCS implements PlugIn {
 
     @Override
     public void run(String _arg) {
-        MainPanelController mainController = new MainPanelController();
+        new SplashScreenController();
     }
 }

@@ -1,5 +1,6 @@
-package fiji.plugin.imaging_fcs.new_imfcs.controller.listeners;
+package fiji.plugin.imaging_fcs.new_imfcs.controller;
 
+import fiji.plugin.imaging_fcs.new_imfcs.model.HardwareModel;
 import fiji.plugin.imaging_fcs.new_imfcs.view.MainPanelView;
 
 import javax.swing.event.DocumentListener;
@@ -8,8 +9,9 @@ import java.awt.event.ItemListener;
 
 public class MainPanelController {
     private MainPanelView view;
+    private HardwareModel hardwareModel;
 
-    public MainPanelController() {
+    public MainPanelController(HardwareModel hardwareModel) {
         this.view = new MainPanelView(this);
     }
 

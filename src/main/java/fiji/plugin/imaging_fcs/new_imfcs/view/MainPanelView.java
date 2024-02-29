@@ -1,7 +1,7 @@
 package fiji.plugin.imaging_fcs.new_imfcs.view;
 
 import fiji.plugin.imaging_fcs.new_imfcs.constants.Constants;
-import fiji.plugin.imaging_fcs.new_imfcs.controller.listeners.MainPanelController;
+import fiji.plugin.imaging_fcs.new_imfcs.controller.MainPanelController;
 import ij.IJ;
 
 import javax.swing.*;
@@ -16,8 +16,6 @@ import static fiji.plugin.imaging_fcs.version.VERSION.IMFCS_VERSION;
  */
 public class MainPanelView extends JFrame {
     // Constants for UI design
-    private static final Dimension PANEL_DIM = new Dimension(410, 370);
-    private static final Point PANEL_POS = new Point(10, 125);
     private static final GridLayout PANEL_LAYOUT = new GridLayout(14, 4);
     private static final String CORREL_Q = "8";
     private static final int TEXT_FIELD_COLUMNS = 8;
@@ -52,7 +50,7 @@ public class MainPanelView extends JFrame {
      * @param controller The controller to handle actions performed on this panel.
      */
     public MainPanelView(MainPanelController controller) {
-        super("ImFCS " + IMFCS_VERSION); // items for ImFCS control panel;
+        super("ImagingFCS " + IMFCS_VERSION); // items for ImFCS control panel;
         this.controller = controller;
         initializeUI();
     }
@@ -81,8 +79,8 @@ public class MainPanelView extends JFrame {
         setFocusable(true);
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         setLayout(PANEL_LAYOUT);
-        setLocation(PANEL_POS);
-        setSize(PANEL_DIM);
+        setLocation(Constants.MAIN_PANEL_POS);
+        setSize(Constants.MAIN_PANEL_DIM);
         setResizable(false);
     }
 
