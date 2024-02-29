@@ -1,6 +1,6 @@
 package fiji.plugin.imaging_fcs.imfcs.view;
 
-import fiji.plugin.imaging_fcs.imfcs.controller.action_listeners.MainPanelController;
+import fiji.plugin.imaging_fcs.imfcs.controller.listeners.MainPanelController;
 import ij.IJ;
 
 import javax.swing.*;
@@ -55,7 +55,7 @@ public class MainPanelView extends JFrame {
         try {
             addComponentsToFrame();
         } catch (Exception e) {
-            IJ.log(e)
+            IJ.log(e.getMessage());
         }
 
         setVisible(true);

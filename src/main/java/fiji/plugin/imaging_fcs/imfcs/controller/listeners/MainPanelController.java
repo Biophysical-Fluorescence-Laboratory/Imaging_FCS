@@ -1,4 +1,4 @@
-package fiji.plugin.imaging_fcs.imfcs.controller.action_listeners;
+package fiji.plugin.imaging_fcs.imfcs.controller.listeners;
 
 import fiji.plugin.imaging_fcs.imfcs.Imaging_FCS;
 import fiji.plugin.imaging_fcs.imfcs.TimerFit;
