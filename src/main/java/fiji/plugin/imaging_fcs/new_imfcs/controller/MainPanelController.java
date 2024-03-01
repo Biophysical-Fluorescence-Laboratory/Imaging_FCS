@@ -1,6 +1,7 @@
 package fiji.plugin.imaging_fcs.new_imfcs.controller;
 
 import fiji.plugin.imaging_fcs.new_imfcs.model.HardwareModel;
+import fiji.plugin.imaging_fcs.new_imfcs.model.OptionsModel;
 import fiji.plugin.imaging_fcs.new_imfcs.view.MainPanelView;
 
 import javax.swing.event.DocumentListener;
@@ -11,10 +12,12 @@ import java.awt.event.ItemListener;
 public class MainPanelController {
     private final MainPanelView view;
     private final HardwareModel hardwareModel;
+    private final OptionsModel optionsModel;
 
     public MainPanelController(HardwareModel hardwareModel) {
         this.view = new MainPanelView(this);
         this.hardwareModel = hardwareModel;
+        this.optionsModel = new OptionsModel(hardwareModel.isCuda());
     }
 
     public DocumentListener expSettingsChanged() {
@@ -87,8 +90,7 @@ public class MainPanelController {
     }
 
     public ActionListener btnOptionsPressed() {
-        // TODO: FIXME
-        return null;
+        return (ActionEvent ev) -> new OptionsController(optionsModel);
     }
 
     public ItemListener tbNBPressed() {
