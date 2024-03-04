@@ -1,8 +1,13 @@
 package fiji.plugin.imaging_fcs.new_imfcs.controller;
 
 import fiji.plugin.imaging_fcs.new_imfcs.model.HardwareModel;
+import fiji.plugin.imaging_fcs.new_imfcs.model.ImageModel;
 import fiji.plugin.imaging_fcs.new_imfcs.model.OptionsModel;
+import fiji.plugin.imaging_fcs.new_imfcs.view.ImageView;
 import fiji.plugin.imaging_fcs.new_imfcs.view.MainPanelView;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.WindowManager;
 
 import javax.swing.event.DocumentListener;
 import java.awt.event.ActionEvent;
@@ -13,11 +18,13 @@ public class MainPanelController {
     private final MainPanelView view;
     private final HardwareModel hardwareModel;
     private final OptionsModel optionsModel;
+    private final ImageModel imageModel;
 
     public MainPanelController(HardwareModel hardwareModel) {
         this.view = new MainPanelView(this);
         this.hardwareModel = hardwareModel;
         this.optionsModel = new OptionsModel(hardwareModel.isCuda());
+        this.imageModel = new ImageModel();
     }
 
     public DocumentListener expSettingsChanged() {
@@ -55,13 +62,34 @@ public class MainPanelController {
     }
 
     public ActionListener btnUseExistingPressed() {
-        // TODO: FIXME
-        return null;
+        return (ActionEvent ev) -> {
+            if (WindowManager.getImageCount() > 0) {
+                try {
+                    imageModel.loadImage(IJ.getImage());
+                    ImageView imageView = new ImageView();
+                    imageView.showImage(imageModel);
+                } catch (RuntimeException e) {
+                    IJ.showMessage("Wrong image format", e.getMessage());
+                }
+            } else {
+                IJ.showMessage("No image open.");
+            }
+        };
     }
 
     public ActionListener btnLoadNewPressed() {
-        // TODO: FIXME
-        return null;
+        return (ActionEvent ev) -> {
+            ImagePlus image = IJ.openImage();
+            if (image != null) {
+                try {
+                    imageModel.loadImage(image);
+                    ImageView imageView = new ImageView();
+                    imageView.showImage(imageModel);
+                } catch (RuntimeException e) {
+                    IJ.showMessage("Wrong image format", e.getMessage());
+                }
+            }
+        };
     }
 
     public ActionListener btnSavePressed() {

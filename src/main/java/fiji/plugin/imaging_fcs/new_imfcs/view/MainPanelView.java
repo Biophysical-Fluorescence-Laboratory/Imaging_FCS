@@ -15,8 +15,6 @@ import static fiji.plugin.imaging_fcs.version.VERSION.IMFCS_VERSION;
  * It extends JFrame and uses a MainPanelController to handle events.
  */
 public class MainPanelView extends JFrame {
-    public static final Point PANEL_POS = new Point(10, 125);
-    public static final Dimension PANEL_DIM = new Dimension(410, 370);
     // Constants for UI design
     private static final GridLayout PANEL_LAYOUT = new GridLayout(14, 4);
     private static final String CORREL_Q = "8";
@@ -81,8 +79,8 @@ public class MainPanelView extends JFrame {
         setFocusable(true);
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         setLayout(PANEL_LAYOUT);
-        setLocation(PANEL_POS);
-        setSize(PANEL_DIM);
+        setLocation(Constants.MAIN_PANEL_POS);
+        setSize(Constants.MAIN_PANEL_DIM);
         setResizable(false);
     }
 
