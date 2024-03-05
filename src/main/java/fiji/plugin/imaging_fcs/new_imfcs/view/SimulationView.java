@@ -7,6 +7,8 @@ import ij.IJ;
 import javax.swing.*;
 import java.awt.*;
 
+import static fiji.plugin.imaging_fcs.new_imfcs.view.ButtonFactory.createJButton;
+import static fiji.plugin.imaging_fcs.new_imfcs.view.ButtonFactory.createJToggleButton;
 import static fiji.plugin.imaging_fcs.new_imfcs.view.UIUtils.createJLabel;
 import static fiji.plugin.imaging_fcs.new_imfcs.view.UIUtils.createTextField;
 
@@ -123,11 +125,11 @@ public class SimulationView extends JFrame {
     }
 
     private void initializeButtons() throws Exception {
-        ButtonFactory btnFact = new ButtonFactory();
-        btnSimulate = btnFact.createJButton("Simulate", "", null, controller.btnSimulatePressed());
-        btnBatchSim = btnFact.createJButton("Batch", "Run multiple simulations", null, controller.btnBatchSimPressed());
-        btnStopSimulation = btnFact.createJButton("Stop", "Stops running simulations", null, controller.btnStopSimulationPressed());
-        tbSimTrip = btnFact.createJToggleButton("Triplet off", "", null, controller.tbSimTripPressed());
+        btnSimulate = createJButton("Simulate", "", null, controller.btnSimulatePressed());
+        btnBatchSim = createJButton("Batch", "Run multiple simulations", null, controller.btnBatchSimPressed());
+        btnStopSimulation = createJButton("Stop", "Stops running simulations", null,
+                controller.btnStopSimulationPressed());
+        tbSimTrip = createJToggleButton("Triplet off", "", null, controller.tbSimTripPressed());
     }
 
     private void disable_fields() {
@@ -209,7 +211,7 @@ public class SimulationView extends JFrame {
                 "Double: Diffusion coefficient of first species to be simulated.  Press enter to calculate new step size."));
         add(tfSimD1);
         add(createJLabel("Dout/Din",
-                "Double: Ratio of diffuion coeeficients of particles outside and inside domains."));
+                "Double: Ratio of diffusion coefficients of particles outside and inside domains."));
         add(tfSimDoutDinRatio);
 
         // row 8

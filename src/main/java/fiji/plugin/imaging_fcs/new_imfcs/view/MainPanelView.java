@@ -7,6 +7,8 @@ import ij.IJ;
 import javax.swing.*;
 import java.awt.*;
 
+import static fiji.plugin.imaging_fcs.new_imfcs.view.ButtonFactory.createJButton;
+import static fiji.plugin.imaging_fcs.new_imfcs.view.ButtonFactory.createJToggleButton;
 import static fiji.plugin.imaging_fcs.new_imfcs.view.UIUtils.createTextField;
 import static fiji.plugin.imaging_fcs.version.VERSION.IMFCS_VERSION;
 
@@ -147,29 +149,26 @@ public class MainPanelView extends JFrame {
      * @throws Exception if there is an error adding components to the frame.
      */
     private void addComponentsToFrame() throws Exception {
-        // create the button factory
-        ButtonFactory btnFact = new ButtonFactory();
-
         // create the IO colored buttons
-        JButton btnSave = btnFact.createJButton("Save",
+        JButton btnSave = createJButton("Save",
                 "Save the evaluation of the data as binary files. Which data to save can be selected in a dialog.",
                 null, controller.btnSavePressed());
         btnSave.setForeground(SAVE_BUTTON_COLOR);
 
-        JButton btnRead = btnFact.createJButton("Read",
+        JButton btnRead = createJButton("Read",
                 "Load a previously saved experiment. Note that the original image is not automatically loaded along.",
                 null, controller.btnLoadPressed());
         btnRead.setForeground(LOAD_BUTTON_COLOR);
 
-        JButton btnExit = btnFact.createJButton("Exit", "", null, controller.btnExitPressed());
+        JButton btnExit = createJButton("Exit", "", null, controller.btnExitPressed());
         btnExit.setForeground(EXIT_BUTTON_COLOR);
 
         // row 1
         add(new JLabel("Image"));
-        add(btnFact.createJButton("Use", "Uses the active existing image in ImageJ.", null,
+        add(createJButton("Use", "Uses the active existing image in ImageJ.", null,
                 controller.btnUseExistingPressed()));
-        add(btnFact.createJButton("Load", "Opens a dialog to open a new image.", null, controller.btnLoadNewPressed()));
-        add(btnFact.createJButton("Batch",
+        add(createJButton("Load", "Opens a dialog to open a new image.", null, controller.btnLoadNewPressed()));
+        add(createJButton("Batch",
                 "Allow to select a list of evaluations to be performed on a range of images.", null,
                 controller.btnBatchPressed()));
 
@@ -182,9 +181,9 @@ public class MainPanelView extends JFrame {
         // row 3
         add(new JLabel("Frame time: "));
         add(tfFrameTime);
-        add(btnFact.createJToggleButton("Exp Set", "Opens a dialog with experimental settings.", null,
+        add(createJToggleButton("Exp Set", "Opens a dialog with experimental settings.", null,
                 controller.tbExpSettingsPressed()));
-        add(btnFact.createJButton("Write Conf",
+        add(createJButton("Write Conf",
                 "Writes a configuration file int user.home that will be read at next ImFCS start",
                 new Font(Constants.PANEL_FONT, Font.BOLD, 11), controller.btnWriteConfigPressed()));
 
@@ -203,9 +202,9 @@ public class MainPanelView extends JFrame {
         // row 6
         add(new JLabel("Fit Model: "));
         add(cbFitModel);
-        add(btnFact.createJToggleButton("FCCS Disp Off", "", new Font(Constants.PANEL_FONT, Font.BOLD, 9),
+        add(createJToggleButton("FCCS Disp Off", "", new Font(Constants.PANEL_FONT, Font.BOLD, 9),
                 controller.tbFCCSDisplayPressed()));
-        add(btnFact.createJToggleButton("Overlap Off", "", new Font(Constants.PANEL_FONT, Font.BOLD, 11),
+        add(createJToggleButton("Overlap Off", "", new Font(Constants.PANEL_FONT, Font.BOLD, 11),
                 controller.tbOverlapPressed()));
 
         // row 7
@@ -215,35 +214,35 @@ public class MainPanelView extends JFrame {
         add(new JLabel(""));
 
         // row 8
-        add(btnFact.createJButton("LiveReadout", "", new Font(Constants.PANEL_FONT, Font.BOLD, 10), controller.btnDCRPressed()));
-        add(btnFact.createJButton("PVideo", "Creates videos of parameter maps", null, controller.btnParamVideoPressed()));
-        add(btnFact.createJToggleButton("Background", "Panel for different methods to perform background subtraction.",
+        add(createJButton("LiveReadout", "", new Font(Constants.PANEL_FONT, Font.BOLD, 10), controller.btnDCRPressed()));
+        add(createJButton("PVideo", "Creates videos of parameter maps", null, controller.btnParamVideoPressed()));
+        add(createJToggleButton("Background", "Panel for different methods to perform background subtraction.",
                 new Font(Constants.PANEL_FONT, Font.BOLD, 10), controller.tbBackgroundPressed()));
-        add(btnFact.createJButton("", "", null, controller.btnDebugPressed()));
+        add(createJButton("", "", null, controller.btnDebugPressed()));
 
         // row 9
-        add(btnFact.createJButton("Options", "Select various options regarding the display of results.", null,
+        add(createJButton("Options", "Select various options regarding the display of results.", null,
                 controller.btnOptionsPressed()));
-        add(btnFact.createJToggleButton("N&B Off", "", null, controller.tbNBPressed()));
-        add(btnFact.createJToggleButton("Threshold",
+        add(createJToggleButton("N&B Off", "", null, controller.tbNBPressed()));
+        add(createJToggleButton("Threshold",
                 "Filters the values in parameters maps using user-defined thresholds", null,
                 controller.tbFilteringPressed()));
-        add(btnFact.createJButton("Average",
+        add(createJButton("Average",
                 "Calculate the average ACF from all valid ACFs and fit if fit is switched on; this does not calculate residuals or sd.",
                 null, controller.btnAvePressed()));
 
         // row 10
-        add(btnFact.createJButton("Scatter",
+        add(createJButton("Scatter",
                 "Calculates a scatter plot for a pair of two parameters from the scroll down menu.", null,
                 controller.btnParaCorPressed()));
         add(cbParaCor);
-        add(btnFact.createJToggleButton("Bleach Cor",
+        add(createJToggleButton("Bleach Cor",
                 "Set number of intensity points to be averaged before bleach correction is performed.", null,
                 controller.tbBleachCorStridePressed()));
         add(cbBleachCor);
 
         // row 11
-        add(btnFact.createJButton("dCCF",
+        add(createJButton("dCCF",
                 "Create a dCCF image to see differences between forward and backward correlation in a direction (see scroll down menu).",
                 null, controller.btnDCCFPressed()));
         add(cbDCCF);
@@ -251,22 +250,22 @@ public class MainPanelView extends JFrame {
         add(cbFilter);
 
         // row 12
-        add(btnFact.createJButton("PSF", "Calculates the calibration for the PSF.", null, controller.btnPSFPressed()));
-        add(btnFact.createJToggleButton("Diff. Law", "Calculates the Diffusion Law.", null, controller.tbDLPressed()));
-        add(btnFact.createJToggleButton("Fit off", "Switches Fit on/off; opens/closes Fit panel.", null,
+        add(createJButton("PSF", "Calculates the calibration for the PSF.", null, controller.btnPSFPressed()));
+        add(createJToggleButton("Diff. Law", "Calculates the Diffusion Law.", null, controller.tbDLPressed()));
+        add(createJToggleButton("Fit off", "Switches Fit on/off; opens/closes Fit panel.", null,
                 controller.tbFitPressed()));
-        add(btnFact.createJButton("All", "Calculates all ACFs.", null, controller.btnAllPressed()));
+        add(createJButton("All", "Calculates all ACFs.", null, controller.btnAllPressed()));
 
         // row 13
-        add(btnFact.createJToggleButton("Sim off", "Opens/closes Simulation panel.", null, controller.tbSimPressed()));
-        add(btnFact.createJButton("Res. Table", "Create a results table.", null, controller.btnRTPressed()));
-        add(btnFact.createJToggleButton("MSD Off", "Switches Mean Square Displacement calculation and plot on/off.",
+        add(createJToggleButton("Sim off", "Opens/closes Simulation panel.", null, controller.tbSimPressed()));
+        add(createJButton("Res. Table", "Create a results table.", null, controller.btnRTPressed()));
+        add(createJToggleButton("MSD Off", "Switches Mean Square Displacement calculation and plot on/off.",
                 null, controller.tbMSDPressed()));
-        add(btnFact.createJButton("ROI", "Calculates ACFs only in the currently chose ROI.", null,
+        add(createJButton("ROI", "Calculates ACFs only in the currently chose ROI.", null,
                 controller.btnROIPressed()));
 
         // row 14
-        add(btnFact.createJButton("To Front", "Bring all windows of this plugin instance to the front.", null,
+        add(createJButton("To Front", "Bring all windows of this plugin instance to the front.", null,
                 controller.btnBtfPressed()));
         add(btnSave);
         add(btnRead);

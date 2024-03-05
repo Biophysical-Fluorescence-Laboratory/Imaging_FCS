@@ -6,11 +6,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
 
 /**
- * Factory class for creating various types of buttons with common properties
- * set,
+ * Factory class for creating various types of buttons with common properties set,
  * such as the button label, tooltip text, font, and event listeners.
  */
-public class ButtonFactory {
+public final class ButtonFactory {
 
     /**
      * Creates an instance of a button given the button class type, label, tooltip
@@ -25,8 +24,8 @@ public class ButtonFactory {
      * @return an instance of {@link AbstractButton} with the specified properties
      * @throws Exception if there is an error creating the button instance
      */
-    private AbstractButton createButton(Class<? extends AbstractButton> buttonClass, String label, String toolTipText,
-                                        Font font) throws Exception {
+    private static AbstractButton createButton(Class<? extends AbstractButton> buttonClass, String label,
+                                               String toolTipText, Font font) throws Exception {
         AbstractButton button = buttonClass.getDeclaredConstructor(String.class).newInstance(label);
 
         if (!toolTipText.isEmpty()) {
@@ -51,7 +50,7 @@ public class ButtonFactory {
      * @return a configured {@link JButton} instance
      * @throws Exception if there is an error creating the button
      */
-    public JButton createJButton(String label, String toolTipText, Font font, ItemListener itemListener)
+    public static JButton createJButton(String label, String toolTipText, Font font, ItemListener itemListener)
             throws Exception {
         JButton button = (JButton) createButton(JButton.class, label, toolTipText, font);
         button.addItemListener(itemListener);
@@ -69,7 +68,7 @@ public class ButtonFactory {
      * @return a configured {@link JButton} instance
      * @throws Exception if there is an error creating the button
      */
-    public JButton createJButton(String label, String toolTipText, Font font, ActionListener actionListener)
+    public static JButton createJButton(String label, String toolTipText, Font font, ActionListener actionListener)
             throws Exception {
         JButton button = (JButton) createButton(JButton.class, label, toolTipText, font);
         button.addActionListener(actionListener);
@@ -87,8 +86,8 @@ public class ButtonFactory {
      * @return a configured {@link JToggleButton} instance
      * @throws Exception if there is an error creating the toggle button
      */
-    public JToggleButton createJToggleButton(String label, String toolTipText, Font font, ItemListener itemListener)
-            throws Exception {
+    public static JToggleButton createJToggleButton(String label, String toolTipText, Font font,
+                                                    ItemListener itemListener) throws Exception {
         JToggleButton button = (JToggleButton) createButton(JToggleButton.class, label, toolTipText, font);
         button.addItemListener(itemListener);
         return button;
@@ -105,8 +104,8 @@ public class ButtonFactory {
      * @return a configured {@link JToggleButton} instance
      * @throws Exception if there is an error creating the toggle button
      */
-    public JToggleButton createJToggleButton(String label, String toolTipText, Font font, ActionListener actionListener)
-            throws Exception {
+    public static JToggleButton createJToggleButton(String label, String toolTipText, Font font,
+                                                    ActionListener actionListener) throws Exception {
         JToggleButton button = (JToggleButton) createButton(JToggleButton.class, label, toolTipText, font);
         button.addActionListener(actionListener);
         return button;
