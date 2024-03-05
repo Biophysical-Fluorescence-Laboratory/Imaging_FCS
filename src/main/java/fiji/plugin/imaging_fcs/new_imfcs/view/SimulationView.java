@@ -15,13 +15,10 @@ public class SimulationView extends JFrame {
     private static final Point SIMULATION_LOCATION = new Point(
             Constants.MAIN_PANEL_POS.x + Constants.MAIN_PANEL_DIM.width + 10, 125);
     private static final Dimension SIMULATION_DIM = new Dimension(370, 320);
-
+    // ComboBoxes
+    public JComboBox<String> cbSimMode;
     // Controller
     private SimulationController controller;
-
-    // ComboBoxes
-    private JComboBox<String> cbSimMode;
-
     // TextFields
     private JTextField tfSimSeed;
     private JTextField tfSimParticleNum;
@@ -91,6 +88,7 @@ public class SimulationView extends JFrame {
     private void initializeComboBoxes() {
         cbSimMode = new JComboBox<>(new String[]{
                 "2D (free)", "2D (domains)", "2D (mesh)", "2D (dom+mesh)", "3D (free)"});
+        cbSimMode.addActionListener(controller.cbSimModeChanged());
     }
 
     private void initializeTextFields() {
@@ -144,6 +142,29 @@ public class SimulationView extends JFrame {
         tfMeshworkSize.setEnabled(false);
         tfHopProbability.setEnabled(false);
         btnStopSimulation.setEnabled(false);
+    }
+
+    public void tripletSetEnable(boolean b) {
+        tfSimKon.setEnabled(b);
+        tfSimKoff.setEnabled(b);
+    }
+
+    public void bleachSetEnable(boolean b) {
+        tfSimBleachRadius.setEnabled(b);
+        tfSimBleachFrame.setEnabled(b);
+    }
+
+    public void meshSetEnable(boolean b) {
+        tfMeshworkSize.setEnabled(b);
+        tfHopProbability.setEnabled(b);
+    }
+
+    public void domainSetEnable(boolean b) {
+        tfSimDoutDinRatio.setEnabled(b);
+        tfDomainRadius.setEnabled(b);
+        tfDomainDensity.setEnabled(b);
+        tfPin.setEnabled(b);
+        tfPout.setEnabled(b);
     }
 
     private void addComponentsToFrame() {

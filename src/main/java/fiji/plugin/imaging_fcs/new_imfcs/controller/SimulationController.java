@@ -2,7 +2,10 @@ package fiji.plugin.imaging_fcs.new_imfcs.controller;
 
 import fiji.plugin.imaging_fcs.new_imfcs.view.SimulationView;
 
+import javax.swing.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 public class SimulationController {
@@ -14,6 +17,16 @@ public class SimulationController {
 
     public void setVisible(boolean b) {
         simulationView.setVisible(b);
+    }
+
+    public ActionListener cbSimModeChanged() {
+        return (ActionEvent ev) -> {
+            String simMode = ControllerUtils.getComboBoxSelectionFromEvent(ev);
+
+            simulationView.bleachSetEnable(simMode.contains("2D"));
+            simulationView.domainSetEnable(simMode.contains("dom"));
+            simulationView.meshSetEnable(simMode.contains("mesh"));
+        };
     }
 
     public ActionListener btnSimulatePressed() {
@@ -32,7 +45,15 @@ public class SimulationController {
     }
 
     public ItemListener tbSimTripPressed() {
-        // FIXME
-        return null;
+        return (ItemEvent ev) -> {
+            JToggleButton button = (JToggleButton) ev.getItemSelectable();
+            if (ev.getStateChange() == ItemEvent.SELECTED) {
+                button.setText("Triplet On");
+                simulationView.tripletSetEnable(true);
+            } else {
+                button.setText("Triplet Off");
+                simulationView.tripletSetEnable(false);
+            }
+        };
     }
 }
