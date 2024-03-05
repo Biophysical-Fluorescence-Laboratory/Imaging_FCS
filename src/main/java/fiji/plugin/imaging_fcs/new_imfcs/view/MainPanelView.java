@@ -5,9 +5,9 @@ import fiji.plugin.imaging_fcs.new_imfcs.controller.MainPanelController;
 import ij.IJ;
 
 import javax.swing.*;
-import javax.swing.event.DocumentListener;
 import java.awt.*;
 
+import static fiji.plugin.imaging_fcs.new_imfcs.view.UIUtils.createTextField;
 import static fiji.plugin.imaging_fcs.version.VERSION.IMFCS_VERSION;
 
 /**
@@ -18,7 +18,6 @@ public class MainPanelView extends JFrame {
     // Constants for UI design
     private static final GridLayout PANEL_LAYOUT = new GridLayout(14, 4);
     private static final String CORREL_Q = "8";
-    private static final int TEXT_FIELD_COLUMNS = 8;
 
     // Colors for buttons
     private static final Color SAVE_BUTTON_COLOR = Color.BLUE;
@@ -107,27 +106,6 @@ public class MainPanelView extends JFrame {
                 controller.expSettingsChanged());
 
         tfCorrelatorQ = createTextField(CORREL_Q, "", null);
-    }
-
-    /**
-     * Creates a text field with specified initial text, tooltip, and document listener.
-     *
-     * @param text     The initial text for the text field.
-     * @param toolTip  The tooltip to display when hovering over the text field.
-     * @param listener The document listener to attach to the text field, or null if no listener is needed.
-     * @return A new JTextField instance configured with the specified parameters.
-     */
-    private JTextField createTextField(String text, String toolTip, DocumentListener listener) {
-        JTextField textField = new JTextField(text, TEXT_FIELD_COLUMNS);
-        if (!toolTip.isEmpty()) {
-            textField.setToolTipText(toolTip);
-        }
-
-        if (listener != null) {
-            textField.getDocument().addDocumentListener(listener);
-        }
-
-        return textField;
     }
 
     /**

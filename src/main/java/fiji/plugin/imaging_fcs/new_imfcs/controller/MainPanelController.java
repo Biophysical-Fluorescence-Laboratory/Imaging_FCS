@@ -3,15 +3,16 @@ package fiji.plugin.imaging_fcs.new_imfcs.controller;
 import fiji.plugin.imaging_fcs.new_imfcs.model.HardwareModel;
 import fiji.plugin.imaging_fcs.new_imfcs.model.ImageModel;
 import fiji.plugin.imaging_fcs.new_imfcs.model.OptionsModel;
-import fiji.plugin.imaging_fcs.new_imfcs.view.ImageView;
 import fiji.plugin.imaging_fcs.new_imfcs.view.MainPanelView;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 
+import javax.swing.*;
 import javax.swing.event.DocumentListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 public class MainPanelController {
@@ -19,12 +20,14 @@ public class MainPanelController {
     private final HardwareModel hardwareModel;
     private final OptionsModel optionsModel;
     private final ImageModel imageModel;
+    private final SimulationController simulationController;
 
     public MainPanelController(HardwareModel hardwareModel) {
         this.view = new MainPanelView(this);
         this.hardwareModel = hardwareModel;
         this.optionsModel = new OptionsModel(hardwareModel.isCuda());
         this.imageModel = new ImageModel();
+        this.simulationController = new SimulationController();
     }
 
     public DocumentListener expSettingsChanged() {
@@ -66,8 +69,7 @@ public class MainPanelController {
             if (WindowManager.getImageCount() > 0) {
                 try {
                     imageModel.loadImage(IJ.getImage());
-                    ImageView imageView = new ImageView();
-                    imageView.showImage(imageModel);
+                    new ImageController(imageModel);
                 } catch (RuntimeException e) {
                     IJ.showMessage("Wrong image format", e.getMessage());
                 }
@@ -83,8 +85,7 @@ public class MainPanelController {
             if (image != null) {
                 try {
                     imageModel.loadImage(image);
-                    ImageView imageView = new ImageView();
-                    imageView.showImage(imageModel);
+                    new ImageController(imageModel);
                 } catch (RuntimeException e) {
                     IJ.showMessage("Wrong image format", e.getMessage());
                 }
@@ -202,8 +203,16 @@ public class MainPanelController {
     }
 
     public ItemListener tbSimPressed() {
-        // TODO: FIXME
-        return null;
+        return (ItemEvent ev) -> {
+            JToggleButton button = (JToggleButton) ev.getItemSelectable();
+            if (ev.getStateChange() == ItemEvent.SELECTED) {
+                button.setText("Sim on");
+                simulationController.setVisible(true);
+            } else {
+                button.setText("Sim off");
+                simulationController.setVisible(false);
+            }
+        };
     }
 
     public ActionListener tbMSDPressed() {

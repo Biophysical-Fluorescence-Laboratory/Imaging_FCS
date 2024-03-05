@@ -7,6 +7,8 @@ import ij.gui.ImageCanvas;
 import ij.gui.ImageWindow;
 
 import java.awt.*;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseListener;
 
 /**
  * The ImageView class is responsible for displaying images in a window with custom settings.
@@ -31,13 +33,16 @@ public class ImageView {
      *
      * @param imageModel The ImageModel object representing the image to be displayed.
      */
-    public void showImage(ImageModel imageModel) {
+    public void showImage(ImageModel imageModel, MouseListener mouseListener, KeyListener keyListener) {
         imageModel.show();
         ImageWindow window = imageModel.getWindow();
-        ImageCanvas canvas = imageModel.getCanvas();
-
-        canvas.setFocusable(true);
         window.setLocation(IMAGE_POSITION);
+
+        ImageCanvas canvas = imageModel.getCanvas();
+        canvas.setFocusable(true);
+        // add listeners
+        canvas.addMouseListener(mouseListener);
+        canvas.addKeyListener(keyListener);
 
         int width = imageModel.getWidth();
         int height = imageModel.getHeight();
