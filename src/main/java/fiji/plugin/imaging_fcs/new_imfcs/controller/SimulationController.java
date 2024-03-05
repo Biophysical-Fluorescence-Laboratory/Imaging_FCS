@@ -1,5 +1,6 @@
 package fiji.plugin.imaging_fcs.new_imfcs.controller;
 
+import fiji.plugin.imaging_fcs.new_imfcs.model.SimulationModel;
 import fiji.plugin.imaging_fcs.new_imfcs.view.SimulationView;
 
 import javax.swing.*;
@@ -10,9 +11,11 @@ import java.awt.event.ItemListener;
 
 public class SimulationController {
     private final SimulationView simulationView;
+    private final SimulationModel simulationModel;
 
     public SimulationController() {
         simulationView = new SimulationView(this);
+        simulationModel = new SimulationModel();
     }
 
     public void setVisible(boolean b) {
@@ -22,10 +25,18 @@ public class SimulationController {
     public ActionListener cbSimModeChanged() {
         return (ActionEvent ev) -> {
             String simMode = ControllerUtils.getComboBoxSelectionFromEvent(ev);
+            boolean is2D = simMode.contains("2D");
+            boolean isDomain = simMode.contains("dom");
+            boolean isMesh = simMode.contains("mesh");
 
-            simulationView.bleachSetEnable(simMode.contains("2D"));
-            simulationView.domainSetEnable(simMode.contains("dom"));
-            simulationView.meshSetEnable(simMode.contains("mesh"));
+            simulationView.bleachSetEnable(is2D);
+            simulationModel.setIs2D(is2D);
+
+            simulationView.domainSetEnable(isDomain);
+            simulationModel.setIsDomain(isDomain);
+
+            simulationView.meshSetEnable(isMesh);
+            simulationModel.setIsMesh(isMesh);
         };
     }
 
@@ -46,14 +57,13 @@ public class SimulationController {
 
     public ItemListener tbSimTripPressed() {
         return (ItemEvent ev) -> {
+            // Get the button
             JToggleButton button = (JToggleButton) ev.getItemSelectable();
-            if (ev.getStateChange() == ItemEvent.SELECTED) {
-                button.setText("Triplet On");
-                simulationView.tripletSetEnable(true);
-            } else {
-                button.setText("Triplet Off");
-                simulationView.tripletSetEnable(false);
-            }
+
+            boolean selected = (ev.getStateChange() == ItemEvent.SELECTED);
+            button.setText(selected ? "Triplet On" : "Triplet Off");
+            simulationView.tripletSetEnable(selected);
+            simulationModel.setSimBlinkFlag(selected);
         };
     }
 }

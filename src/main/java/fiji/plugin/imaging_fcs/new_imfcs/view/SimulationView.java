@@ -15,10 +15,10 @@ public class SimulationView extends JFrame {
     private static final Point SIMULATION_LOCATION = new Point(
             Constants.MAIN_PANEL_POS.x + Constants.MAIN_PANEL_DIM.width + 10, 125);
     private static final Dimension SIMULATION_DIM = new Dimension(370, 320);
+    // Controller
+    private final SimulationController controller;
     // ComboBoxes
     public JComboBox<String> cbSimMode;
-    // Controller
-    private SimulationController controller;
     // TextFields
     private JTextField tfSimSeed;
     private JTextField tfSimParticleNum;
@@ -132,16 +132,11 @@ public class SimulationView extends JFrame {
 
     private void disable_fields() {
         tfSimCurrentStepSize.setEnabled(false);
-        tfSimDoutDinRatio.setEnabled(false);
-        tfSimKon.setEnabled(false);
-        tfSimKoff.setEnabled(false);
-        tfDomainRadius.setEnabled(false);
-        tfDomainDensity.setEnabled(false);
-        tfPin.setEnabled(false);
-        tfPout.setEnabled(false);
-        tfMeshworkSize.setEnabled(false);
-        tfHopProbability.setEnabled(false);
         btnStopSimulation.setEnabled(false);
+
+        tripletSetEnable(false);
+        meshSetEnable(false);
+        domainSetEnable(false);
     }
 
     public void tripletSetEnable(boolean b) {
