@@ -1,6 +1,7 @@
 package fiji.plugin.imaging_fcs.new_imfcs;
 
 import fiji.plugin.imaging_fcs.new_imfcs.controller.SplashScreenController;
+import fiji.plugin.imaging_fcs.new_imfcs.view.UIUtils;
 import ij.ImageJ;
 import ij.plugin.PlugIn;
 

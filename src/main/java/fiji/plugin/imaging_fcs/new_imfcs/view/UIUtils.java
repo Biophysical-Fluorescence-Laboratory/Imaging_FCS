@@ -1,8 +1,9 @@
-package fiji.plugin.imaging_fcs.new_imfcs;
+package fiji.plugin.imaging_fcs.new_imfcs.view;
 
 import fiji.plugin.imaging_fcs.new_imfcs.constants.Constants;
 
 import javax.swing.*;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,5 +42,36 @@ public final class UIUtils {
 
         // Apply fonts to components
         componentFonts.forEach(UIManager::put);
+    }
+
+    /**
+     * Creates a text field with specified initial text, tooltip, and document listener.
+     *
+     * @param text     The initial text for the text field.
+     * @param toolTip  The tooltip to display when hovering over the text field.
+     * @param listener The document listener to attach to the text field, or null if no listener is needed.
+     * @return A new JTextField instance configured with the specified parameters.
+     */
+    public static JTextField createTextField(String text, String toolTip, DocumentListener listener) {
+        JTextField textField = new JTextField(text, Constants.TEXT_FIELD_COLUMNS);
+        if (!toolTip.isEmpty()) {
+            textField.setToolTipText(toolTip);
+        }
+
+        if (listener != null) {
+            textField.getDocument().addDocumentListener(listener);
+        }
+
+        return textField;
+    }
+
+    public static JLabel createJLabel(String text, String toolTip) {
+        JLabel label = new JLabel(text);
+
+        if (!toolTip.isEmpty()) {
+            label.setToolTipText(toolTip);
+        }
+
+        return label;
     }
 }

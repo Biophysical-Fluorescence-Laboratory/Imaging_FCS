@@ -8,6 +8,7 @@ public final class Constants {
     public static final int PANEL_FONT_SIZE = 12;
     public static final Point MAIN_PANEL_POS = new Point(10, 125);
     public static final Dimension MAIN_PANEL_DIM = new Dimension(410, 370);
+    public static final int TEXT_FIELD_COLUMNS = 8;
 
     // Private constructor to prevent instantiation
     private Constants() {
