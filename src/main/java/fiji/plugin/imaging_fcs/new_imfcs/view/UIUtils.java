@@ -3,7 +3,6 @@ package fiji.plugin.imaging_fcs.new_imfcs.view;
 import fiji.plugin.imaging_fcs.new_imfcs.constants.Constants;
 
 import javax.swing.*;
-import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,26 +44,15 @@ public final class UIUtils {
     }
 
     /**
-     * Creates a text field with specified initial text, tooltip, and document listener.
+     * Creates a {@link JLabel} with specified text and an optional tooltip. The tooltip is only set
+     * if the provided tooltip string is not empty. This method streamlines the creation of labels with
+     * consistent tooltip handling.
      *
-     * @param text     The initial text for the text field.
-     * @param toolTip  The tooltip to display when hovering over the text field.
-     * @param listener The document listener to attach to the text field, or null if no listener is needed.
-     * @return A new JTextField instance configured with the specified parameters.
+     * @param text    The text to be displayed by the {@link JLabel}.
+     * @param toolTip The tooltip text to be displayed when hovering over the label. If this parameter
+     *                is an empty string, no tooltip is set.
+     * @return A {@link JLabel} instance configured with the specified text and an optional tooltip.
      */
-    public static JTextField createTextField(String text, String toolTip, DocumentListener listener) {
-        JTextField textField = new JTextField(text, Constants.TEXT_FIELD_COLUMNS);
-        if (!toolTip.isEmpty()) {
-            textField.setToolTipText(toolTip);
-        }
-
-        if (listener != null) {
-            textField.getDocument().addDocumentListener(listener);
-        }
-
-        return textField;
-    }
-
     public static JLabel createJLabel(String text, String toolTip) {
         JLabel label = new JLabel(text);
 

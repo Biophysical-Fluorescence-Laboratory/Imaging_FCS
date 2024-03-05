@@ -2,15 +2,17 @@ package fiji.plugin.imaging_fcs.new_imfcs.view;
 
 import fiji.plugin.imaging_fcs.new_imfcs.constants.Constants;
 import fiji.plugin.imaging_fcs.new_imfcs.controller.SimulationController;
+import fiji.plugin.imaging_fcs.new_imfcs.model.SimulationModel;
 import ij.IJ;
 
 import javax.swing.*;
 import java.awt.*;
 
+import static fiji.plugin.imaging_fcs.new_imfcs.controller.FocusListenerFactory.createFocusListener;
 import static fiji.plugin.imaging_fcs.new_imfcs.view.ButtonFactory.createJButton;
 import static fiji.plugin.imaging_fcs.new_imfcs.view.ButtonFactory.createJToggleButton;
+import static fiji.plugin.imaging_fcs.new_imfcs.view.TextFieldFactory.createTextField;
 import static fiji.plugin.imaging_fcs.new_imfcs.view.UIUtils.createJLabel;
-import static fiji.plugin.imaging_fcs.new_imfcs.view.UIUtils.createTextField;
 
 public class SimulationView extends JFrame {
     private static final GridLayout SIMULATION_LAYOUT = new GridLayout(16, 4);
@@ -19,6 +21,9 @@ public class SimulationView extends JFrame {
     private static final Dimension SIMULATION_DIM = new Dimension(370, 320);
     // Controller
     private final SimulationController controller;
+    // model
+    private final SimulationModel model;
+
     // ComboBoxes
     public JComboBox<String> cbSimMode;
     // TextFields
@@ -57,9 +62,10 @@ public class SimulationView extends JFrame {
     private JButton btnStopSimulation;
     private JToggleButton tbSimTrip;
 
-    public SimulationView(SimulationController controller) {
+    public SimulationView(SimulationController controller, SimulationModel model) {
         super("Simulation Panel");
         this.controller = controller;
+        this.model = model;
         initializeUI();
     }
 
@@ -94,34 +100,34 @@ public class SimulationView extends JFrame {
     }
 
     private void initializeTextFields() {
-        tfSimSeed = createTextField("1", "", null);
-        tfSimParticleNum = createTextField("1000", "", null);
-        tfSimCPS = createTextField("10000", "", null);
-        tfSimTauBleach = createTextField("0", "", null);
-        tfSimPixelNum = createTextField("21", "", null);
-        tfSimExtensionFactor = createTextField("1.5", "", null);
-        tfSimTimeStepNum = createTextField("50000", "", null);
-        tfSimFrameTime = createTextField("0.001", "", null);
-        tfSimStepsPerFrame = createTextField("10", "", null);
-        tfSimCurrentStepSize = createTextField("20", "", null);
-        tfSimD1 = createTextField("1.0", "", null);
-        tfSimDoutDinRatio = createTextField("1.0", "", null);
-        tfSimD2 = createTextField("0.1", "", null);
-        tfSimF2 = createTextField("0.0", "", null);
-        tfSimD3 = createTextField("0.01", "", null);
-        tfSimF3 = createTextField("0.0", "", null);
-        tfSimKon = createTextField("300", "", null);
-        tfSimKoff = createTextField("700", "", null);
-        tfSimCameraOffset = createTextField("100", "", null);
-        tfSimCameraNoiseFactor = createTextField("3", "", null);
-        tfSimBleachRadius = createTextField("3.0", "", null);
-        tfSimBleachFrame = createTextField("1000000", "", null);
-        tfDomainRadius = createTextField("30", "", null);
-        tfDomainDensity = createTextField("30", "", null);
-        tfPin = createTextField("1.0", "", null);
-        tfPout = createTextField("0.6", "", null);
-        tfMeshworkSize = createTextField("100", "", null);
-        tfHopProbability = createTextField("1", "", null);
+        tfSimSeed = createTextField(model.getSeed(), "", createFocusListener(model::setSeed));
+        tfSimParticleNum = createTextField("1000", "");
+        tfSimCPS = createTextField("10000", "");
+        tfSimTauBleach = createTextField("0", "");
+        tfSimPixelNum = createTextField("21", "");
+        tfSimExtensionFactor = createTextField("1.5", "");
+        tfSimTimeStepNum = createTextField("50000", "");
+        tfSimFrameTime = createTextField("0.001", "");
+        tfSimStepsPerFrame = createTextField("10", "");
+        tfSimCurrentStepSize = createTextField("20", "");
+        tfSimD1 = createTextField("1.0", "");
+        tfSimDoutDinRatio = createTextField("1.0", "");
+        tfSimD2 = createTextField("0.1", "");
+        tfSimF2 = createTextField("0.0", "");
+        tfSimD3 = createTextField("0.01", "");
+        tfSimF3 = createTextField("0.0", "");
+        tfSimKon = createTextField("300", "");
+        tfSimKoff = createTextField("700", "");
+        tfSimCameraOffset = createTextField("100", "");
+        tfSimCameraNoiseFactor = createTextField("3", "");
+        tfSimBleachRadius = createTextField("3.0", "");
+        tfSimBleachFrame = createTextField("1000000", "");
+        tfDomainRadius = createTextField("30", "");
+        tfDomainDensity = createTextField("30", "");
+        tfPin = createTextField("1.0", "");
+        tfPout = createTextField("0.6", "");
+        tfMeshworkSize = createTextField("100", "");
+        tfHopProbability = createTextField("1", "");
     }
 
     private void initializeButtons() throws Exception {

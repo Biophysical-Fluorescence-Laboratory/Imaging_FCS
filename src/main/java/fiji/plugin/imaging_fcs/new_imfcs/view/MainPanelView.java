@@ -9,7 +9,7 @@ import java.awt.*;
 
 import static fiji.plugin.imaging_fcs.new_imfcs.view.ButtonFactory.createJButton;
 import static fiji.plugin.imaging_fcs.new_imfcs.view.ButtonFactory.createJToggleButton;
-import static fiji.plugin.imaging_fcs.new_imfcs.view.UIUtils.createTextField;
+import static fiji.plugin.imaging_fcs.new_imfcs.view.TextFieldFactory.createTextField;
 import static fiji.plugin.imaging_fcs.version.VERSION.IMFCS_VERSION;
 
 /**
@@ -95,7 +95,7 @@ public class MainPanelView extends JFrame {
         tfFirstFrame = createTextField("1", "", controller.tfFirstFrameChanged());
 
         tfFrameTime = createTextField(
-                "0.001", "Time per this. NOTE: Changing this value will reinitialize all arrays.", null);
+                "0.001", "Time per this. NOTE: Changing this value will reinitialize all arrays.");
 
         tfLastFrame = createTextField("0", "", controller.tfLastFrameChanged());
 
@@ -107,7 +107,7 @@ public class MainPanelView extends JFrame {
                 "Distance in x- and y-direction for spatial cross-correlation. NOTE: Changing this value will reinitialize all arrays.",
                 controller.expSettingsChanged());
 
-        tfCorrelatorQ = createTextField(CORREL_Q, "", null);
+        tfCorrelatorQ = createTextField(CORREL_Q, "");
     }
 
     /**

@@ -14,8 +14,8 @@ public class SimulationController {
     private final SimulationModel simulationModel;
 
     public SimulationController() {
-        simulationView = new SimulationView(this);
         simulationModel = new SimulationModel();
+        simulationView = new SimulationView(this, simulationModel);
     }
 
     public void setVisible(boolean b) {
