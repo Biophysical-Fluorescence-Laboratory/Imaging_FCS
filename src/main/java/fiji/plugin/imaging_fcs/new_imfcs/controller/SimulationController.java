@@ -22,7 +22,7 @@ public class SimulationController {
         simulationView.setVisible(b);
     }
 
-    public ActionListener cbSimModeChanged() {
+    public ActionListener cbModeChanged() {
         return (ActionEvent ev) -> {
             String simMode = ControllerUtils.getComboBoxSelectionFromEvent(ev);
             boolean is2D = simMode.contains("2D");

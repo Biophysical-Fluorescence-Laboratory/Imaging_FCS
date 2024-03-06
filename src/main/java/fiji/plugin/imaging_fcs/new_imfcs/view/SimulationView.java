@@ -25,30 +25,30 @@ public class SimulationView extends JFrame {
     private final SimulationModel model;
 
     // ComboBoxes
-    public JComboBox<String> cbSimMode;
+    public JComboBox<String> cbMode;
     // TextFields
-    private JTextField tfSimSeed;
-    private JTextField tfSimParticleNum;
-    private JTextField tfSimCPS;
-    private JTextField tfSimTauBleach;
-    private JTextField tfSimPixelNum;
-    private JTextField tfSimExtensionFactor;
-    private JTextField tfSimTimeStepNum;
-    private JTextField tfSimFrameTime;
-    private JTextField tfSimStepsPerFrame;
-    private JTextField tfSimCurrentStepSize;
-    private JTextField tfSimD1;
-    private JTextField tfSimDoutDinRatio;
-    private JTextField tfSimD2;
-    private JTextField tfSimF2;
-    private JTextField tfSimD3;
-    private JTextField tfSimF3;
-    private JTextField tfSimKon;
-    private JTextField tfSimKoff;
-    private JTextField tfSimCameraOffset;
-    private JTextField tfSimCameraNoiseFactor;
-    private JTextField tfSimBleachRadius;
-    private JTextField tfSimBleachFrame;
+    private JTextField tfSeed;
+    private JTextField tfNumParticle;
+    private JTextField tfCPS;
+    private JTextField tfTauBleach;
+    private JTextField tfPixelNum;
+    private JTextField tfExtensionFactor;
+    private JTextField tfNumFrames;
+    private JTextField tfFrameTime;
+    private JTextField tfStepsPerFrame;
+    private JTextField tfCurrentStepSize;
+    private JTextField tfD1;
+    private JTextField tfDoutDinRatio;
+    private JTextField tfD2;
+    private JTextField tfF2;
+    private JTextField tfD3;
+    private JTextField tfF3;
+    private JTextField tfKon;
+    private JTextField tfKoff;
+    private JTextField tfCameraOffset;
+    private JTextField tfCameraNoiseFactor;
+    private JTextField tfBleachRadius;
+    private JTextField tfBleachFrame;
     private JTextField tfDomainRadius;
     private JTextField tfDomainDensity;
     private JTextField tfPin;
@@ -94,40 +94,50 @@ public class SimulationView extends JFrame {
     }
 
     private void initializeComboBoxes() {
-        cbSimMode = new JComboBox<>(new String[]{
+        cbMode = new JComboBox<>(new String[]{
                 "2D (free)", "2D (domains)", "2D (mesh)", "2D (dom+mesh)", "3D (free)"});
-        cbSimMode.addActionListener(controller.cbSimModeChanged());
+        cbMode.addActionListener(controller.cbModeChanged());
     }
 
     private void initializeTextFields() {
-        tfSimSeed = createTextField(model.getSeed(), "", createFocusListener(model::setSeed));
-        tfSimParticleNum = createTextField("1000", "");
-        tfSimCPS = createTextField("10000", "");
-        tfSimTauBleach = createTextField("0", "");
-        tfSimPixelNum = createTextField("21", "");
-        tfSimExtensionFactor = createTextField("1.5", "");
-        tfSimTimeStepNum = createTextField("50000", "");
-        tfSimFrameTime = createTextField("0.001", "");
-        tfSimStepsPerFrame = createTextField("10", "");
-        tfSimCurrentStepSize = createTextField("20", "");
-        tfSimD1 = createTextField("1.0", "");
-        tfSimDoutDinRatio = createTextField("1.0", "");
-        tfSimD2 = createTextField("0.1", "");
-        tfSimF2 = createTextField("0.0", "");
-        tfSimD3 = createTextField("0.01", "");
-        tfSimF3 = createTextField("0.0", "");
-        tfSimKon = createTextField("300", "");
-        tfSimKoff = createTextField("700", "");
-        tfSimCameraOffset = createTextField("100", "");
-        tfSimCameraNoiseFactor = createTextField("3", "");
-        tfSimBleachRadius = createTextField("3.0", "");
-        tfSimBleachFrame = createTextField("1000000", "");
-        tfDomainRadius = createTextField("30", "");
-        tfDomainDensity = createTextField("30", "");
-        tfPin = createTextField("1.0", "");
-        tfPout = createTextField("0.6", "");
-        tfMeshworkSize = createTextField("100", "");
-        tfHopProbability = createTextField("1", "");
+        tfSeed = createTextField(model.getSeed(), "", createFocusListener(model::setSeed));
+        tfNumParticle = createTextField(model.getNumParticles(), "",
+                createFocusListener(model::setNumParticles));
+        tfCPS = createTextField(model.getCPS(), "", createFocusListener(model::setCPS));
+        tfTauBleach = createTextField(model.getTauBleach(), "", createFocusListener(model::setTauBleach));
+        tfPixelNum = createTextField(model.getPixelNum(), "", createFocusListener(model::setPixelNum));
+        tfExtensionFactor = createTextField(model.getExtFactor(), "", createFocusListener(model::setExtFactor));
+        tfNumFrames = createTextField(model.getNumFrames(), "", createFocusListener(model::setNumFrames));
+        tfFrameTime = createTextField(model.getFrameTime(), "", createFocusListener(model::setFrameTime));
+        tfStepsPerFrame = createTextField(model.getStepsPerFrame(), "",
+                createFocusListener(model::setStepsPerFrame));
+        tfCurrentStepSize = createTextField("20", "");
+        tfD1 = createTextField(model.getD1(), "", createFocusListener(model::setD1));
+        tfDoutDinRatio = createTextField(model.getDoutDinRatio(), "",
+                createFocusListener(model::setDoutDinRatio));
+        tfD2 = createTextField(model.getD2(), "", createFocusListener(model::setD2));
+        tfF2 = createTextField(model.getF2(), "", createFocusListener(model::setF2));
+        tfD3 = createTextField(model.getD3(), "", createFocusListener(model::setD3));
+        tfF3 = createTextField(model.getF3(), "", createFocusListener(model::setF3));
+        tfKon = createTextField(model.getKon(), "", createFocusListener(model::setKon));
+        tfKoff = createTextField(model.getKoff(), "", createFocusListener(model::setKoff));
+        tfCameraOffset = createTextField(model.getCameraOffset(), "",
+                createFocusListener(model::setCameraOffset));
+        tfCameraNoiseFactor = createTextField(model.getCameraNoiseFactor(), "",
+                createFocusListener(model::setCameraNoiseFactor));
+        tfBleachRadius = createTextField(model.getBleachRadius(), "",
+                createFocusListener(model::setBleachRadius));
+        tfBleachFrame = createTextField(model.getBleachFrame(), "", createFocusListener(model::setBleachFrame));
+        tfDomainRadius = createTextField(model.getDomainRadius(), "",
+                createFocusListener(model::setDomainRadius));
+        tfDomainDensity = createTextField(model.getDomainDensity(), "",
+                createFocusListener(model::setDomainDensity));
+        tfPin = createTextField(model.getPin(), "", createFocusListener(model::setPin));
+        tfPout = createTextField(model.getPout(), "", createFocusListener(model::setPout));
+        tfMeshworkSize = createTextField(model.getMeshWorkSize(), "",
+                createFocusListener(model::setMeshWorkSize));
+        tfHopProbability = createTextField(model.getHopProbability(), "",
+                createFocusListener(model::setHopProbability));
     }
 
     private void initializeButtons() throws Exception {
@@ -139,7 +149,7 @@ public class SimulationView extends JFrame {
     }
 
     private void disable_fields() {
-        tfSimCurrentStepSize.setEnabled(false);
+        tfCurrentStepSize.setEnabled(false);
         btnStopSimulation.setEnabled(false);
 
         tripletSetEnable(false);
@@ -148,13 +158,13 @@ public class SimulationView extends JFrame {
     }
 
     public void tripletSetEnable(boolean b) {
-        tfSimKon.setEnabled(b);
-        tfSimKoff.setEnabled(b);
+        tfKon.setEnabled(b);
+        tfKoff.setEnabled(b);
     }
 
     public void bleachSetEnable(boolean b) {
-        tfSimBleachRadius.setEnabled(b);
-        tfSimBleachFrame.setEnabled(b);
+        tfBleachRadius.setEnabled(b);
+        tfBleachFrame.setEnabled(b);
     }
 
     public void meshSetEnable(boolean b) {
@@ -163,7 +173,7 @@ public class SimulationView extends JFrame {
     }
 
     public void domainSetEnable(boolean b) {
-        tfSimDoutDinRatio.setEnabled(b);
+        tfDoutDinRatio.setEnabled(b);
         tfDomainRadius.setEnabled(b);
         tfDomainDensity.setEnabled(b);
         tfPin.setEnabled(b);
@@ -173,85 +183,85 @@ public class SimulationView extends JFrame {
     private void addComponentsToFrame() {
         // row 1
         add(createJLabel("Mode", ""));
-        add(cbSimMode);
+        add(cbMode);
         add(createJLabel("", ""));
         add(tbSimTrip);
 
         // row 2
         add(createJLabel("Seed",
                 "Integer: Seed for the random number generator. Using the same seed (>0) leads to reproducible simulations."));
-        add(tfSimSeed);
+        add(tfSeed);
         add(createJLabel("Particle #", "Integer: Number of particles"));
-        add(tfSimParticleNum);
+        add(tfNumParticle);
 
         // row 3
         add(createJLabel("CPS", "Integer: counts per particle per second; brightness of the molecules"));
-        add(tfSimCPS);
+        add(tfCPS);
         add(createJLabel("Bleach time",
                 "Integer: Characteristic bleach time in seconds (based on an exponential). Set to 0 for no bleaching"));
-        add(tfSimTauBleach);
+        add(tfTauBleach);
 
         // row 4
         add(createJLabel("Pixel #",
                 "Integer: number of pixels in x and y direction to be simulated. Only square areas are used."));
-        add(tfSimPixelNum);
+        add(tfPixelNum);
         add(createJLabel("Extension", "Double: ratio of simulated to observed region."));
-        add(tfSimExtensionFactor);
+        add(tfExtensionFactor);
 
         // row 5
         add(createJLabel("Frame #", "Integer: Numbers of frames to be simulated."));
-        add(tfSimTimeStepNum);
+        add(tfNumFrames);
         add(createJLabel("Time res", "Double: time per frame in seconds.  Press enter to calculate new step size."));
-        add(tfSimFrameTime);
+        add(tfFrameTime);
 
         // row 6
         add(createJLabel("Steps per Frame",
                 "Double: number of simulation steps per frame. Press enter to calculate new step size."));
-        add(tfSimStepsPerFrame);
+        add(tfStepsPerFrame);
         add(createJLabel("Step Size [nm]",
                 "Double: Shows the current step size in the simulations based on D1 and time per simulation step"));
-        add(tfSimCurrentStepSize);
+        add(tfCurrentStepSize);
 
         // row 7
         add(createJLabel("D1 [um2/s]",
                 "Double: Diffusion coefficient of first species to be simulated.  Press enter to calculate new step size."));
-        add(tfSimD1);
+        add(tfD1);
         add(createJLabel("Dout/Din",
                 "Double: Ratio of diffusion coefficients of particles outside and inside domains."));
-        add(tfSimDoutDinRatio);
+        add(tfDoutDinRatio);
 
         // row 8
         add(createJLabel("D2 [um2/s]", "Double: Diffusion coefficient of second species to be simulated (if any)."));
-        add(tfSimD2);
+        add(tfD2);
         add(createJLabel("F2", "Double (0 < F2 < 1): Fraction of particles of the total for the second species."));
-        add(tfSimF2);
+        add(tfF2);
 
         // row 9
         add(createJLabel("D3 [um2s]", "Double: Diffusion coefficient of third species to be simulated (if any)."));
-        add(tfSimD3);
+        add(tfD3);
         add(createJLabel("F3",
                 "Double (0 < F3 < 1 AND F2 + F3 < 1): Fraction of particles of the total for the second species."));
-        add(tfSimF3);
+        add(tfF3);
 
         // row 10
         add(createJLabel("kon (triplet)", "Double: on rate for transition to triplet"));
-        add(tfSimKon);
+        add(tfKon);
         add(createJLabel("koff (triplet)", "Double: off rate for transition from triplet."));
-        add(tfSimKoff);
+        add(tfKoff);
 
         // row 11
         add(createJLabel("Cam Offset", "Integer: Offset of the CCD camera."));
-        add(tfSimCameraOffset);
+        add(tfCameraOffset);
         add(createJLabel("Cam Noise", "Integer: noise factor of the camera."));
-        add(tfSimCameraNoiseFactor);
+        add(tfCameraNoiseFactor);
 
         // row 12
         add(createJLabel("FRAP Radius [um]",
                 "Double: Radius in um within which the particles will be bleached. Only available in 2D."));
-        add(tfSimBleachRadius);
+        add(tfBleachRadius);
         add(createJLabel("FRAP Frame",
                 "Integer: Frame at which the assumed bleach pulse happens. Bleaching is assumed to be instantaneous."));
-        add(tfSimBleachFrame);
+        add(tfBleachFrame);
 
         // rox 13
         add(createJLabel("Dom Rad [nm]", "Radius of domains in nm"));
