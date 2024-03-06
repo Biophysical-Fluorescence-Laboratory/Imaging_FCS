@@ -23,6 +23,17 @@ public class ExpSettingsModel {
     private double paramRy = 0;
 
     public ExpSettingsModel() {
+        updateSettings();
+    }
+
+    public void updateSettings() {
+        paramA = pixelSize * 1000 / magnification * binning.x;
+        paramW = sigma * emLambda / NA;
+        paramW2 = sigma2 * emLamdba2 / NA;
+        paramZ = sigmaZ * emLambda / NA;
+        paramZ2 = sigmaZ2 * emLamdba2 / NA;
+        paramRx = pixelSize * 1000 / magnification * CCF.width; // FIXME: supposed to be "cfXshift"
+        paramRy = pixelSize * 1000 / magnification * CCF.height; // FIXME: supposed to be "cfYshit"
     }
 
     public double getPixelSize() {

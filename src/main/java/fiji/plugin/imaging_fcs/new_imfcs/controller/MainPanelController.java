@@ -12,10 +12,10 @@ import ij.WindowManager;
 
 import javax.swing.*;
 import javax.swing.event.DocumentListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import java.awt.event.*;
+import java.util.function.Consumer;
+
+import static fiji.plugin.imaging_fcs.new_imfcs.controller.FocusListenerFactory.createFocusListener;
 
 public class MainPanelController {
     private final MainPanelView view;
@@ -32,7 +32,7 @@ public class MainPanelController {
         this.imageModel = new ImageModel();
 
         this.expSettingsModel = new ExpSettingsModel();
-        this.expSettingsView = new ExpSettingsView(expSettingsModel);
+        this.expSettingsView = new ExpSettingsView(this, expSettingsModel);
 
         this.simulationController = new SimulationController();
 
@@ -228,5 +228,35 @@ public class MainPanelController {
     public ItemListener tbBackgroundPressed() {
         // TODO: FIXME
         return null;
+    }
+
+    public void updateSettingsField() {
+        Runnable doUpdateSettingsField = new Runnable() {
+            @Override
+            public void run() {
+                expSettingsModel.updateSettings();
+
+                expSettingsView.tfParamA.setText(String.valueOf(expSettingsModel.getParamA()));
+                expSettingsView.tfParamW.setText(String.valueOf(expSettingsModel.getParamW()));
+                expSettingsView.tfParamW2.setText(String.valueOf(expSettingsModel.getParamW2()));
+                expSettingsView.tfParamZ.setText(String.valueOf(expSettingsModel.getParamZ()));
+                expSettingsView.tfParamZ2.setText(String.valueOf(expSettingsModel.getParamZ2()));
+                expSettingsView.tfParamRx.setText(String.valueOf(expSettingsModel.getParamRx()));
+                expSettingsView.tfParamRy.setText(String.valueOf(expSettingsModel.getParamRy()));
+            }
+        };
+
+        SwingUtilities.invokeLater(doUpdateSettingsField);
+    }
+
+    public FocusListener updateSettings(Consumer<String> setter) {
+        // decorate the setter to call updateSettingsfield after changing the value
+        Consumer<String> decoratedSetter = (String value) -> {
+            setter.accept(value);
+            updateSettingsField();
+        };
+
+        // Create the focus listener with the method from the factory with the decorated setter
+        return createFocusListener(decoratedSetter);
     }
 }

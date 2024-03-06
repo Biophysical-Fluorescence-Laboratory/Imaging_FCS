@@ -1,12 +1,12 @@
 package fiji.plugin.imaging_fcs.new_imfcs.view;
 
 import fiji.plugin.imaging_fcs.new_imfcs.constants.Constants;
+import fiji.plugin.imaging_fcs.new_imfcs.controller.MainPanelController;
 import fiji.plugin.imaging_fcs.new_imfcs.model.ExpSettingsModel;
 
 import javax.swing.*;
 import java.awt.*;
 
-import static fiji.plugin.imaging_fcs.new_imfcs.controller.FocusListenerFactory.createFocusListener;
 import static fiji.plugin.imaging_fcs.new_imfcs.view.TextFieldFactory.createTextField;
 import static fiji.plugin.imaging_fcs.new_imfcs.view.UIUtils.createJLabel;
 
@@ -16,6 +16,7 @@ public class ExpSettingsView extends JFrame {
             Constants.MAIN_PANEL_POS.x + Constants.MAIN_PANEL_DIM.width + 10, 125);
     private static final Dimension SETTINGS_DIMENSION = new Dimension(370, 280);
     private final ExpSettingsModel model;
+    private final MainPanelController controller;
     public JTextField tfParamA;
     public JTextField tfParamW;
     public JTextField tfParamZ;
@@ -33,9 +34,10 @@ public class ExpSettingsView extends JFrame {
     private JTextField tfSigmaZ;
     private JTextField tfSigmaZ2;
 
-    public ExpSettingsView(ExpSettingsModel model) {
+    public ExpSettingsView(MainPanelController controller, ExpSettingsModel model) {
         super("Experimental Settings");
         this.model = model;
+        this.controller = controller;
         initializeUI();
     }
 
@@ -56,15 +58,15 @@ public class ExpSettingsView extends JFrame {
 
     private void initializeTextFields() {
         // create editable fields
-        tfPixelSize = createTextField(model.getPixelSize(), "", createFocusListener(model::setPixelSize));
-        tfMagnification = createTextField(model.getMagnification(), "", createFocusListener(model::setMagnification));
-        tfNA = createTextField(model.getNA(), "", createFocusListener(model::setNA));
-        tfEmLambda = createTextField(model.getEmLambda(), "", createFocusListener(model::setEmLambda));
-        tfEmLambda2 = createTextField(model.getEmLamdba2(), "", createFocusListener(model::setEmLamdba2));
-        tfSigma = createTextField(model.getSigma(), "", createFocusListener(model::setSigma));
-        tfSigma2 = createTextField(model.getSigma2(), "", createFocusListener(model::setSigma2));
-        tfSigmaZ = createTextField(model.getSigmaZ(), "", createFocusListener(model::setSigmaZ));
-        tfSigmaZ2 = createTextField(model.getSigmaZ2(), "", createFocusListener(model::setSigmaZ2));
+        tfPixelSize = createTextField(model.getPixelSize(), "", controller.updateSettings(model::setPixelSize));
+        tfMagnification = createTextField(model.getMagnification(), "", controller.updateSettings(model::setMagnification));
+        tfNA = createTextField(model.getNA(), "", controller.updateSettings(model::setNA));
+        tfEmLambda = createTextField(model.getEmLambda(), "", controller.updateSettings(model::setEmLambda));
+        tfEmLambda2 = createTextField(model.getEmLamdba2(), "", controller.updateSettings(model::setEmLamdba2));
+        tfSigma = createTextField(model.getSigma(), "", controller.updateSettings(model::setSigma));
+        tfSigma2 = createTextField(model.getSigma2(), "", controller.updateSettings(model::setSigma2));
+        tfSigmaZ = createTextField(model.getSigmaZ(), "", controller.updateSettings(model::setSigmaZ));
+        tfSigmaZ2 = createTextField(model.getSigmaZ2(), "", controller.updateSettings(model::setSigmaZ2));
 
         // create non editable fields
         tfParamA = createTextField(model.getParamA(), "");

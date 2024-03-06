@@ -8,7 +8,6 @@ import ij.IJ;
 import javax.swing.*;
 import java.awt.*;
 
-import static fiji.plugin.imaging_fcs.new_imfcs.controller.FocusListenerFactory.createFocusListener;
 import static fiji.plugin.imaging_fcs.new_imfcs.view.ButtonFactory.createJButton;
 import static fiji.plugin.imaging_fcs.new_imfcs.view.ButtonFactory.createJToggleButton;
 import static fiji.plugin.imaging_fcs.new_imfcs.view.TextFieldFactory.createTextField;
@@ -107,12 +106,12 @@ public class MainPanelView extends JFrame {
 
         tfBinning = createTextField(expSettingsModel.getBinningString(),
                 "Pixel binning used in the evaluations. NOTE: Changing this value will reinitialize all arrays.",
-                createFocusListener(expSettingsModel::setBinning)
+                controller.updateSettings(expSettingsModel::setBinning)
         );
 
         tfCCFDistance = createTextField(expSettingsModel.getCCFString(),
                 "Distance in x- and y-direction for spatial cross-correlation. NOTE: Changing this value will reinitialize all arrays.",
-                createFocusListener(expSettingsModel::setCCF));
+                controller.updateSettings(expSettingsModel::setCCF));
 
         tfCorrelatorQ = createTextField(CORREL_Q, "");
     }
