@@ -2,11 +2,13 @@ package fiji.plugin.imaging_fcs.new_imfcs.view;
 
 import fiji.plugin.imaging_fcs.new_imfcs.constants.Constants;
 import fiji.plugin.imaging_fcs.new_imfcs.controller.MainPanelController;
+import fiji.plugin.imaging_fcs.new_imfcs.model.ExpSettingsModel;
 import ij.IJ;
 
 import javax.swing.*;
 import java.awt.*;
 
+import static fiji.plugin.imaging_fcs.new_imfcs.controller.FocusListenerFactory.createFocusListener;
 import static fiji.plugin.imaging_fcs.new_imfcs.view.ButtonFactory.createJButton;
 import static fiji.plugin.imaging_fcs.new_imfcs.view.ButtonFactory.createJToggleButton;
 import static fiji.plugin.imaging_fcs.new_imfcs.view.TextFieldFactory.createTextField;
@@ -26,8 +28,11 @@ public class MainPanelView extends JFrame {
     private static final Color LOAD_BUTTON_COLOR = Color.BLUE;
     private static final Color EXIT_BUTTON_COLOR = Color.RED;
 
-    // controller for handling user actions
+    // Controller for handling user actions
     private final MainPanelController controller;
+
+    // Settings model for default values
+    private final ExpSettingsModel expSettingsModel;
 
     // Text Fields for user input
     public JTextField tfFirstFrame; // a detailed description is given in the accompanying documentation
@@ -50,9 +55,10 @@ public class MainPanelView extends JFrame {
      *
      * @param controller The controller to handle actions performed on this panel.
      */
-    public MainPanelView(MainPanelController controller) {
+    public MainPanelView(MainPanelController controller, ExpSettingsModel expSettingsModel) {
         super("ImagingFCS " + IMFCS_VERSION); // items for ImFCS control panel;
         this.controller = controller;
+        this.expSettingsModel = expSettingsModel;
         initializeUI();
     }
 
@@ -99,13 +105,14 @@ public class MainPanelView extends JFrame {
 
         tfLastFrame = createTextField("0", "", controller.tfLastFrameChanged());
 
-        tfBinning = createTextField("1 x 1",
+        tfBinning = createTextField(expSettingsModel.getBinningString(),
                 "Pixel binning used in the evaluations. NOTE: Changing this value will reinitialize all arrays.",
-                controller.expSettingsChanged());
+                createFocusListener(expSettingsModel::setBinning)
+        );
 
-        tfCCFDistance = createTextField("0 x 0",
+        tfCCFDistance = createTextField(expSettingsModel.getCCFString(),
                 "Distance in x- and y-direction for spatial cross-correlation. NOTE: Changing this value will reinitialize all arrays.",
-                controller.expSettingsChanged());
+                createFocusListener(expSettingsModel::setCCF));
 
         tfCorrelatorQ = createTextField(CORREL_Q, "");
     }

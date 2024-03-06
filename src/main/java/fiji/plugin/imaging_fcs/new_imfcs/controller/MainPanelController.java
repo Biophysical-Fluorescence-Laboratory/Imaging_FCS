@@ -1,8 +1,10 @@
 package fiji.plugin.imaging_fcs.new_imfcs.controller;
 
+import fiji.plugin.imaging_fcs.new_imfcs.model.ExpSettingsModel;
 import fiji.plugin.imaging_fcs.new_imfcs.model.HardwareModel;
 import fiji.plugin.imaging_fcs.new_imfcs.model.ImageModel;
 import fiji.plugin.imaging_fcs.new_imfcs.model.OptionsModel;
+import fiji.plugin.imaging_fcs.new_imfcs.view.ExpSettingsView;
 import fiji.plugin.imaging_fcs.new_imfcs.view.MainPanelView;
 import ij.IJ;
 import ij.ImagePlus;
@@ -17,22 +19,24 @@ import java.awt.event.ItemListener;
 
 public class MainPanelController {
     private final MainPanelView view;
+    private final ExpSettingsView expSettingsView;
     private final HardwareModel hardwareModel;
     private final OptionsModel optionsModel;
     private final ImageModel imageModel;
+    private final ExpSettingsModel expSettingsModel;
     private final SimulationController simulationController;
 
     public MainPanelController(HardwareModel hardwareModel) {
-        this.view = new MainPanelView(this);
         this.hardwareModel = hardwareModel;
         this.optionsModel = new OptionsModel(hardwareModel.isCuda());
         this.imageModel = new ImageModel();
-        this.simulationController = new SimulationController();
-    }
 
-    public DocumentListener expSettingsChanged() {
-        // TODO: FIXME
-        return null;
+        this.expSettingsModel = new ExpSettingsModel();
+        this.expSettingsView = new ExpSettingsView(expSettingsModel);
+
+        this.simulationController = new SimulationController();
+
+        this.view = new MainPanelView(this, this.expSettingsModel);
     }
 
     public DocumentListener tfLastFrameChanged() {
@@ -188,8 +192,7 @@ public class MainPanelController {
     }
 
     public ItemListener tbExpSettingsPressed() {
-        // TODO: FIXME
-        return null;
+        return (ItemEvent ev) -> expSettingsView.setVisible(ev.getStateChange() == ItemEvent.SELECTED);
     }
 
     public ItemListener tbBleachCorStridePressed() {
@@ -205,13 +208,10 @@ public class MainPanelController {
     public ItemListener tbSimPressed() {
         return (ItemEvent ev) -> {
             JToggleButton button = (JToggleButton) ev.getItemSelectable();
-            if (ev.getStateChange() == ItemEvent.SELECTED) {
-                button.setText("Sim on");
-                simulationController.setVisible(true);
-            } else {
-                button.setText("Sim off");
-                simulationController.setVisible(false);
-            }
+
+            boolean selected = (ev.getStateChange() == ItemEvent.SELECTED);
+            button.setText(selected ? "Sim on" : "Sim off");
+            simulationController.setVisible(selected);
         };
     }
 

@@ -1,10 +1,13 @@
 package fiji.plugin.imaging_fcs.new_imfcs.view;
 
 import fiji.plugin.imaging_fcs.new_imfcs.constants.Constants;
+import fiji.plugin.imaging_fcs.new_imfcs.model.ExpSettingsModel;
 
 import javax.swing.*;
 import java.awt.*;
 
+import static fiji.plugin.imaging_fcs.new_imfcs.controller.FocusListenerFactory.createFocusListener;
+import static fiji.plugin.imaging_fcs.new_imfcs.view.TextFieldFactory.createTextField;
 import static fiji.plugin.imaging_fcs.new_imfcs.view.UIUtils.createJLabel;
 
 public class ExpSettingsView extends JFrame {
@@ -12,6 +15,7 @@ public class ExpSettingsView extends JFrame {
     private static final Point SETTINGS_LOCATION = new Point(
             Constants.MAIN_PANEL_POS.x + Constants.MAIN_PANEL_DIM.width + 10, 125);
     private static final Dimension SETTINGS_DIMENSION = new Dimension(370, 280);
+    private final ExpSettingsModel model;
     public JTextField tfParamA;
     public JTextField tfParamW;
     public JTextField tfParamZ;
@@ -19,7 +23,6 @@ public class ExpSettingsView extends JFrame {
     public JTextField tfParamZ2;
     public JTextField tfParamRx;
     public JTextField tfParamRy;
-    public JTextField tfParamRz;
     private JTextField tfPixelSize;
     private JTextField tfMagnification;
     private JTextField tfNA;
@@ -30,7 +33,9 @@ public class ExpSettingsView extends JFrame {
     private JTextField tfSigmaZ;
     private JTextField tfSigmaZ2;
 
-    public ExpSettingsView() {
+    public ExpSettingsView(ExpSettingsModel model) {
+        super("Experimental Settings");
+        this.model = model;
         initializeUI();
     }
 
@@ -50,14 +55,30 @@ public class ExpSettingsView extends JFrame {
     }
 
     private void initializeTextFields() {
-        // TODO
+        // create editable fields
+        tfPixelSize = createTextField(model.getPixelSize(), "", createFocusListener(model::setPixelSize));
+        tfMagnification = createTextField(model.getMagnification(), "", createFocusListener(model::setMagnification));
+        tfNA = createTextField(model.getNA(), "", createFocusListener(model::setNA));
+        tfEmLambda = createTextField(model.getEmLambda(), "", createFocusListener(model::setEmLambda));
+        tfEmLambda2 = createTextField(model.getEmLamdba2(), "", createFocusListener(model::setEmLamdba2));
+        tfSigma = createTextField(model.getSigma(), "", createFocusListener(model::setSigma));
+        tfSigma2 = createTextField(model.getSigma2(), "", createFocusListener(model::setSigma2));
+        tfSigmaZ = createTextField(model.getSigmaZ(), "", createFocusListener(model::setSigmaZ));
+        tfSigmaZ2 = createTextField(model.getSigmaZ2(), "", createFocusListener(model::setSigmaZ2));
+
+        // create non editable fields
+        tfParamA = createTextField(model.getParamA(), "");
+        tfParamW = createTextField(model.getParamW(), "");
+        tfParamZ = createTextField(model.getParamZ(), "");
+        tfParamW2 = createTextField(model.getParamW2(), "");
+        tfParamZ2 = createTextField(model.getParamZ2(), "");
+        tfParamRx = createTextField(model.getParamRx(), "");
+        tfParamRy = createTextField(model.getParamRy(), "");
         setNonEditable();
     }
 
     private void setNonEditable() {
-        JTextField[] nonEditFields = {
-                tfParamA, tfParamW, tfParamZ, tfParamW2, tfParamZ2, tfParamRx, tfParamRy, tfParamRz
-        };
+        JTextField[] nonEditFields = {tfParamA, tfParamW, tfParamZ, tfParamW2, tfParamZ2, tfParamRx, tfParamRy};
 
         for (JTextField textField : nonEditFields) {
             textField.setEditable(false);
@@ -128,7 +149,7 @@ public class ExpSettingsView extends JFrame {
         // row 11
         add(createJLabel("ry [nm]: ", ""));
         add(tfParamRy);
-        add(createJLabel("rz [nm]: ", ""));
-        add(tfParamRz);
+        add(createJLabel("", ""));
+        add(createJLabel("", ""));
     }
 }
