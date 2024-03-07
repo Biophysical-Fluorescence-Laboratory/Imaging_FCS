@@ -101,43 +101,33 @@ public class SimulationView extends JFrame {
 
     private void initializeTextFields() {
         tfSeed = createTextField(model.getSeed(), "", createFocusListener(model::setSeed));
-        tfNumParticle = createTextField(model.getNumParticles(), "",
-                createFocusListener(model::setNumParticles));
+        tfNumParticle = createTextField(model.getNumParticles(), "", createFocusListener(model::setNumParticles));
         tfCPS = createTextField(model.getCPS(), "", createFocusListener(model::setCPS));
         tfTauBleach = createTextField(model.getTauBleach(), "", createFocusListener(model::setTauBleach));
         tfPixelNum = createTextField(model.getPixelNum(), "", createFocusListener(model::setPixelNum));
         tfExtensionFactor = createTextField(model.getExtFactor(), "", createFocusListener(model::setExtFactor));
         tfNumFrames = createTextField(model.getNumFrames(), "", createFocusListener(model::setNumFrames));
         tfFrameTime = createTextField(model.getFrameTime(), "", createFocusListener(model::setFrameTime));
-        tfStepsPerFrame = createTextField(model.getStepsPerFrame(), "",
-                createFocusListener(model::setStepsPerFrame));
+        tfStepsPerFrame = createTextField(model.getStepsPerFrame(), "", createFocusListener(model::setStepsPerFrame));
         tfCurrentStepSize = createTextField("20", "");
         tfD1 = createTextField(model.getD1(), "", createFocusListener(model::setD1));
-        tfDoutDinRatio = createTextField(model.getDoutDinRatio(), "",
-                createFocusListener(model::setDoutDinRatio));
+        tfDoutDinRatio = createTextField(model.getDoutDinRatio(), "", createFocusListener(model::setDoutDinRatio));
         tfD2 = createTextField(model.getD2(), "", createFocusListener(model::setD2));
         tfF2 = createTextField(model.getF2(), "", createFocusListener(model::setF2));
         tfD3 = createTextField(model.getD3(), "", createFocusListener(model::setD3));
         tfF3 = createTextField(model.getF3(), "", createFocusListener(model::setF3));
         tfKon = createTextField(model.getKon(), "", createFocusListener(model::setKon));
         tfKoff = createTextField(model.getKoff(), "", createFocusListener(model::setKoff));
-        tfCameraOffset = createTextField(model.getCameraOffset(), "",
-                createFocusListener(model::setCameraOffset));
-        tfCameraNoiseFactor = createTextField(model.getCameraNoiseFactor(), "",
-                createFocusListener(model::setCameraNoiseFactor));
-        tfBleachRadius = createTextField(model.getBleachRadius(), "",
-                createFocusListener(model::setBleachRadius));
+        tfCameraOffset = createTextField(model.getCameraOffset(), "", createFocusListener(model::setCameraOffset));
+        tfCameraNoiseFactor = createTextField(model.getCameraNoiseFactor(), "", createFocusListener(model::setCameraNoiseFactor));
+        tfBleachRadius = createTextField(model.getBleachRadius(), "", createFocusListener(model::setBleachRadius));
         tfBleachFrame = createTextField(model.getBleachFrame(), "", createFocusListener(model::setBleachFrame));
-        tfDomainRadius = createTextField(model.getDomainRadius(), "",
-                createFocusListener(model::setDomainRadius));
-        tfDomainDensity = createTextField(model.getDomainDensity(), "",
-                createFocusListener(model::setDomainDensity));
+        tfDomainRadius = createTextField(model.getDomainRadius(), "", createFocusListener(model::setDomainRadius));
+        tfDomainDensity = createTextField(model.getDomainDensity(), "", createFocusListener(model::setDomainDensity));
         tfPin = createTextField(model.getPin(), "", createFocusListener(model::setPin));
         tfPout = createTextField(model.getPout(), "", createFocusListener(model::setPout));
-        tfMeshworkSize = createTextField(model.getMeshWorkSize(), "",
-                createFocusListener(model::setMeshWorkSize));
-        tfHopProbability = createTextField(model.getHopProbability(), "",
-                createFocusListener(model::setHopProbability));
+        tfMeshworkSize = createTextField(model.getMeshWorkSize(), "", createFocusListener(model::setMeshWorkSize));
+        tfHopProbability = createTextField(model.getHopProbability(), "", createFocusListener(model::setHopProbability));
     }
 
     private void initializeButtons() throws Exception {

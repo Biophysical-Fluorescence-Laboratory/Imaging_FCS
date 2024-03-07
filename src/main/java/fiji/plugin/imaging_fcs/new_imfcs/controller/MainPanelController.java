@@ -45,7 +45,7 @@ public class MainPanelController {
         this.expSettingsModel = new ExpSettingsModel();
         this.expSettingsView = new ExpSettingsView(this, expSettingsModel);
 
-        this.simulationController = new SimulationController();
+        this.simulationController = new SimulationController(expSettingsModel);
 
         this.view = new MainPanelView(this, this.expSettingsModel);
     }

@@ -1,5 +1,6 @@
 package fiji.plugin.imaging_fcs.new_imfcs.controller;
 
+import fiji.plugin.imaging_fcs.new_imfcs.model.ExpSettingsModel;
 import fiji.plugin.imaging_fcs.new_imfcs.model.SimulationModel;
 import fiji.plugin.imaging_fcs.new_imfcs.view.SimulationView;
 
@@ -13,8 +14,8 @@ public class SimulationController {
     private final SimulationView simulationView;
     private final SimulationModel simulationModel;
 
-    public SimulationController() {
-        simulationModel = new SimulationModel();
+    public SimulationController(ExpSettingsModel expSettingsModel) {
+        simulationModel = new SimulationModel(expSettingsModel);
         simulationView = new SimulationView(this, simulationModel);
     }
 
@@ -63,7 +64,7 @@ public class SimulationController {
             boolean selected = (ev.getStateChange() == ItemEvent.SELECTED);
             button.setText(selected ? "Triplet On" : "Triplet Off");
             simulationView.tripletSetEnable(selected);
-            simulationModel.setSimBlinkFlag(selected);
+            simulationModel.setBlinkFlag(selected);
         };
     }
 }

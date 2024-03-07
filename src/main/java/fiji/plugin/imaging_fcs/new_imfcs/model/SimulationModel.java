@@ -2,12 +2,11 @@ package fiji.plugin.imaging_fcs.new_imfcs.model;
 
 public class SimulationModel {
     private static final double DIFFUSION_COEFFICIENT_BASE = Math.pow(10, 12);
-    private static final double PIXEL_SIZE_REAL_SPACE_CONVERSION_FACTOR = Math.pow(10, 6);
-    private static final double OBSERVATION_WAVELENGTH_CONVERSION_FACTOR = Math.pow(10, 9);
+    private final ExpSettingsModel expSettingsModel;
     private boolean is2D;
     private boolean isDomain;
     private boolean isMesh;
-    private boolean simBlinkFlag;
+    private boolean blinkFlag;
     private int seed = 1;
     private int numParticles = 1000; // number of simulated particles
     private int CPS = 10000; // average count rate per particle per second
@@ -25,7 +24,7 @@ public class SimulationModel {
     private double F3 = 0.0; // fraction of particle 3
     private double kon = 300.0; // on-rate for triplet
     private double koff = 700.0; // off-rate for triplet
-    private int CameraOffset = 100; // offset of CCD camera
+    private int cameraOffset = 100; // offset of CCD camera
     private double cameraNoiseFactor = 3.0; // noise of CCD camera
     private double bleachRadius = 3.0; // bleach radius
     private int bleachFrame = 10000000; // frame at which bleach happens
@@ -35,17 +34,14 @@ public class SimulationModel {
     private double pout = 0.6; // Probability to exit domain
     private double meshWorkSize = 100.0; // Size of meshes
     private double hopProbability = 1.0; // hop probability over meshwork barriers
-    private double pixelSizeRS = 24 / PIXEL_SIZE_REAL_SPACE_CONVERSION_FACTOR; // pixel size in real space
-    private double mag = 63.0; // objective magnification
-    private double wavelength = 614.0 / OBSERVATION_WAVELENGTH_CONVERSION_FACTOR; // observation wavelength
-    private double NA = 1.0; // NA of the objective
-    private double sigma0 = 0.8; // actual resolution
 
-    public SimulationModel() {
+    public SimulationModel(ExpSettingsModel expSettingsModel) {
+        this.expSettingsModel = expSettingsModel;
+
         is2D = true;
         isDomain = false;
         isMesh = false;
-        simBlinkFlag = false;
+        blinkFlag = false;
     }
 
     public void setIs2D(boolean is2D) {
@@ -60,8 +56,8 @@ public class SimulationModel {
         this.isMesh = isMesh;
     }
 
-    public void setSimBlinkFlag(boolean simBlinkFlag) {
-        this.simBlinkFlag = simBlinkFlag;
+    public void setBlinkFlag(boolean blinkFlag) {
+        this.blinkFlag = blinkFlag;
     }
 
     public int getSeed() {
@@ -140,8 +136,8 @@ public class SimulationModel {
         return D1 * DIFFUSION_COEFFICIENT_BASE;
     }
 
-    public void setD1(String d1) {
-        D1 = Double.parseDouble(d1) / DIFFUSION_COEFFICIENT_BASE;
+    public void setD1(String D1) {
+        this.D1 = Double.parseDouble(D1) / DIFFUSION_COEFFICIENT_BASE;
     }
 
     public double getDoutDinRatio() {
@@ -156,32 +152,32 @@ public class SimulationModel {
         return D2 * DIFFUSION_COEFFICIENT_BASE;
     }
 
-    public void setD2(String d2) {
-        D2 = Double.parseDouble(d2) / DIFFUSION_COEFFICIENT_BASE;
+    public void setD2(String D2) {
+        this.D2 = Double.parseDouble(D2) / DIFFUSION_COEFFICIENT_BASE;
     }
 
     public double getD3() {
         return D3 * DIFFUSION_COEFFICIENT_BASE;
     }
 
-    public void setD3(String d3) {
-        D3 = Double.parseDouble(d3) / DIFFUSION_COEFFICIENT_BASE;
+    public void setD3(String D3) {
+        this.D3 = Double.parseDouble(D3) / DIFFUSION_COEFFICIENT_BASE;
     }
 
     public double getF2() {
         return F2;
     }
 
-    public void setF2(String f2) {
-        F2 = Double.parseDouble(f2);
+    public void setF2(String F2) {
+        this.F2 = Double.parseDouble(F2);
     }
 
     public double getF3() {
         return F3;
     }
 
-    public void setF3(String f3) {
-        F3 = Double.parseDouble(f3);
+    public void setF3(String F3) {
+        this.F3 = Double.parseDouble(F3);
     }
 
     public double getKon() {
@@ -201,11 +197,11 @@ public class SimulationModel {
     }
 
     public int getCameraOffset() {
-        return CameraOffset;
+        return cameraOffset;
     }
 
     public void setCameraOffset(String cameraOffset) {
-        CameraOffset = Integer.parseInt(cameraOffset);
+        this.cameraOffset = Integer.parseInt(cameraOffset);
     }
 
     public double getCameraNoiseFactor() {
@@ -278,45 +274,5 @@ public class SimulationModel {
 
     public void setHopProbability(String hopProbability) {
         this.hopProbability = Double.parseDouble(hopProbability);
-    }
-
-    public double getPixelSizeRS() {
-        return pixelSizeRS * PIXEL_SIZE_REAL_SPACE_CONVERSION_FACTOR;
-    }
-
-    public void setPixelSizeRS(String pixelSizeRS) {
-        this.pixelSizeRS = Double.parseDouble(pixelSizeRS) / PIXEL_SIZE_REAL_SPACE_CONVERSION_FACTOR;
-    }
-
-    public double getMag() {
-        return mag;
-    }
-
-    public void setMag(String mag) {
-        this.mag = Double.parseDouble(mag);
-    }
-
-    public double getWavelength() {
-        return wavelength * OBSERVATION_WAVELENGTH_CONVERSION_FACTOR;
-    }
-
-    public void setWavelength(String wavelength) {
-        this.wavelength = Double.parseDouble(wavelength) / OBSERVATION_WAVELENGTH_CONVERSION_FACTOR;
-    }
-
-    public double getNA() {
-        return NA;
-    }
-
-    public void setNA(String NA) {
-        this.NA = Double.parseDouble(NA);
-    }
-
-    public double getSigma0() {
-        return sigma0;
-    }
-
-    public void setSigma0(String sigma0) {
-        this.sigma0 = Double.parseDouble(sigma0);
     }
 }
