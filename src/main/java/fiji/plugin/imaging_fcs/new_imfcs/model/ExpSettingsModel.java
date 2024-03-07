@@ -2,7 +2,14 @@ package fiji.plugin.imaging_fcs.new_imfcs.model;
 
 import java.awt.*;
 
+/**
+ * Represents the experimental settings for imaging FCS.
+ * This model includes various parameters related to imaging,
+ * such as pixel size, magnification, numerical aperture (NA),
+ * and others relevant for fluorescence correlation spectroscopy (FCS) analysis.
+ */
 public class ExpSettingsModel {
+    // User parameters with default values
     private Point binning = new Point(1, 1);
     private Dimension CCF = new Dimension(0, 0);
     private double pixelSize = 24;
@@ -14,28 +21,46 @@ public class ExpSettingsModel {
     private double emLamdba2 = 600;
     private double sigmaZ = 1000000;
     private double sigmaZ2 = 1000000;
-    private double paramA = 0;
-    private double paramW = 0;
-    private double paramW2 = 0;
-    private double paramZ = 0;
-    private double paramZ2 = 0;
-    private double paramRx = 0;
-    private double paramRy = 0;
 
+    // Non user parameters (compute using user parameters)
+    private double paramA;
+    private double paramW;
+    private double paramW2;
+    private double paramZ;
+    private double paramZ2;
+    private double paramRx;
+    private double paramRy;
+
+    /**
+     * Constructs an ExpSettingsModel and initializes settings by calling updateSettings.
+     */
     public ExpSettingsModel() {
         updateSettings();
     }
 
+    /**
+     * Updates the derived parameters based on the current settings.
+     * This includes calculations for resolution and displacement adjustments.
+     */
     public void updateSettings() {
+        // Calculation of the axial resolution adjustment parameter based on pixel size and magnification.
         paramA = pixelSize * 1000 / magnification * binning.x;
+
+        // Calculation of lateral and axial resolutions for both emission wavelengths.
         paramW = sigma * emLambda / NA;
         paramW2 = sigma2 * emLamdba2 / NA;
         paramZ = sigmaZ * emLambda / NA;
         paramZ2 = sigmaZ2 * emLamdba2 / NA;
+
+        // Adjustments for lateral displacements, intended to reflect CCF shifts but currently using dimension directly.
         paramRx = pixelSize * 1000 / magnification * CCF.width; // FIXME: supposed to be "cfXshift"
         paramRy = pixelSize * 1000 / magnification * CCF.height; // FIXME: supposed to be "cfYshit"
     }
 
+    // Getters and setters for various parameters follow, allowing external modification and access to the settings.
+    // These include straightforward implementations to set and get values for pixel size, magnification, NA, etc.
+    // Some setters parse strings to double values, enabling easy handling of text input.
+    // Additionally, there are methods to get and set the binning and CCF dimensions as strings for user interfaces.
     public double getPixelSize() {
         return pixelSize;
     }

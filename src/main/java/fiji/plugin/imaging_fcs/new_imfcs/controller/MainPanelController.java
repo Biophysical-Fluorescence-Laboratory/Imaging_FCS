@@ -17,7 +17,13 @@ import java.util.function.Consumer;
 
 import static fiji.plugin.imaging_fcs.new_imfcs.controller.FocusListenerFactory.createFocusListener;
 
+/**
+ * Controller class for the main panel of the FCS plugin. It handles user interactions and coordinates
+ * the update of models based on user input, as well as the update of views to reflect the current state
+ * of the models.
+ */
 public class MainPanelController {
+    // Field declarations for the views and models that this controller will manage
     private final MainPanelView view;
     private final ExpSettingsView expSettingsView;
     private final HardwareModel hardwareModel;
@@ -26,6 +32,11 @@ public class MainPanelController {
     private final ExpSettingsModel expSettingsModel;
     private final SimulationController simulationController;
 
+    /**
+     * Constructor that initializes models, views, and other controllers needed for the main panel.
+     *
+     * @param hardwareModel The model containing hardware settings for the imaging FCS analysis.
+     */
     public MainPanelController(HardwareModel hardwareModel) {
         this.hardwareModel = hardwareModel;
         this.optionsModel = new OptionsModel(hardwareModel.isCuda());
@@ -230,7 +241,11 @@ public class MainPanelController {
         return null;
     }
 
-    public void updateSettingsField() {
+    /**
+     * Updates the display fields in the experimental settings view based on the current values in the model.
+     * This method ensures that the UI reflects the most up-to-date settings.
+     */
+    private void updateSettingsField() {
         Runnable doUpdateSettingsField = new Runnable() {
             @Override
             public void run() {
@@ -246,9 +261,17 @@ public class MainPanelController {
             }
         };
 
+        // Execute the update in the Swing event dispatch thread to ensure thread safety
         SwingUtilities.invokeLater(doUpdateSettingsField);
     }
 
+    /**
+     * Decorates a setter from the model to automatically update the settings view
+     * after the model value has been changed.
+     *
+     * @param setter A Consumer that sets a value in the model.
+     * @return A FocusListener that updates the model and then the view when focus is lost.
+     */
     public FocusListener updateSettings(Consumer<String> setter) {
         // decorate the setter to call updateSettingsfield after changing the value
         Consumer<String> decoratedSetter = (String value) -> {

@@ -10,6 +10,11 @@ import java.awt.*;
 import static fiji.plugin.imaging_fcs.new_imfcs.view.TextFieldFactory.createTextField;
 import static fiji.plugin.imaging_fcs.new_imfcs.view.UIUtils.createJLabel;
 
+/**
+ * Provides the user interface for adjusting and displaying experimental settings in the imaging FCS application.
+ * This class extends JFrame to create a window where users can input and view settings such as pixel size,
+ * magnification, numerical aperture, and more. It also displays calculated parameters based on these settings.
+ */
 public class ExpSettingsView extends JFrame {
     private static final GridLayout SETTINGS_LAYOUT = new GridLayout(11, 4);
     private static final Point SETTINGS_LOCATION = new Point(
@@ -34,6 +39,13 @@ public class ExpSettingsView extends JFrame {
     private JTextField tfSigmaZ;
     private JTextField tfSigmaZ2;
 
+    /**
+     * Constructs an ExpSettingsView with references to a controller and a model.
+     * Initializes the UI components of the settings window.
+     *
+     * @param controller The controller that manages interactions between the view and the model.
+     * @param model      The model containing the experimental settings data.
+     */
     public ExpSettingsView(MainPanelController controller, ExpSettingsModel model) {
         super("Experimental Settings");
         this.model = model;
@@ -41,12 +53,18 @@ public class ExpSettingsView extends JFrame {
         initializeUI();
     }
 
+    /**
+     * Configures the main window settings, initializes text fields for user input, and adds components to the frame.
+     */
     private void initializeUI() {
         configureWindow();
         initializeTextFields();
         addComponentsToFrame();
     }
 
+    /**
+     * Sets up the basic window properties such as size, layout, and default close operation.
+     */
     private void configureWindow() {
         setFocusable(true);
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -57,7 +75,7 @@ public class ExpSettingsView extends JFrame {
     }
 
     private void initializeTextFields() {
-        // create editable fields
+        // Initialize editable fields with model data and controller actions
         tfPixelSize = createTextField(model.getPixelSize(), "", controller.updateSettings(model::setPixelSize));
         tfMagnification = createTextField(model.getMagnification(), "", controller.updateSettings(model::setMagnification));
         tfNA = createTextField(model.getNA(), "", controller.updateSettings(model::setNA));
@@ -68,7 +86,7 @@ public class ExpSettingsView extends JFrame {
         tfSigmaZ = createTextField(model.getSigmaZ(), "", controller.updateSettings(model::setSigmaZ));
         tfSigmaZ2 = createTextField(model.getSigmaZ2(), "", controller.updateSettings(model::setSigmaZ2));
 
-        // create non editable fields
+        // Initialize non-editable fields for displaying calculated parameters
         tfParamA = createTextField(model.getParamA(), "");
         tfParamW = createTextField(model.getParamW(), "");
         tfParamZ = createTextField(model.getParamZ(), "");
@@ -79,6 +97,9 @@ public class ExpSettingsView extends JFrame {
         setNonEditable();
     }
 
+    /**
+     * Sets certain text fields to be non-editable, indicating they are for display only.
+     */
     private void setNonEditable() {
         JTextField[] nonEditFields = {tfParamA, tfParamW, tfParamZ, tfParamW2, tfParamZ2, tfParamRx, tfParamRy};
 
@@ -87,6 +108,9 @@ public class ExpSettingsView extends JFrame {
         }
     }
 
+    /**
+     * Adds UI components to the frame, organizing them according to the layout for the settings panel.
+     */
     private void addComponentsToFrame() {
         // row 1
         add(createJLabel("Pixel size [um]:", ""));
