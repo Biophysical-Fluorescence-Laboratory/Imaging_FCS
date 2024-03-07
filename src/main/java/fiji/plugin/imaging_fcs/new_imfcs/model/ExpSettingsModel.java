@@ -137,48 +137,24 @@ public class ExpSettingsModel {
         return paramA;
     }
 
-    public void setParamA(String paramA) {
-        this.paramA = Double.parseDouble(paramA);
-    }
-
     public double getParamW() {
         return paramW;
-    }
-
-    public void setParamW(String paramW) {
-        this.paramW = Double.parseDouble(paramW);
     }
 
     public double getParamZ() {
         return paramZ;
     }
 
-    public void setParamZ(String paramZ) {
-        this.paramZ = Double.parseDouble(paramZ);
-    }
-
     public double getParamZ2() {
         return paramZ2;
-    }
-
-    public void setParamZ2(String paramZ2) {
-        this.paramZ2 = Double.parseDouble(paramZ2);
     }
 
     public double getParamRx() {
         return paramRx;
     }
 
-    public void setParamRx(String paramRx) {
-        this.paramRx = Double.parseDouble(paramRx);
-    }
-
     public double getParamRy() {
         return paramRy;
-    }
-
-    public void setParamRy(String paramRy) {
-        this.paramRy = Double.parseDouble(paramRy);
     }
 
     public Point getBinning() {
@@ -211,9 +187,5 @@ public class ExpSettingsModel {
 
     public double getParamW2() {
         return paramW2;
-    }
-
-    public void setParamW2(double paramW2) {
-        this.paramW2 = paramW2;
     }
 }

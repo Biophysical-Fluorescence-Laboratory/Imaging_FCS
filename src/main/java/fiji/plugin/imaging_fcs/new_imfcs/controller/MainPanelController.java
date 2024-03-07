@@ -14,6 +14,7 @@ import javax.swing.*;
 import javax.swing.event.DocumentListener;
 import java.awt.event.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static fiji.plugin.imaging_fcs.new_imfcs.controller.FocusListenerFactory.createFocusListener;
 
@@ -44,6 +45,7 @@ public class MainPanelController {
 
         this.expSettingsModel = new ExpSettingsModel();
         this.expSettingsView = new ExpSettingsView(this, expSettingsModel);
+        updateSettingsField();
 
         this.simulationController = new SimulationController(expSettingsModel);
 
@@ -251,13 +253,16 @@ public class MainPanelController {
             public void run() {
                 expSettingsModel.updateSettings();
 
-                expSettingsView.tfParamA.setText(String.valueOf(expSettingsModel.getParamA()));
-                expSettingsView.tfParamW.setText(String.valueOf(expSettingsModel.getParamW()));
-                expSettingsView.tfParamW2.setText(String.valueOf(expSettingsModel.getParamW2()));
-                expSettingsView.tfParamZ.setText(String.valueOf(expSettingsModel.getParamZ()));
-                expSettingsView.tfParamZ2.setText(String.valueOf(expSettingsModel.getParamZ2()));
-                expSettingsView.tfParamRx.setText(String.valueOf(expSettingsModel.getParamRx()));
-                expSettingsView.tfParamRy.setText(String.valueOf(expSettingsModel.getParamRy()));
+                // Use scientific notation for these fields
+                Function<Double, String> formatter = value -> String.format("%6.2e", value);
+
+                expSettingsView.setTextParamA(formatter.apply(expSettingsModel.getParamA()));
+                expSettingsView.setTextParamW(formatter.apply(expSettingsModel.getParamW()));
+                expSettingsView.setTextParamW2(formatter.apply(expSettingsModel.getParamW2()));
+                expSettingsView.setTextParamZ(formatter.apply(expSettingsModel.getParamZ()));
+                expSettingsView.setTextParamZ2(formatter.apply(expSettingsModel.getParamZ2()));
+                expSettingsView.setTextParamRx(formatter.apply(expSettingsModel.getParamRx()));
+                expSettingsView.setTextParamRy(formatter.apply(expSettingsModel.getParamRy()));
             }
         };
 

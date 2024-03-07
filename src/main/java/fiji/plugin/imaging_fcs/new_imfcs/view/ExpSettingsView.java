@@ -22,13 +22,13 @@ public class ExpSettingsView extends JFrame {
     private static final Dimension SETTINGS_DIMENSION = new Dimension(370, 280);
     private final ExpSettingsModel model;
     private final MainPanelController controller;
-    public JTextField tfParamA;
-    public JTextField tfParamW;
-    public JTextField tfParamZ;
-    public JTextField tfParamW2;
-    public JTextField tfParamZ2;
-    public JTextField tfParamRx;
-    public JTextField tfParamRy;
+    private JTextField tfParamA;
+    private JTextField tfParamW;
+    private JTextField tfParamZ;
+    private JTextField tfParamW2;
+    private JTextField tfParamZ2;
+    private JTextField tfParamRx;
+    private JTextField tfParamRy;
     private JTextField tfPixelSize;
     private JTextField tfMagnification;
     private JTextField tfNA;
@@ -87,13 +87,13 @@ public class ExpSettingsView extends JFrame {
         tfSigmaZ2 = createTextField(model.getSigmaZ2(), "", controller.updateSettings(model::setSigmaZ2));
 
         // Initialize non-editable fields for displaying calculated parameters
-        tfParamA = createTextField(model.getParamA(), "");
-        tfParamW = createTextField(model.getParamW(), "");
-        tfParamZ = createTextField(model.getParamZ(), "");
-        tfParamW2 = createTextField(model.getParamW2(), "");
-        tfParamZ2 = createTextField(model.getParamZ2(), "");
-        tfParamRx = createTextField(model.getParamRx(), "");
-        tfParamRy = createTextField(model.getParamRy(), "");
+        tfParamA = createTextField("", "");
+        tfParamW = createTextField("", "");
+        tfParamZ = createTextField("", "");
+        tfParamW2 = createTextField("", "");
+        tfParamZ2 = createTextField("", "");
+        tfParamRx = createTextField("", "");
+        tfParamRy = createTextField("", "");
         setNonEditable();
     }
 
@@ -177,5 +177,34 @@ public class ExpSettingsView extends JFrame {
         add(tfParamRy);
         add(createJLabel("", ""));
         add(createJLabel("", ""));
+    }
+
+    public void setTextParamA(String text) {
+        tfParamA.setText(text);
+    }
+
+    public void setTextParamW(String text) {
+
+        tfParamW.setText(text);
+    }
+
+    public void setTextParamW2(String text) {
+        tfParamW2.setText(text);
+    }
+
+    public void setTextParamZ(String text) {
+        tfParamZ.setText(text);
+    }
+
+    public void setTextParamZ2(String text) {
+        tfParamZ2.setText(text);
+    }
+
+    public void setTextParamRx(String text) {
+        tfParamRx.setText(text);
+    }
+
+    public void setTextParamRy(String text) {
+        tfParamRy.setText(text);
     }
 }
