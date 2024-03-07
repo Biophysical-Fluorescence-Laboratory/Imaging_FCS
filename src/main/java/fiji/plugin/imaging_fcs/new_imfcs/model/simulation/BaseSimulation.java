@@ -22,43 +22,40 @@ public class BaseSimulation {
         this.settingsModel = settingsModel;
     }
 
-    public int checkInDomain(double px, double py, double[][] domains, int[][][] domainsorted, int maxct,
-                             double gridMidPos, double subgridsize) {
-        // px and py are particle positions
-        // domains has the position and size of the different existing domains
-        // domainsorted is essentially a grid in which the domains are sorted according
-        // to their place in the simulated area; this makes sure not all domains but
-        // only domians in the vicinity of the particle are searched
-        // maxct is the maximum number of domains in any subgrid area (max length of
-        // domainsorted[][])
-        // gridMidPos and subgridsize define the subgrid on which the domains were
-        // sorted
-        int maxxt = domainsorted.length;
-        int maxyt = domainsorted[0].length;
-        int xt = (int) Math.floor((px + gridMidPos) / subgridsize);
-        int yt = (int) Math.floor((py + gridMidPos) / subgridsize);
-        int result = 0;
-        if (xt > maxxt || xt < 0 || yt > maxyt || yt < 0) {
-            return result;
+    public int findDomainContainingParticle(double particleX, double particleY, double[][] domains, int[][][] domainGrid,
+                                            int maxDomainsPerCell, double gridMidpoint, double cellSize) {
+        // Calculate grid coordinates of the particle
+        int gridX = (int) Math.floor((particleX + gridMidpoint) / cellSize);
+        int gridY = (int) Math.floor((particleY + gridMidpoint) / cellSize);
+
+        // Grid dimensions
+        int gridWidth = domainGrid.length;
+        int gridHeight = domainGrid[0].length;
+
+        // Check if the particle is outside the grid boundaries
+        if (gridX < 0 || gridX >= gridWidth || gridY < 0 || gridY >= gridHeight) {
+            return 0; // Return 0 to indicate no domain found
         }
-        boolean indomain = false;
-        int ct = 0;
-        while (domainsorted[xt][yt][ct] > 0 && ct < maxct && !indomain) { // check whether particle is in domain, and if
-            // yes, remember the domain number
-            if (Math.pow(px - domains[domainsorted[xt][yt][ct]][0], 2.0)
-                    + Math.pow(py - domains[domainsorted[xt][yt][ct]][1], 2.0)
-                    - Math.pow(domains[domainsorted[xt][yt][ct]][2], 2.0) <= 0.0) {
-                result = domainsorted[xt][yt][ct]; // remember number of domain in which particle resides
-                indomain = true;
-                if (Math.pow(px - domains[domainsorted[xt][yt][ct]][0], 2.0)
-                        + Math.pow(py - domains[domainsorted[xt][yt][ct]][1], 2.0)
-                        - Math.pow(domains[domainsorted[xt][yt][ct]][2], 2.0) == 0.0) {
-                }
+
+        // Iterate through the domains in the grid cell to find the containing domain
+        for (int i = 0; i < maxDomainsPerCell && domainGrid[gridX][gridY][i] > 0; i++) {
+            int domainIndex = domainGrid[gridX][gridY][i];
+            double[] domain = domains[domainIndex];
+
+            double dx = particleX - domain[0];
+            double dy = particleY - domain[1];
+            double distanceSquared = dx * dx + dy * dy;
+            double radiusSquared = domain[2] * domain[2];
+
+            // Check if the particle is within the domain
+            if (distanceSquared <= radiusSquared) {
+                return domainIndex; // Return the domain index
             }
-            ct++;
         }
-        return result;
+
+        return 0; // Return 0 if no containing domain is found
     }
+
 
     public void simulateACF2D() {
         double tStep = model.getFrameTime() / model.getStepsPerFrame();
@@ -274,7 +271,7 @@ public class BaseSimulation {
 
         if (model.getIsDomain()) { // check for each particle whether it is in a domain
             for (int m = 0; m < model.getNumParticles(); m++) {
-                particles[m][3] = checkInDomain(particles[m][0], particles[m][1], domains, domainsorted, maxct,
+                particles[m][3] = findDomainContainingParticle(particles[m][0], particles[m][1], domains, domainsorted, maxct,
                         gridMidPos, subgridsize);
             }
         }
@@ -405,7 +402,7 @@ public class BaseSimulation {
                         }
 
                         if (domnum != 0 && crossinout) { // if inside domain and in-out allowed
-                            int domcheck = checkInDomain(particles[m][0] + dx, particles[m][1] + dy, domains,
+                            int domcheck = findDomainContainingParticle(particles[m][0] + dx, particles[m][1] + dy, domains,
                                     domainsorted, maxct, gridMidPos, subgridsize); // is new position in domain
                             if (domcheck == 0) { // act only if new position is actually outside domain
                                 double domx = domains[domnum][0]; // domain coordinates
@@ -443,7 +440,7 @@ public class BaseSimulation {
                         }
 
                         if (domnum == 0 && crossoutin) { // if outside domain and out-in allowed
-                            int domcheck = checkInDomain(particles[m][0] + dx, particles[m][1] + dy, domains,
+                            int domcheck = findDomainContainingParticle(particles[m][0] + dx, particles[m][1] + dy, domains,
                                     domainsorted, maxct, gridMidPos, subgridsize); // is new position in domain
                             if (domcheck != 0) { // act only if step brings particle into domain
                                 double domx = domains[domcheck][0]; // domain coordinates
@@ -461,7 +458,7 @@ public class BaseSimulation {
                         }
 
                         if (domnum == 0 && !crossoutin) { // if outside domain and out-in not allowed
-                            while (checkInDomain(particles[m][0] + dx, particles[m][1] + dy, domains, domainsorted,
+                            while (findDomainContainingParticle(particles[m][0] + dx, particles[m][1] + dy, domains, domainsorted,
                                     maxct, gridMidPos, subgridsize) != 0) { // find (dx, dy) to stay outside domain
                                 if (m < num1) {
                                     dx = rgg1.next();
@@ -507,7 +504,7 @@ public class BaseSimulation {
                     }
 
                     if (model.getIsDomain()) { // check the domain location of the particle
-                        particles[m][3] = checkInDomain(particles[m][0], particles[m][1], domains, domainsorted,
+                        particles[m][3] = findDomainContainingParticle(particles[m][0], particles[m][1], domains, domainsorted,
                                 maxct, gridMidPos, subgridsize);
                     }
                     // create photons if the particle is fluorescent
