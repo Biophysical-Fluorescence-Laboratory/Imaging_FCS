@@ -44,16 +44,32 @@ public class SimulationModel {
         blinkFlag = false;
     }
 
+    public boolean getIs2D() {
+        return is2D;
+    }
+
     public void setIs2D(boolean is2D) {
         this.is2D = is2D;
+    }
+
+    public boolean getIsDomain() {
+        return isDomain;
     }
 
     public void setIsDomain(boolean isDomain) {
         this.isDomain = isDomain;
     }
 
+    public boolean getIsMesh() {
+        return isMesh;
+    }
+
     public void setIsMesh(boolean isMesh) {
         this.isMesh = isMesh;
+    }
+
+    public boolean getBlinkFlag() {
+        return blinkFlag;
     }
 
     public void setBlinkFlag(boolean blinkFlag) {
