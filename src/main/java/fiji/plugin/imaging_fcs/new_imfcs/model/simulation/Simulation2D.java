@@ -16,6 +16,7 @@ public class Simulation2D {
     private static final double REFRACTIVE_INDEX = Math.pow(1.333, 2); // 1.333 is the refractive index of water;
     private final SimulationModel model;
     private final ExpSettingsModel settingsModel;
+    private final Random random;
     private double tStep;
     private double darkF;
     private double pixelSizeRealSize;
@@ -39,11 +40,17 @@ public class Simulation2D {
     private ImagePlus impSim; // Assuming this is your image stack for the simulation
     private int width; // Width of the simulation area in pixels
     private int height; // Height of the simulation area in pixels
-    private Random random = new Random();
 
     public Simulation2D(SimulationModel model, ExpSettingsModel settingsModel) {
         this.model = model;
         this.settingsModel = settingsModel;
+
+        // Set random with the seed if it's different to 0 to make results reproducible
+        if (model.getSeed() == 0) {
+            random = new Random();
+        } else {
+            random = new Random(model.getSeed());
+        }
     }
 
     public int findDomainContainingParticle(double particleX, double particleY, double[][] domains, int[][][] domainGrid,
@@ -165,8 +172,6 @@ public class Simulation2D {
 
         domains = new double[numberOfDomains][3]; // Initialize domains array
 
-        Random random = new Random(model.getSeed()); // Use the model seed for reproducibility
-
         int attempts = 0;
         int createdDomains = 0;
         while (createdDomains < numberOfDomains && attempts < numberOfDomains * 10) {
@@ -205,8 +210,6 @@ public class Simulation2D {
     private void initializeParticles() {
         int numParticles = model.getNumParticles(); // Total number of particles
         particles = new Particle[numParticles]; // Initialize particles array
-
-        Random random = new Random(model.getSeed()); // Use model's seed for reproducibility
 
         for (int i = 0; i < numParticles; i++) {
             // Randomly position particles within the simulation area
