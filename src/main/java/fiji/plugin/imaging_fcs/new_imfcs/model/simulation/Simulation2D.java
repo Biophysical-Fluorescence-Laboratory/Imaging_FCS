@@ -36,7 +36,7 @@ public class Simulation2D {
     private double blinkOnFactor;
     private double blinkOffFactor;
     private double[][] domains;
-    private Particle[] particles;
+    private Particle2D[] particles;
     private ImagePlus impSim; // Assuming this is your image stack for the simulation
     private int width; // Width of the simulation area in pixels
     private int height; // Height of the simulation area in pixels
@@ -51,40 +51,6 @@ public class Simulation2D {
         } else {
             random = new Random(model.getSeed());
         }
-    }
-
-    public int findDomainContainingParticle(double particleX, double particleY, double[][] domains, int[][][] domainGrid,
-                                            int maxDomainsPerCell, double gridMidpoint, double cellSize) {
-        // Calculate grid coordinates of the particle
-        int gridX = (int) Math.floor((particleX + gridMidpoint) / cellSize);
-        int gridY = (int) Math.floor((particleY + gridMidpoint) / cellSize);
-
-        // Grid dimensions
-        int gridWidth = domainGrid.length;
-        int gridHeight = domainGrid[0].length;
-
-        // Check if the particle is outside the grid boundaries
-        if (gridX < 0 || gridX >= gridWidth || gridY < 0 || gridY >= gridHeight) {
-            return 0; // Return 0 to indicate no domain found
-        }
-
-        // Iterate through the domains in the grid cell to find the containing domain
-        for (int i = 0; i < maxDomainsPerCell && domainGrid[gridX][gridY][i] > 0; i++) {
-            int domainIndex = domainGrid[gridX][gridY][i];
-            double[] domain = domains[domainIndex];
-
-            double dx = particleX - domain[0];
-            double dy = particleY - domain[1];
-            double distanceSquared = dx * dx + dy * dy;
-            double radiusSquared = domain[2] * domain[2];
-
-            // Check if the particle is within the domain
-            if (distanceSquared <= radiusSquared) {
-                return domainIndex; // Return the domain index
-            }
-        }
-
-        return 0; // Return 0 if no containing domain is found
     }
 
     public void simulateACF2D() {
@@ -209,13 +175,13 @@ public class Simulation2D {
 
     private void initializeParticles() {
         int numParticles = model.getNumParticles(); // Total number of particles
-        particles = new Particle[numParticles]; // Initialize particles array
+        particles = new Particle2D[numParticles]; // Initialize particles array
 
         for (int i = 0; i < numParticles; i++) {
             // Randomly position particles within the simulation area
             double x = sizeLowerLimit + random.nextDouble() * (sizeUpperLimit - sizeLowerLimit);
             double y = sizeLowerLimit + random.nextDouble() * (sizeUpperLimit - sizeLowerLimit);
-            particles[i] = new Particle(x, y);
+            particles[i] = new Particle2D(x, y);
 
             // Determine if the particle is in a dark state based on the dark fraction (darkF)
             if (model.getBlinkFlag() && (int) ((i + 1) * darkF) > (int) (i * darkF)) {
@@ -230,18 +196,15 @@ public class Simulation2D {
     }
 
     private void assignParticlesToDomains() {
-        for (int i = 0; i < particles.length; i++) {
-            double x = particles[i].x;
-            double y = particles[i].y;
-
+        for (Particle2D particle : particles) {
             for (int j = 0; j < domains.length; j++) {
                 double domainX = domains[j][0];
                 double domainY = domains[j][1];
                 double radius = domains[j][2];
 
-                double distance = Math.sqrt(Math.pow(x - domainX, 2) + Math.pow(y - domainY, 2));
+                double distance = Math.sqrt(Math.pow(particle.x - domainX, 2) + Math.pow(particle.y - domainY, 2));
                 if (distance < radius) {
-                    particles[i].setDomainIndex(j); // Assign particle to the domain j
+                    particle.setDomainIndex(j); // Assign particle to the domain j
                     break; // Break the loop once a domain is assigned
                 }
             }
@@ -257,6 +220,7 @@ public class Simulation2D {
                 return;
             }
             processFrame(n);
+            IJ.showProgress(n, model.getNumFrames());
         }
     }
 
@@ -273,9 +237,12 @@ public class Simulation2D {
         // Iterate through each simulation step within the current frame
         for (int step = 0; step < model.getStepsPerFrame(); step++) {
             for (int particleIndex = 0; particleIndex < particles.length; particleIndex++) {
-                updateParticlePosition(particleIndex); // Update particle positions based on diffusion and potential domain constraints
-                handleBleachingAndBlinking(particleIndex); // Handle bleaching and blinking effects for the particle
-                resetParticleIfOutOfBounds(particleIndex); // Reset particle position if it moves out of bounds
+                // Update particle positions based on diffusion and potential domain constraints
+                updateParticlePosition(particles[particleIndex], particleIndex);
+                // Handle bleaching and blinking effects for the particle
+                handleBleachingAndBlinking(particles[particleIndex]);
+                // Reset particle position if it moves out of bounds
+                resetParticleIfOutOfBounds(particles[particleIndex]);
             }
         }
 
@@ -298,7 +265,7 @@ public class Simulation2D {
         // add the camera offset and a noise term to each pixel
         for (int dx = 0; dx < model.getPixelNum(); dx++) {
             for (int dy = 0; dy < model.getPixelNum(); dy++) {
-                double random_noise = random.nextGaussian() * Math.sqrt(model.getDomainRadius());
+                double random_noise = random.nextGaussian() * Math.sqrt(model.getCameraNoiseFactor());
                 ipSim.putPixelValue(dx, dy, model.getCameraOffset() + random_noise);
             }
         }
@@ -312,20 +279,20 @@ public class Simulation2D {
         double bleachCenterX = midPos; // For simplicity, assuming the bleach center is at the middle. Adjust as needed.
         double bleachCenterY = midPos; // For simplicity, assuming the bleach center is at the middle. Adjust as needed.
 
-        for (int i = 0; i < particles.length; i++) {
+        for (Particle2D particle : particles) {
             // Calculate the distance of the particle from the bleach center
-            double dx = particles[i].x - bleachCenterX;
-            double dy = particles[i].y - bleachCenterY;
+            double dx = particle.x - bleachCenterX;
+            double dy = particle.y - bleachCenterY;
             double distance = Math.sqrt(dx * dx + dy * dy);
 
             // If the particle is within the bleach radius, mark it as bleached
             if (distance <= bleachRadius) {
-                particles[i].setBleached();
+                particle.setBleached();
             }
         }
     }
 
-    private double getDiffusionCoefficient(int particleIndex) {
+    private double getDiffusionCoefficient(Particle2D particle, int particleIndex) {
         double diffusionCoefficient;
         if (particleIndex < particleGroup1) {
             diffusionCoefficient = model.getD1();
@@ -336,114 +303,69 @@ public class Simulation2D {
         }
 
         // Update diffusion coefficient if we have domains
-        if (model.getIsDomain()) {
+        if (model.getIsDomain() && particle.getDomainIndex() != -1) {
             diffusionCoefficient /= model.getDoutDinRatio();
         }
 
         return diffusionCoefficient;
     }
 
-    private void updateParticlePosition(int particleIndex) {
-        // Retrieve the current particle properties
-        double x = particles[particleIndex].x;
-        double y = particles[particleIndex].y;
-
+    private void updateParticlePosition(Particle2D particle, int particleIndex) {
         // Determine the diffusion coefficient based on the particle index
-        double diffusionCoefficient = getDiffusionCoefficient(particleIndex);
+        double diffusionCoefficient = getDiffusionCoefficient(particle, particleIndex);
 
         // Calculate step size based on diffusion coefficient
         double stepSizeX = Math.sqrt(2 * diffusionCoefficient * tStep) * random.nextGaussian();
         double stepSizeY = Math.sqrt(2 * diffusionCoefficient * tStep) * random.nextGaussian();
 
         // Update particle position
-        particles[particleIndex].x = x + stepSizeX;
-        particles[particleIndex].y = y + stepSizeY;
-
-        // Handle boundary conditions if particle moves out of bounds
-        handleBoundaryConditions(particleIndex);
+        particle.x += stepSizeX;
+        particle.y += stepSizeY;
     }
 
-    private void handleBoundaryConditions(int particleIndex) {
-        double x = particles[particleIndex].x;
-        double y = particles[particleIndex].y;
-
-        // Example boundary condition: wrap-around
-        if (x > sizeUpperLimit) x = sizeLowerLimit + (x - sizeUpperLimit);
-        if (y > sizeUpperLimit) y = sizeLowerLimit + (y - sizeUpperLimit);
-        if (x < sizeLowerLimit) x = sizeUpperLimit - (sizeLowerLimit - x);
-        if (y < sizeLowerLimit) y = sizeUpperLimit - (sizeLowerLimit - y);
-
-        // Update particle position after boundary handling
-        particles[particleIndex].x = x;
-        particles[particleIndex].y = y;
-    }
-
-    private void handleBleachingAndBlinking(int particleIndex) {
+    private void handleBleachingAndBlinking(Particle2D particle) {
         // Handle bleaching
-        if (!particles[particleIndex].isBleached()) { // If the particle is not already bleached
+        if (!particle.isBleached()) { // If the particle is not already bleached
             // Assuming bleachFactor is the probability of not bleaching, adjust as necessary
             double bleachChance = random.nextDouble();
             if (bleachChance > bleachFactor) {
-                particles[particleIndex].setBleached();
+                particle.setBleached();
             }
         }
 
         // Handle blinking
-        if (!particles[particleIndex].isBleached()) { // Only consider blinking if the particle is not bleached
+        if (!particle.isBleached()) { // Only consider blinking if the particle is not bleached
             double blinkChance = random.nextDouble();
-            if (particles[particleIndex].isOn() && blinkChance > blinkOffFactor) {
+            if (particle.isOn() && blinkChance > blinkOffFactor) {
                 // If the particle is on and decides to turn off
-                particles[particleIndex].setOff();
-            } else if (!particles[particleIndex].isOn() && blinkChance > blinkOnFactor) {
+                particle.setOff();
+            } else if (!particle.isOn() && blinkChance > blinkOnFactor) {
                 // If the particle is off and decides to turn on
-                particles[particleIndex].setOn();
+                particle.setOn();
             }
         }
     }
 
-    private void resetParticleIfOutOfBounds(int particleIndex) {
-        double x = particles[particleIndex].x;
-        double y = particles[particleIndex].y;
+    private void resetParticleIfOutOfBounds(Particle2D particle) {
+        if (particle.isOutOfBound(sizeLowerLimit, sizeUpperLimit)) {
+            double random_position = sizeLowerLimit + random.nextDouble() * (sizeUpperLimit - sizeLowerLimit);
+            // Randomly choose whether to reset x or y
+            if (random.nextBoolean()) {
+                // Reset x to either the lower or upper limit
+                particle.x = random.nextBoolean() ? sizeLowerLimit : sizeUpperLimit;
+                particle.y = random_position;
+            } else {
+                // Reset y to either the lower or upper limit
+                particle.y = random.nextBoolean() ? sizeLowerLimit : sizeUpperLimit;
+                particle.x = random_position;
+            }
 
-        // Example 1: Wrap-around (Periodic Boundary Conditions)
-        if (x > sizeUpperLimit) {
-            x = sizeLowerLimit + (x - sizeUpperLimit);
-        } else if (x < sizeLowerLimit) {
-            x = sizeUpperLimit - (sizeLowerLimit - x);
+            particle.resetBleached();
         }
-
-        if (y > sizeUpperLimit) {
-            y = sizeLowerLimit + (y - sizeUpperLimit);
-        } else if (y < sizeLowerLimit) {
-            y = sizeUpperLimit - (sizeLowerLimit - y);
-        }
-
-        // Example 2: Reflective Boundary Conditions (Uncomment to use)
-        // if (x > sizeUL) {
-        //     x = sizeUL - (x - sizeUL);
-        // } else if (x < sizeLL) {
-        //     x = sizeLL + (sizeLL - x);
-        // }
-        //
-        // if (y > sizeUL) {
-        //     y = sizeUL - (y - sizeUL);
-        // } else if (y < sizeLL) {
-        //     y = sizeLL + (sizeLL - y);
-        // }
-
-        // Example 3: Reset to Random Position Within Bounds (Uncomment to use)
-        // if (x > sizeUL || x < sizeLL || y > sizeUL || y < sizeLL) {
-        //     x = sizeLL + random.nextDouble() * (sizeUL - sizeLL);
-        //     y = sizeLL + random.nextDouble() * (sizeUL - sizeLL);
-        // }
-
-        // Update particle position after handling boundary conditions
-        particles[particleIndex].x = x;
-        particles[particleIndex].y = y;
     }
 
     private void emitPhotonsForFrame(ImageProcessor ipSim) {
-        for (Particle particle : particles) {
+        for (Particle2D particle : particles) {
             if (particle.isOn() && !particle.isBleached()) {
                 // Convert particle's continuous position to discrete pixel coordinates
                 int xPixel = (int) Math.round((particle.x - sizeLowerLimit) / (sizeUpperLimit - sizeLowerLimit) * (width - 1));
