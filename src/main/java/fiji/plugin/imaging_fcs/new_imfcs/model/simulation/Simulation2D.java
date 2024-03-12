@@ -30,7 +30,6 @@ public class Simulation2D {
     private double sizeUpperLimit;
     private double detectorSize;
     private double bleachFactor;
-    private double F1;
     private long particleGroup1;
     private long particleGroup2;
     private double blinkOnFactor;
@@ -126,9 +125,9 @@ public class Simulation2D {
         width = model.getPixelNum();
         height = model.getPixelNum();
 
-        F1 = 1.0 - model.getF2() - model.getF3();
+        double f1 = 1.0 - model.getF2() - model.getF3();
 
-        particleGroup1 = Math.round(model.getNumParticles() * F1);
+        particleGroup1 = Math.round(model.getNumParticles() * f1);
         particleGroup2 = Math.round(model.getNumParticles() * model.getF2());
     }
 
@@ -174,10 +173,11 @@ public class Simulation2D {
     }
 
     private void initializeParticles() {
-        int numParticles = model.getNumParticles(); // Total number of particles
-        particles = new Particle2D[numParticles]; // Initialize particles array
+        particles = new Particle2D[model.getNumParticles()]; // Initialize particles array
 
-        for (int i = 0; i < numParticles; i++) {
+        double diffusionCoefficient;
+
+        for (int i = 0; i < model.getNumParticles(); i++) {
             // Randomly position particles within the simulation area
             double x = sizeLowerLimit + random.nextDouble() * (sizeUpperLimit - sizeLowerLimit);
             double y = sizeLowerLimit + random.nextDouble() * (sizeUpperLimit - sizeLowerLimit);
@@ -187,6 +187,16 @@ public class Simulation2D {
             if (model.getBlinkFlag() && (int) ((i + 1) * darkF) > (int) (i * darkF)) {
                 particles[i].setOff();
             }
+
+            // Determine particle diffusion coefficient based on group
+            if (i < particleGroup1) {
+                diffusionCoefficient = model.getD1();
+            } else if (i < particleGroup1 + particleGroup2) {
+                diffusionCoefficient = model.getD2();
+            } else {
+                diffusionCoefficient = model.getD3();
+            }
+            particles[i].setDiffusionCoefficient(diffusionCoefficient);
         }
 
         // If domains are used, determine each particle's domain
@@ -205,6 +215,8 @@ public class Simulation2D {
                 double distance = Math.sqrt(Math.pow(particle.x - domainX, 2) + Math.pow(particle.y - domainY, 2));
                 if (distance < radius) {
                     particle.setDomainIndex(j); // Assign particle to the domain j
+                    // Update diffusion coefficient if it's in domain
+                    particle.setDiffusionCoefficient(particle.getDiffusionCoefficient() / model.getDoutDinRatio());
                     break; // Break the loop once a domain is assigned
                 }
             }
@@ -236,13 +248,13 @@ public class Simulation2D {
 
         // Iterate through each simulation step within the current frame
         for (int step = 0; step < model.getStepsPerFrame(); step++) {
-            for (int particleIndex = 0; particleIndex < particles.length; particleIndex++) {
+            for (Particle2D particle : particles) {
                 // Update particle positions based on diffusion and potential domain constraints
-                updateParticlePosition(particles[particleIndex], particleIndex);
+                updateParticlePosition(particle);
                 // Handle bleaching and blinking effects for the particle
-                handleBleachingAndBlinking(particles[particleIndex]);
+                handleBleachingAndBlinking(particle);
                 // Reset particle position if it moves out of bounds
-                resetParticleIfOutOfBounds(particles[particleIndex]);
+                resetParticleIfOutOfBounds(particle);
             }
         }
 
@@ -292,31 +304,10 @@ public class Simulation2D {
         }
     }
 
-    private double getDiffusionCoefficient(Particle2D particle, int particleIndex) {
-        double diffusionCoefficient;
-        if (particleIndex < particleGroup1) {
-            diffusionCoefficient = model.getD1();
-        } else if (particleIndex < particleGroup1 + particleGroup2) {
-            diffusionCoefficient = model.getD2();
-        } else {
-            diffusionCoefficient = model.getD3();
-        }
-
-        // Update diffusion coefficient if we have domains
-        if (model.getIsDomain() && particle.getDomainIndex() != -1) {
-            diffusionCoefficient /= model.getDoutDinRatio();
-        }
-
-        return diffusionCoefficient;
-    }
-
-    private void updateParticlePosition(Particle2D particle, int particleIndex) {
-        // Determine the diffusion coefficient based on the particle index
-        double diffusionCoefficient = getDiffusionCoefficient(particle, particleIndex);
-
+    private void updateParticlePosition(Particle2D particle) {
         // Calculate step size based on diffusion coefficient
-        double stepSizeX = Math.sqrt(2 * diffusionCoefficient * tStep) * random.nextGaussian();
-        double stepSizeY = Math.sqrt(2 * diffusionCoefficient * tStep) * random.nextGaussian();
+        double stepSizeX = Math.sqrt(2 * particle.getDiffusionCoefficient() * tStep) * random.nextGaussian();
+        double stepSizeY = Math.sqrt(2 * particle.getDiffusionCoefficient() * tStep) * random.nextGaussian();
 
         // Update particle position
         particle.x += stepSizeX;

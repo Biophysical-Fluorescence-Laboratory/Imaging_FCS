@@ -7,6 +7,7 @@ public class Particle2D {
     private boolean bleached;
     private boolean on;
     private int domainIndex;
+    private double diffusionCoefficient;
 
     public Particle2D(double x, double y) {
         this.x = x;
@@ -15,6 +16,7 @@ public class Particle2D {
         bleached = false;
         on = true;
         domainIndex = -1;
+        diffusionCoefficient = 0.0;
     }
 
     public boolean isOutOfBound(double lowerLimit, double upperLimit) {
@@ -52,5 +54,13 @@ public class Particle2D {
 
     public void setDomainIndex(int domainIndex) {
         this.domainIndex = domainIndex;
+    }
+
+    public double getDiffusionCoefficient() {
+        return diffusionCoefficient;
+    }
+
+    public void setDiffusionCoefficient(double diffusionCoefficient) {
+        this.diffusionCoefficient = diffusionCoefficient;
     }
 }
