@@ -1,8 +1,17 @@
 package fiji.plugin.imaging_fcs.new_imfcs.model;
 
-public class SimulationModel {
+import fiji.plugin.imaging_fcs.new_imfcs.controller.SimulationController;
+import fiji.plugin.imaging_fcs.new_imfcs.model.simulation.Simulation2D;
+import ij.IJ;
+import ij.ImagePlus;
+
+import javax.swing.*;
+
+public class SimulationModel extends SwingWorker<Void, Void> {
+    public static final double PIXEL_SIZE_REAL_SPACE_CONVERSION_FACTOR = Math.pow(10, 6);
     private static final double DIFFUSION_COEFFICIENT_BASE = Math.pow(10, 12);
     private final ExpSettingsModel expSettingsModel;
+    private final SimulationController controller;
     private boolean is2D;
     private boolean isDomain;
     private boolean isMesh;
@@ -26,7 +35,7 @@ public class SimulationModel {
     private double koff = 700.0; // off-rate for triplet
     private int cameraOffset = 100; // offset of CCD camera
     private double cameraNoiseFactor = 3.0; // noise of CCD camera
-    private double bleachRadius = 3.0; // bleach radius
+    private double bleachRadius = 3.0 / PIXEL_SIZE_REAL_SPACE_CONVERSION_FACTOR; // bleach radius
     private int bleachFrame = 10000000; // frame at which bleach happens
     private double domainRadius = 30.0; // Radius of domains
     private double domainDensity = 30.0; // Density of domains in number/um2
@@ -35,13 +44,27 @@ public class SimulationModel {
     private double meshWorkSize = 100.0; // Size of meshes
     private double hopProbability = 1.0; // hop probability over meshwork barriers
 
-    public SimulationModel(ExpSettingsModel expSettingsModel) {
+    public SimulationModel(SimulationController controller, ExpSettingsModel expSettingsModel) {
+        this.controller = controller;
         this.expSettingsModel = expSettingsModel;
 
         is2D = true;
         isDomain = false;
         isMesh = false;
         blinkFlag = false;
+    }
+
+    @Override
+    protected Void doInBackground() {
+        if (is2D) {
+            Simulation2D simulation = new Simulation2D(this, expSettingsModel);
+            ImagePlus image = simulation.simulateACF2D();
+            IJ.run(image, "Enhance Contrast", "saturated-0.35");
+            controller.loadImage(image);
+        } else {
+            // run simulation 3D
+        }
+        return null;
     }
 
     public boolean getIs2D() {
@@ -148,8 +171,12 @@ public class SimulationModel {
         this.stepsPerFrame = Integer.parseInt(stepsPerFrame);
     }
 
-    public double getD1() {
+    public double getD1Interface() {
         return D1 * DIFFUSION_COEFFICIENT_BASE;
+    }
+
+    public double getD1() {
+        return D1;
     }
 
     public void setD1(String D1) {
@@ -165,19 +192,27 @@ public class SimulationModel {
     }
 
     public double getD2() {
-        return D2 * DIFFUSION_COEFFICIENT_BASE;
+        return D2;
     }
 
     public void setD2(String D2) {
         this.D2 = Double.parseDouble(D2) / DIFFUSION_COEFFICIENT_BASE;
     }
 
+    public double getD2Interface() {
+        return D2 * DIFFUSION_COEFFICIENT_BASE;
+    }
+
     public double getD3() {
-        return D3 * DIFFUSION_COEFFICIENT_BASE;
+        return D3;
     }
 
     public void setD3(String D3) {
         this.D3 = Double.parseDouble(D3) / DIFFUSION_COEFFICIENT_BASE;
+    }
+
+    public double getD3Interface() {
+        return D3 * DIFFUSION_COEFFICIENT_BASE;
     }
 
     public double getF2() {
@@ -233,7 +268,11 @@ public class SimulationModel {
     }
 
     public void setBleachRadius(String bleachRadius) {
-        this.bleachRadius = Double.parseDouble(bleachRadius);
+        this.bleachRadius = Double.parseDouble(bleachRadius) / PIXEL_SIZE_REAL_SPACE_CONVERSION_FACTOR;
+    }
+
+    public double getBleachRadiusInterface() {
+        return bleachRadius * PIXEL_SIZE_REAL_SPACE_CONVERSION_FACTOR;
     }
 
     public int getBleachFrame() {

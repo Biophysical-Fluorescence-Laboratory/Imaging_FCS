@@ -1,13 +1,18 @@
 package fiji.plugin.imaging_fcs.new_imfcs.model;
 
+import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.ImageCanvas;
 import ij.gui.ImageWindow;
+
+import java.util.EventListener;
+import java.util.function.Consumer;
 
 /**
  * The ImageModel class encapsulates data and operations for an image.
  */
 public class ImageModel {
+    private static final double ZOOM_FACTOR = 250;
     public ImagePlus image;
     private String imagePath;
     private String fileName;
@@ -27,13 +32,65 @@ public class ImageModel {
      * @param image The ImagePlus object to load into the model.
      * @throws RuntimeException if the image is not of type GRAY16.
      */
-    public void loadImage(ImagePlus image) {
+    public void loadImage(ImagePlus image, boolean simulation) {
         checkImage(image);
+        // If an image is already loaded, unload it
+        if (this.image != null) {
+            unloadImage();
+        }
 
+        this.isSimulation = simulation;
         this.image = image;
-        getImagePath();
 
-        this.isSimulation = false;
+        if (!this.isSimulation) {
+            getImagePath();
+        }
+    }
+
+    private void unloadImage() {
+        // if no image is load or the window is closed, do nothing
+        if (image.getWindow() == null) {
+            return;
+        }
+
+        if (image.getOverlay() != null) {
+            image.deleteRoi();
+            image.getOverlay().clear();
+            image.setOverlay(null);
+        }
+
+        ImageCanvas canvas = image.getCanvas();
+        removeListeners(canvas.getMouseListeners(), canvas::removeMouseListener);
+        removeListeners(canvas.getKeyListeners(), canvas::removeKeyListener);
+
+        image = null;
+    }
+
+    private <T extends EventListener> void removeListeners(T[] listeners, Consumer<T> removeListenerFunction) {
+        for (T listener : listeners) {
+            removeListenerFunction.accept(listener);
+        }
+    }
+
+    public void adapt_image_scale() {
+        double scimp;
+        if (image.getWidth() >= image.getHeight()) {
+            scimp = ZOOM_FACTOR / image.getWidth();
+        } else {
+            scimp = ZOOM_FACTOR / image.getHeight();
+        }
+
+        if (scimp < 1.0) {
+            scimp = 1.0;
+        }
+        // Convert scale factor to percentage for the ImageJ command
+        scimp *= 100;
+
+        IJ.run(image, "Original Scale", "");
+        String options = String.format("zoom=%f x=%d y=%d", scimp, image.getWidth() / 2, image.getHeight() / 2);
+        IJ.run(image, "Set... ", options);
+        // This workaround addresses a potential bug in ImageJ versions 1.48v and later
+        IJ.run("In [+]", "");
     }
 
     /**
