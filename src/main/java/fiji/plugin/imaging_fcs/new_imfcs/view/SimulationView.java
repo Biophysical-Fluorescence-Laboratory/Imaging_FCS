@@ -110,17 +110,17 @@ public class SimulationView extends JFrame {
         tfFrameTime = createTextField(model.getFrameTime(), "", createFocusListener(model::setFrameTime));
         tfStepsPerFrame = createTextField(model.getStepsPerFrame(), "", createFocusListener(model::setStepsPerFrame));
         tfCurrentStepSize = createTextField("20", "");
-        tfD1 = createTextField(model.getD1(), "", createFocusListener(model::setD1));
+        tfD1 = createTextField(model.getD1Interface(), "", createFocusListener(model::setD1));
         tfDoutDinRatio = createTextField(model.getDoutDinRatio(), "", createFocusListener(model::setDoutDinRatio));
-        tfD2 = createTextField(model.getD2(), "", createFocusListener(model::setD2));
+        tfD2 = createTextField(model.getD2Interface(), "", createFocusListener(model::setD2));
         tfF2 = createTextField(model.getF2(), "", createFocusListener(model::setF2));
-        tfD3 = createTextField(model.getD3(), "", createFocusListener(model::setD3));
+        tfD3 = createTextField(model.getD3Interface(), "", createFocusListener(model::setD3));
         tfF3 = createTextField(model.getF3(), "", createFocusListener(model::setF3));
         tfKon = createTextField(model.getKon(), "", createFocusListener(model::setKon));
         tfKoff = createTextField(model.getKoff(), "", createFocusListener(model::setKoff));
         tfCameraOffset = createTextField(model.getCameraOffset(), "", createFocusListener(model::setCameraOffset));
         tfCameraNoiseFactor = createTextField(model.getCameraNoiseFactor(), "", createFocusListener(model::setCameraNoiseFactor));
-        tfBleachRadius = createTextField(model.getBleachRadius(), "", createFocusListener(model::setBleachRadius));
+        tfBleachRadius = createTextField(model.getBleachRadiusInterface(), "", createFocusListener(model::setBleachRadius));
         tfBleachFrame = createTextField(model.getBleachFrame(), "", createFocusListener(model::setBleachFrame));
         tfDomainRadius = createTextField(model.getDomainRadius(), "", createFocusListener(model::setDomainRadius));
         tfDomainDensity = createTextField(model.getDomainDensity(), "", createFocusListener(model::setDomainDensity));
@@ -276,5 +276,9 @@ public class SimulationView extends JFrame {
         add(btnBatchSim);
         add(btnStopSimulation);
         add(btnSimulate);
+    }
+
+    public void enableBtnStopSimulation(boolean b) {
+        btnStopSimulation.setEnabled(b);
     }
 }

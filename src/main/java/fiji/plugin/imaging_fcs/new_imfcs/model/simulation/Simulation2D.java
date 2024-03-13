@@ -6,30 +6,21 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.process.ImageProcessor;
 
-import java.io.File;
-import java.util.Random;
-
 public class Simulation2D {
-    private static final double PIXEL_SIZE_REAL_SPACE_CONVERSION_FACTOR = Math.pow(10, 6);
     private static final double OBSERVATION_WAVELENGTH_CONVERSION_FACTOR = Math.pow(10, 9);
     // Refractive index of water
-    private static final double REFRACTIVE_INDEX = Math.pow(1.333, 2); // 1.333 is the refractive index of water;
     private final SimulationModel model;
     private final ExpSettingsModel settingsModel;
-    private final Random random;
+    private final RandomCustom random;
     private double tStep;
     private double darkF;
-    private double pixelSizeRealSize;
-    private double wavelength;
-    private double sigma0;
     private double pixelSize;
-    private double pSFSize;
-    private double gridSize;
+    private double PSFSize;
     private double midPos;
     private double sizeLowerLimit;
     private double sizeUpperLimit;
-    private double detectorSize;
     private double bleachFactor;
+    private boolean bleachFlag;
     private long particleGroup1;
     private long particleGroup2;
     private double blinkOnFactor;
@@ -45,16 +36,17 @@ public class Simulation2D {
         this.settingsModel = settingsModel;
 
         // Set random with the seed if it's different to 0 to make results reproducible
+        // Use a custom random class to add a poisson generator
         if (model.getSeed() == 0) {
-            random = new Random();
+            random = new RandomCustom();
         } else {
-            random = new Random(model.getSeed());
+            random = new RandomCustom(model.getSeed());
         }
     }
 
-    public void simulateACF2D() {
+    public ImagePlus simulateACF2D() {
         if (!validateSimulationConditions()) {
-            return;
+            return null;
         }
 
         prepareSimulation();
@@ -67,7 +59,7 @@ public class Simulation2D {
 
         runSimulation();
 
-        finalizeSimulation();
+        return impSim;
     }
 
     private boolean validateSimulationConditions() {
@@ -86,22 +78,22 @@ public class Simulation2D {
         darkF = model.getKoff() / (model.getKoff() + model.getKon());
 
         // Calculate real pixel size based on settings and a conversion factor
-        pixelSizeRealSize = settingsModel.getPixelSize() / PIXEL_SIZE_REAL_SPACE_CONVERSION_FACTOR;
+        double pixelSizeRealSize = settingsModel.getPixelSize() / SimulationModel.PIXEL_SIZE_REAL_SPACE_CONVERSION_FACTOR;
 
         // Calculate the wavelength based on settings and a conversion factor
-        wavelength = settingsModel.getEmLambda() / OBSERVATION_WAVELENGTH_CONVERSION_FACTOR;
+        double wavelength = settingsModel.getEmLambda() / OBSERVATION_WAVELENGTH_CONVERSION_FACTOR;
 
         // Sigma0 from settings
-        sigma0 = settingsModel.getSigma();
+        double sigma0 = settingsModel.getSigma();
 
         // Calculate the pixel size in object space
         pixelSize = pixelSizeRealSize / settingsModel.getMagnification();
 
         // Calculate the PSF (Point Spread Function) size
-        pSFSize = 0.5 * sigma0 * wavelength / settingsModel.getNA();
+        PSFSize = 0.5 * sigma0 * wavelength / settingsModel.getNA();
 
         // Calculate the size of the grid (i.e., the size of the pixel area of the detector)
-        gridSize = model.getPixelNum() * pixelSize;
+        double gridSize = model.getPixelNum() * pixelSize;
 
         // Calculate the middle position of the grid
         midPos = gridSize / 2.0;
@@ -110,12 +102,14 @@ public class Simulation2D {
         sizeLowerLimit = -model.getExtFactor() * gridSize;
         sizeUpperLimit = model.getExtFactor() * gridSize;
 
-        // The detector size, effectively half the grid size
-        detectorSize = gridSize / 2.0;
-
         // Calculate the bleaching factor
-        // 2.0 to ensure no bleaching if tauBleach is 0
-        bleachFactor = model.getTauBleach() != 0 ? Math.exp(-tStep / model.getTauBleach()) : 2.0;
+        if (model.getTauBleach() == 0) {
+            bleachFlag = false;
+            bleachFactor = -1;
+        } else {
+            bleachFlag = true;
+            bleachFactor = Math.exp(-tStep / model.getTauBleach());
+        }
 
         // Initialize the blinking factors for on and off states
         blinkOnFactor = Math.exp(-tStep * model.getKon());
@@ -133,7 +127,8 @@ public class Simulation2D {
 
     private void initializeDomains() {
         double gridLength = sizeUpperLimit - sizeLowerLimit; // Length of the full simulation grid
-        int numberOfDomains = (int) Math.ceil(Math.pow(gridLength * Math.pow(10, 6), 2) * model.getDomainDensity());
+        int numberOfDomains = (int) Math.ceil(
+                Math.pow(gridLength * SimulationModel.PIXEL_SIZE_REAL_SPACE_CONVERSION_FACTOR, 2) * model.getDomainDensity());
 
         domains = new double[numberOfDomains][3]; // Initialize domains array
 
@@ -255,11 +250,10 @@ public class Simulation2D {
                 handleBleachingAndBlinking(particle);
                 // Reset particle position if it moves out of bounds
                 resetParticleIfOutOfBounds(particle);
+                // Emit photons for the current frame and update the visualization
+                emitPhotonsForFrame(ipSim, particle);
             }
         }
-
-        // Emit photons from particles for the current frame and update the visualization or data structure accordingly
-        emitPhotonsForFrame(ipSim);
 
         // Update progress display if applicable
         IJ.showProgress(frameNumber + 1, model.getNumFrames());
@@ -288,13 +282,11 @@ public class Simulation2D {
     private void applyBleaching() {
         // Assuming a bleach radius and a center for the bleach spot. Adjust as needed.
         double bleachRadius = model.getBleachRadius();
-        double bleachCenterX = midPos; // For simplicity, assuming the bleach center is at the middle. Adjust as needed.
-        double bleachCenterY = midPos; // For simplicity, assuming the bleach center is at the middle. Adjust as needed.
 
         for (Particle2D particle : particles) {
-            // Calculate the distance of the particle from the bleach center
-            double dx = particle.x - bleachCenterX;
-            double dy = particle.y - bleachCenterY;
+            // Calculate the distance of the particle from the bleach center (0, 0)
+            double dx = particle.x - 0;
+            double dy = particle.y - 0;
             double distance = Math.sqrt(dx * dx + dy * dy);
 
             // If the particle is within the bleach radius, mark it as bleached
@@ -316,7 +308,7 @@ public class Simulation2D {
 
     private void handleBleachingAndBlinking(Particle2D particle) {
         // Handle bleaching
-        if (!particle.isBleached()) { // If the particle is not already bleached
+        if (bleachFlag && !particle.isBleached()) { // If the particle is not already bleached
             // Assuming bleachFactor is the probability of not bleaching, adjust as necessary
             double bleachChance = random.nextDouble();
             if (bleachChance > bleachFactor) {
@@ -325,7 +317,7 @@ public class Simulation2D {
         }
 
         // Handle blinking
-        if (!particle.isBleached()) { // Only consider blinking if the particle is not bleached
+        if (model.getBlinkFlag() && !particle.isBleached()) { // Only consider blinking if the particle is not bleached
             double blinkChance = random.nextDouble();
             if (particle.isOn() && blinkChance > blinkOffFactor) {
                 // If the particle is on and decides to turn off
@@ -340,75 +332,41 @@ public class Simulation2D {
     private void resetParticleIfOutOfBounds(Particle2D particle) {
         if (particle.isOutOfBound(sizeLowerLimit, sizeUpperLimit)) {
             double random_position = sizeLowerLimit + random.nextDouble() * (sizeUpperLimit - sizeLowerLimit);
+            double random_border = random.nextBoolean() ? sizeLowerLimit : sizeUpperLimit;
             // Randomly choose whether to reset x or y
             if (random.nextBoolean()) {
                 // Reset x to either the lower or upper limit
-                particle.x = random.nextBoolean() ? sizeLowerLimit : sizeUpperLimit;
+                particle.x = random_border;
                 particle.y = random_position;
             } else {
                 // Reset y to either the lower or upper limit
-                particle.y = random.nextBoolean() ? sizeLowerLimit : sizeUpperLimit;
                 particle.x = random_position;
+                particle.y = random_border;
             }
 
             particle.resetBleached();
         }
     }
 
-    private void emitPhotonsForFrame(ImageProcessor ipSim) {
-        for (Particle2D particle : particles) {
-            if (particle.isOn() && !particle.isBleached()) {
-                // Convert particle's continuous position to discrete pixel coordinates
-                int xPixel = (int) Math.round((particle.x - sizeLowerLimit) / (sizeUpperLimit - sizeLowerLimit) * (width - 1));
-                int yPixel = (int) Math.round((particle.y - sizeLowerLimit) / (sizeUpperLimit - sizeLowerLimit) * (height - 1));
+    private void emitPhotonsForFrame(ImageProcessor ipSim, Particle2D particle) {
+        // If the particle is off or bleached, do nothing
+        if (!particle.isOn() || particle.isBleached()) {
+            return;
+        }
+        int numPhotons = random.nextPoisson(tStep * model.getCPS());
 
-                // Ensure the pixel coordinates are within the bounds of the image
-                xPixel = Math.max(0, Math.min(xPixel, width - 1));
-                yPixel = Math.max(0, Math.min(yPixel, height - 1));
+        for (int i = 0; i < numPhotons; i++) {
+            double photonX = particle.x + random.nextDouble() * PSFSize;
+            double photonY = particle.y + random.nextDouble() * PSFSize;
 
-                // Increment the pixel value at the particle's position to simulate photon emission
+            if (Math.abs(photonX) < midPos && Math.abs(photonY) < midPos) {
+                int xPixel = (int) ((photonX + midPos) / pixelSize);
+                int yPixel = (int) ((photonY + midPos) / pixelSize);
+
+                // Increment the pixel value at the photon's position to simulate photon emission
                 int currentValue = ipSim.getPixel(xPixel, yPixel);
-                ipSim.putPixel(xPixel, yPixel, currentValue + 1); // Assuming each particle contributes a single photon's worth of intensity
+                ipSim.putPixel(xPixel, yPixel, currentValue + 1);
             }
-        }
-    }
-
-    private void finalizeSimulation() {
-        // Show the simulation results
-        if (impSim != null) {
-            impSim.show();
-            IJ.run(impSim, "Enhance Contrast", "saturated=0.35");
-        } else {
-            System.out.println("Simulation image stack is null.");
-        }
-
-        // Optional: Save the simulation results to a file
-        boolean saveResults = true; // Set this based on user input or your requirements
-        if (saveResults) {
-            saveSimulationResults();
-        }
-    }
-
-    private void saveSimulationResults() {
-        // Define the file path and name for saving the results
-        String resultsDirectory = "/path/to/your/results/directory"; // Update this path
-        String fileName = "simulationResults.tif"; // Customize the file name as needed
-
-        // Ensure the directory exists
-        File dir = new File(resultsDirectory);
-        if (!dir.exists()) {
-            dir.mkdirs(); // Create the directory if it doesn't exist
-        }
-
-        // Construct the full file path
-        String filePath = resultsDirectory + File.separator + fileName;
-
-        // Save the image stack as a TIFF file
-        if (impSim != null) {
-            IJ.saveAsTiff(impSim, filePath);
-            System.out.println("Simulation results saved to: " + filePath);
-        } else {
-            System.out.println("Cannot save simulation results: Image stack is null.");
         }
     }
 }

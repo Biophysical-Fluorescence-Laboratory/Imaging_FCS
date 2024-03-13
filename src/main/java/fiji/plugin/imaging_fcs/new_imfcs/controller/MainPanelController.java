@@ -29,7 +29,7 @@ public class MainPanelController {
     private final ExpSettingsView expSettingsView;
     private final HardwareModel hardwareModel;
     private final OptionsModel optionsModel;
-    private final ImageModel imageModel;
+    private final ImageController imageController;
     private final ExpSettingsModel expSettingsModel;
     private final SimulationController simulationController;
 
@@ -41,13 +41,15 @@ public class MainPanelController {
     public MainPanelController(HardwareModel hardwareModel) {
         this.hardwareModel = hardwareModel;
         this.optionsModel = new OptionsModel(hardwareModel.isCuda());
-        this.imageModel = new ImageModel();
+
+        ImageModel imageModel = new ImageModel();
+        this.imageController = new ImageController(imageModel);
 
         this.expSettingsModel = new ExpSettingsModel();
         this.expSettingsView = new ExpSettingsView(this, expSettingsModel);
         updateSettingsField();
 
-        this.simulationController = new SimulationController(expSettingsModel);
+        this.simulationController = new SimulationController(imageController, expSettingsModel);
 
         this.view = new MainPanelView(this, this.expSettingsModel);
     }
@@ -85,8 +87,7 @@ public class MainPanelController {
         return (ActionEvent ev) -> {
             if (WindowManager.getImageCount() > 0) {
                 try {
-                    imageModel.loadImage(IJ.getImage());
-                    new ImageController(imageModel);
+                    imageController.loadImage(IJ.getImage(), false);
                 } catch (RuntimeException e) {
                     IJ.showMessage("Wrong image format", e.getMessage());
                 }
@@ -101,8 +102,7 @@ public class MainPanelController {
             ImagePlus image = IJ.openImage();
             if (image != null) {
                 try {
-                    imageModel.loadImage(image);
-                    new ImageController(imageModel);
+                    imageController.loadImage(image, false);
                 } catch (RuntimeException e) {
                     IJ.showMessage("Wrong image format", e.getMessage());
                 }
