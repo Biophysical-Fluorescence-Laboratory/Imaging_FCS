@@ -57,6 +57,9 @@ public class Simulation2D {
 
         initializeParticles();
 
+        // create the stack of images
+        impSim = IJ.createImage("2D Simulation", "GRAY16", width, height, model.getNumFrames());
+
         runSimulation();
 
         return impSim;
@@ -121,6 +124,7 @@ public class Simulation2D {
 
         double f1 = 1.0 - model.getF2() - model.getF3();
 
+        // define the groups size for particles
         particleGroup1 = Math.round(model.getNumParticles() * f1);
         particleGroup2 = Math.round(model.getNumParticles() * model.getF2());
     }
@@ -170,8 +174,6 @@ public class Simulation2D {
     private void initializeParticles() {
         particles = new Particle2D[model.getNumParticles()]; // Initialize particles array
 
-        double diffusionCoefficient;
-
         for (int i = 0; i < model.getNumParticles(); i++) {
             // Randomly position particles within the simulation area
             double x = sizeLowerLimit + random.nextDouble() * (sizeUpperLimit - sizeLowerLimit);
@@ -185,13 +187,12 @@ public class Simulation2D {
 
             // Determine particle diffusion coefficient based on group
             if (i < particleGroup1) {
-                diffusionCoefficient = model.getD1();
+                particles[i].setDiffusionCoefficient(model.getD1());
             } else if (i < particleGroup1 + particleGroup2) {
-                diffusionCoefficient = model.getD2();
+                particles[i].setDiffusionCoefficient(model.getD2());
             } else {
-                diffusionCoefficient = model.getD3();
+                particles[i].setDiffusionCoefficient(model.getD3());
             }
-            particles[i].setDiffusionCoefficient(diffusionCoefficient);
         }
 
         // If domains are used, determine each particle's domain
@@ -260,11 +261,6 @@ public class Simulation2D {
     }
 
     private ImageProcessor initializeFrameProcessor(int frameNumber) {
-        // Check if the image stack is initialized; if not, create it
-        if (impSim == null) {
-            impSim = IJ.createImage("2D Simulation", "GRAY16", width, height, model.getNumFrames());
-        }
-
         // Get the ImageProcessor for the current frame. Frames in ImageJ are 1-based.
         ImageProcessor ipSim = impSim.getStack().getProcessor(frameNumber + 1);
 
@@ -353,19 +349,19 @@ public class Simulation2D {
         if (!particle.isOn() || particle.isBleached()) {
             return;
         }
-        int numPhotons = random.nextPoisson(tStep * model.getCPS());
 
+        int numPhotons = random.nextPoisson(tStep * model.getCPS());
         for (int i = 0; i < numPhotons; i++) {
-            double photonX = particle.x + random.nextDouble() * PSFSize;
-            double photonY = particle.y + random.nextDouble() * PSFSize;
+            double photonX = particle.x + random.nextGaussian() * PSFSize;
+            double photonY = particle.y + random.nextGaussian() * PSFSize;
 
             if (Math.abs(photonX) < midPos && Math.abs(photonY) < midPos) {
                 int xPixel = (int) ((photonX + midPos) / pixelSize);
                 int yPixel = (int) ((photonY + midPos) / pixelSize);
 
                 // Increment the pixel value at the photon's position to simulate photon emission
-                int currentValue = ipSim.getPixel(xPixel, yPixel);
-                ipSim.putPixel(xPixel, yPixel, currentValue + 1);
+                double currentValue = ipSim.getPixelValue(xPixel, yPixel);
+                ipSim.putPixelValue(xPixel, yPixel, currentValue + 1);
             }
         }
     }
