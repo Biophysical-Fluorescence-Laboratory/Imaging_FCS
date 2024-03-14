@@ -59,7 +59,7 @@ public class SimulationModel extends SwingWorker<Void, Void> {
         if (is2D) {
             Simulation2D simulation = new Simulation2D(this, expSettingsModel);
             ImagePlus image = simulation.simulateACF2D();
-            IJ.run(image, "Enhance Contrast", "saturated-0.35");
+            IJ.run(image, "Enhance Contrast", "saturated=0.35");
             controller.loadImage(image);
         } else {
             // run simulation 3D
