@@ -2,7 +2,7 @@ package fiji.plugin.imaging_fcs.new_imfcs.model.simulation;
 
 import java.util.Random;
 
-public class RandomCustom extends Random {
+public final class RandomCustom extends Random {
 
     public RandomCustom() {
         super();
