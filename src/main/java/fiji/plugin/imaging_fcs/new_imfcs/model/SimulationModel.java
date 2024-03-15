@@ -8,16 +8,17 @@ import ij.ImagePlus;
 
 import javax.swing.*;
 
+/**
+ * Represents the data model for FCS simulation, encapsulating all simulation parameters
+ * and providing methods to execute and control simulations.
+ */
 public class SimulationModel {
     public static final double PIXEL_SIZE_REAL_SPACE_CONVERSION_FACTOR = Math.pow(10, 6);
     private static final double DIFFUSION_COEFFICIENT_BASE = Math.pow(10, 12);
     private final ExpSettingsModel expSettingsModel;
     private final SimulationController controller;
     private SwingWorker<Void, Void> worker;
-    private boolean is2D;
-    private boolean isDomain;
-    private boolean isMesh;
-    private boolean blinkFlag;
+    private boolean is2D, isDomain, isMesh, blinkFlag;
     private int seed = 1;
     private int numParticles = 1000; // number of simulated particles
     private int CPS = 10000; // average count rate per particle per second
@@ -46,6 +47,12 @@ public class SimulationModel {
     private double meshWorkSize = 100.0; // Size of meshes
     private double hopProbability = 1.0; // hop probability over meshwork barriers
 
+    /**
+     * Constructs a simulation model with references to the controller and experimental settings.
+     *
+     * @param controller       the controller for simulation actions.
+     * @param expSettingsModel the experimental settings model.
+     */
     public SimulationModel(SimulationController controller, ExpSettingsModel expSettingsModel) {
         this.controller = controller;
         this.expSettingsModel = expSettingsModel;
@@ -56,6 +63,9 @@ public class SimulationModel {
         blinkFlag = false;
     }
 
+    /**
+     * Starts the simulation process in a background thread, updating UI upon completion.
+     */
     public void runSimulation() {
         SimulationModel model = this;
         worker = new SwingWorker<Void, Void>() {
@@ -89,10 +99,17 @@ public class SimulationModel {
         worker.execute();
     }
 
+    /**
+     * Cancels the currently running simulation, if possible.
+     *
+     * @param mayInterruptIfRunning true if the thread executing this task should be interrupted; otherwise, in-progress tasks are allowed to complete.
+     */
     public void cancel(boolean mayInterruptIfRunning) {
         worker.cancel(mayInterruptIfRunning);
     }
 
+    // Getter and setter methods follow, providing access to all simulation parameters.
+    // Each setter method parses its input to the expected data type, applying necessary conversions where applicable.
     public boolean getIs2D() {
         return is2D;
     }
