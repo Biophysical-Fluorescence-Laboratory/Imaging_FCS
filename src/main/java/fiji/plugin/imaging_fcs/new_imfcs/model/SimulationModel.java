@@ -2,6 +2,7 @@ package fiji.plugin.imaging_fcs.new_imfcs.model;
 
 import fiji.plugin.imaging_fcs.new_imfcs.controller.SimulationController;
 import fiji.plugin.imaging_fcs.new_imfcs.model.simulation.Simulation2D;
+import fiji.plugin.imaging_fcs.new_imfcs.model.simulation.Simulation3D;
 import ij.IJ;
 import ij.ImagePlus;
 
@@ -56,14 +57,17 @@ public class SimulationModel extends SwingWorker<Void, Void> {
 
     @Override
     protected Void doInBackground() {
+        ImagePlus image = null;
         if (is2D) {
             Simulation2D simulation = new Simulation2D(this, expSettingsModel);
-            ImagePlus image = simulation.simulateACF2D();
-            IJ.run(image, "Enhance Contrast", "saturated=0.35");
-            controller.loadImage(image);
+            image = simulation.simulateACF2D();
         } else {
-            // run simulation 3D
+            Simulation3D simulation = new Simulation3D(this, expSettingsModel);
+            image = simulation.SimulateACF3D();
         }
+
+        IJ.run(image, "Enhance Contrast", "saturated=0.35");
+        controller.loadImage(image);
         return null;
     }
 
