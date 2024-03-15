@@ -13,11 +13,14 @@ public final class Simulation2D extends SimulationBase {
         super(model, settingsModel);
     }
 
-    public ImagePlus simulateACF2D() {
-        if (!validateSimulationConditions()) {
-            return null;
+    @Override
+    protected void validateSimulationConditions() {
+        if (model.getDoutDinRatio() <= 0) {
+            throw new RuntimeException("Dout / Din <= 0 is not allowed");
         }
+    }
 
+    public ImagePlus simulateACF2D() {
         prepareSimulation();
 
         if (model.getIsDomain()) {
@@ -32,14 +35,6 @@ public final class Simulation2D extends SimulationBase {
         runSimulation();
 
         return image;
-    }
-
-    private boolean validateSimulationConditions() {
-        if (model.getDoutDinRatio() <= 0) {
-            IJ.showMessage("Dout / Din <= 0 is not allowed");
-            return false;
-        }
-        return true;
     }
 
     private void initializeDomains() {
@@ -77,10 +72,7 @@ public final class Simulation2D extends SimulationBase {
         }
 
         if (attempts >= numberOfDomains * 10) {
-            IJ.showMessage("Domains too dense, cannot place them without overlap.");
-            IJ.showStatus("Simulation Error");
-            IJ.showProgress(1);
-            // TODO: Stop simulation execution
+            throw new RuntimeException("Domains too dense, cannot place them without overlap.");
         }
     }
 

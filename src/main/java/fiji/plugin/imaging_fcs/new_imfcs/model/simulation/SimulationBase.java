@@ -37,6 +37,9 @@ public abstract class SimulationBase {
         this.model = model;
         this.settingsModel = settingsModel;
 
+        // Validate that we can run the simulation, otherwise throw a runtime exception
+        validateSimulationConditions();
+
         // Set random with the seed if it's different to 0 to make results reproducible
         // Use a custom random class to add a poisson generator
         if (model.getSeed() < 0) {
@@ -45,6 +48,8 @@ public abstract class SimulationBase {
             random = new RandomCustom(model.getSeed());
         }
     }
+
+    protected abstract void validateSimulationConditions();
 
     protected void prepareSimulation() {
         // Calculate the time step based on frame time and steps per frame
@@ -123,9 +128,7 @@ public abstract class SimulationBase {
         IJ.showStatus("Simulating ...");
         for (int n = 0; n < model.getNumFrames(); n++) {
             if (Thread.currentThread().isInterrupted()) {
-                IJ.showStatus("Simulation Interrupted");
-                IJ.showProgress(1);
-                return;
+                throw new RuntimeException("Simulation interrupted");
             }
             processFrame(n);
             IJ.showProgress(n, model.getNumFrames());

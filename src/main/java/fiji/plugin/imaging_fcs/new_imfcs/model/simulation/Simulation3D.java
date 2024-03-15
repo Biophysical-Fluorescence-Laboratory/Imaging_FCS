@@ -18,6 +18,19 @@ public final class Simulation3D extends SimulationBase {
         super(model, settingsModel);
     }
 
+    @Override
+    protected void validateSimulationConditions() {
+        if (settingsModel.getSigmaZ() <= 0) {
+            throw new RuntimeException("SigmaZ (LightSheetThickness) can't be <= 0 (3D only)");
+        } else if (settingsModel.getSigmaZ() > 100) {
+            throw new RuntimeException("SigmaZ (LightSheetThickness) can't be > 100 (3D only)");
+        }
+
+        if (settingsModel.getNA() >= 1.33) {
+            throw new RuntimeException("For 3D simulations NA has to be smaller than 1.33");
+        }
+    }
+
     public ImagePlus SimulateACF3D() {
         prepareSimulation();
 
@@ -54,7 +67,7 @@ public final class Simulation3D extends SimulationBase {
 
     @Override
     protected void applyBleaching() {
-        return; // No implementation for bleaching in 3D
+        return; // No implementation using radius for bleaching in 3D
     }
 
     @Override
