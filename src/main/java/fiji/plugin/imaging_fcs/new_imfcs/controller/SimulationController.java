@@ -3,7 +3,6 @@ package fiji.plugin.imaging_fcs.new_imfcs.controller;
 import fiji.plugin.imaging_fcs.new_imfcs.model.ExpSettingsModel;
 import fiji.plugin.imaging_fcs.new_imfcs.model.SimulationModel;
 import fiji.plugin.imaging_fcs.new_imfcs.view.SimulationView;
-import ij.IJ;
 import ij.ImagePlus;
 
 import javax.swing.*;
@@ -16,13 +15,15 @@ public class SimulationController {
     private final ImageController imageController;
     private final SimulationView simulationView;
     private final SimulationModel simulationModel;
-    private final ExpSettingsModel expSettingsModel;
 
     public SimulationController(ImageController imageController, ExpSettingsModel expSettingsModel) {
         this.imageController = imageController;
-        this.expSettingsModel = expSettingsModel;
         simulationModel = new SimulationModel(this, expSettingsModel);
         simulationView = new SimulationView(this, simulationModel);
+    }
+
+    public void onSimulationComplete() {
+        simulationView.enableBtnStopSimulation(false);
     }
 
     public void setVisible(boolean b) {
@@ -49,24 +50,8 @@ public class SimulationController {
 
     public ActionListener btnSimulatePressed() {
         return (ActionEvent ev) -> {
-            if (!simulationModel.getIs2D()) {
-                // 3D
-                if (expSettingsModel.getSigmaZ() <= 0) {
-                    IJ.showMessage("SigmaZ (LightSheetThickness) can't be <= 0 (3D only)");
-                    return;
-                } else if (expSettingsModel.getSigmaZ() > 100) {
-                    IJ.showMessage("SigmaZ (LightSheetThickness) can't be > 100 (3D only)");
-                    return;
-                }
-
-                if (expSettingsModel.getNA() >= 1.33) {
-                    IJ.showMessage("For 3D simulations NA has to be smaller than 1.33");
-                    return;
-                }
-            }
-
             simulationView.enableBtnStopSimulation(true);
-            simulationModel.execute();
+            simulationModel.runSimulation();
         };
     }
 

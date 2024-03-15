@@ -8,11 +8,12 @@ import ij.ImagePlus;
 
 import javax.swing.*;
 
-public class SimulationModel extends SwingWorker<Void, Void> {
+public class SimulationModel {
     public static final double PIXEL_SIZE_REAL_SPACE_CONVERSION_FACTOR = Math.pow(10, 6);
     private static final double DIFFUSION_COEFFICIENT_BASE = Math.pow(10, 12);
     private final ExpSettingsModel expSettingsModel;
     private final SimulationController controller;
+    private SwingWorker<Void, Void> worker;
     private boolean is2D;
     private boolean isDomain;
     private boolean isMesh;
@@ -55,20 +56,41 @@ public class SimulationModel extends SwingWorker<Void, Void> {
         blinkFlag = false;
     }
 
-    @Override
-    protected Void doInBackground() {
-        ImagePlus image = null;
-        if (is2D) {
-            Simulation2D simulation = new Simulation2D(this, expSettingsModel);
-            image = simulation.simulateACF2D();
-        } else {
-            Simulation3D simulation = new Simulation3D(this, expSettingsModel);
-            image = simulation.SimulateACF3D();
-        }
+    public void runSimulation() {
+        SimulationModel model = this;
+        worker = new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                ImagePlus image = null;
+                try {
+                    if (is2D) {
+                        Simulation2D simulation = new Simulation2D(model, expSettingsModel);
+                        image = simulation.simulateACF2D();
+                    } else {
+                        Simulation3D simulation = new Simulation3D(model, expSettingsModel);
+                        image = simulation.SimulateACF3D();
+                    }
 
-        IJ.run(image, "Enhance Contrast", "saturated=0.35");
-        controller.loadImage(image);
-        return null;
+                    IJ.run(image, "Enhance Contrast", "saturated=0.35");
+                    controller.loadImage(image);
+                } catch (RuntimeException e) {
+                    IJ.showProgress(1);
+                    IJ.showStatus("Simulation Interrupted");
+                    IJ.showMessage(e.getMessage());
+                }
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                controller.onSimulationComplete();
+            }
+        };
+        worker.execute();
+    }
+
+    public void cancel(boolean mayInterruptIfRunning) {
+        worker.cancel(mayInterruptIfRunning);
     }
 
     public boolean getIs2D() {
