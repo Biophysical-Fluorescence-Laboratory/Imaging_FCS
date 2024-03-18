@@ -9,7 +9,6 @@ public class Particle2D {
 
     private boolean bleached;
     private boolean on;
-    private int domainIndex;
     private double diffusionCoefficient;
 
     /**
@@ -24,7 +23,6 @@ public class Particle2D {
 
         bleached = false;
         on = true;
-        domainIndex = -1;
         diffusionCoefficient = 0.0;
     }
 
@@ -84,24 +82,6 @@ public class Particle2D {
      */
     public void setOff() {
         this.on = false;
-    }
-
-    /**
-     * Gets the index of the domain the particle is in.
-     *
-     * @return The index of the domain, or -1 if not in any domain.
-     */
-    public int getDomainIndex() {
-        return domainIndex;
-    }
-
-    /**
-     * Sets the index of the domain the particle is in.
-     *
-     * @param domainIndex The index of the domain.
-     */
-    public void setDomainIndex(int domainIndex) {
-        this.domainIndex = domainIndex;
     }
 
     /**

@@ -12,7 +12,9 @@ import ij.process.ImageProcessor;
  * environment where particles may have different diffusion behaviors.
  */
 public final class Simulation2D extends SimulationBase {
-    private double[][] domains;
+    private static final int DOMAIN_MAX_ATTEMPTS = 10;
+
+    private DomainHashMap domains;
 
     /**
      * Constructs a Simulation2D instance with specified simulation and experimental settings models.
@@ -66,43 +68,32 @@ public final class Simulation2D extends SimulationBase {
         int numberOfDomains = (int) Math.ceil(
                 Math.pow(gridLength * SimulationModel.PIXEL_SIZE_REAL_SPACE_CONVERSION_FACTOR, 2) * model.getDomainDensity());
 
-        domains = new double[numberOfDomains][3]; // Initialize domains array
+        double cellSize = gridLength / (Math.ceil(gridLength / (model.getDomainRadius() * 10)));
+        domains = new DomainHashMap(cellSize);
 
         int attempts = 0;
         int createdDomains = 0;
-        while (createdDomains < numberOfDomains && attempts < numberOfDomains * 10) {
+        while (createdDomains < numberOfDomains && attempts < numberOfDomains * DOMAIN_MAX_ATTEMPTS) {
             double x = sizeLowerLimit + random.nextDouble() * (sizeUpperLimit - sizeLowerLimit);
             double y = sizeLowerLimit + random.nextDouble() * (sizeUpperLimit - sizeLowerLimit);
             double radius = model.getDomainRadius() + random.nextGaussian() * (model.getDomainRadius() / 10);
 
-            boolean overlap = false;
-            for (int i = 0; i < createdDomains; i++) {
-                double dx = x - domains[i][0];
-                double dy = y - domains[i][1];
-                if (Math.sqrt(dx * dx + dy * dy) < (radius + domains[i][2])) {
-                    overlap = true;
-                    break;
-                }
-            }
+            Domain domain = new Domain(x, y, radius);
 
-            if (!overlap) {
-                domains[createdDomains][0] = x;
-                domains[createdDomains][1] = y;
-                domains[createdDomains][2] = radius;
-                createdDomains++;
-            } else {
+            if (domains.hasOverlap(domain)) {
                 attempts++;
+            } else {
+                domains.insert(domain);
             }
         }
 
-        if (attempts >= numberOfDomains * 10) {
+        if (attempts >= numberOfDomains * DOMAIN_MAX_ATTEMPTS) {
             throw new RuntimeException("Domains too dense, cannot place them without overlap.");
         }
     }
 
     /**
-     * Initializes particles within the simulation area. Particles are positioned randomly. If domains are used,
-     * each particle is also assigned to a domain if it falls within one.
+     * Initializes particles within the simulation area. Particles are positioned randomly.
      */
     private void initializeParticles() {
         particles = new Particle2D[model.getNumParticles()]; // Initialize particles array
@@ -115,32 +106,99 @@ public final class Simulation2D extends SimulationBase {
 
             setParticleState(particles[i], i);
         }
-
-        // If domains are used, determine each particle's domain
-        if (model.getIsDomain()) {
-            assignParticlesToDomains();
-        }
     }
 
     /**
-     * Assigns particles to domains based on their positions. Particles within a domain have their diffusion
-     * coefficient adjusted according to the domain's properties.
+     * Updates the position of a particle based on simple meshwork grid diffusion simulation.
+     * The movement is constrained by the meshwork size, with a certain probability to hop across mesh cells.
+     *
+     * @param particle the particle to update.
      */
-    private void assignParticlesToDomains() {
-        for (Particle2D particle : particles) {
-            for (int j = 0; j < domains.length; j++) {
-                double domainX = domains[j][0];
-                double domainY = domains[j][1];
-                double radius = domains[j][2];
+    private void updateParticlePositionWithMesh(Particle2D particle) {
+        // simulate diffusion on a simple meshwork grid
+        double random_range = Math.sqrt(2 * particle.getDiffusionCoefficient() * tStep);
+        // Calculate step size based on diffusion coefficient
+        double stepSizeX = random_range * random.nextGaussian();
+        double stepSizeY = random_range * random.nextGaussian();
 
-                double distance = Math.sqrt(Math.pow(particle.x - domainX, 2) + Math.pow(particle.y - domainY, 2));
-                if (distance < radius) {
-                    particle.setDomainIndex(j); // Assign particle to the domain j
-                    // Update diffusion coefficient if it's in domain
-                    particle.setDiffusionCoefficient(particle.getDiffusionCoefficient() / model.getDoutDinRatio());
-                    break; // Break the loop once a domain is assigned
-                }
+        // if hop is not true, step inside the mesh only
+        if (!(model.getHopProbability() > random.nextDouble())) {
+            while (Math.floor(particle.x / model.getMeshWorkSize()) !=
+                    Math.floor((particle.x + stepSizeX) / model.getMeshWorkSize())) {
+                stepSizeX = random_range * random.nextGaussian();
             }
+
+            while (Math.floor(particle.y / model.getMeshWorkSize()) !=
+                    Math.floor((particle.y + stepSizeX) / model.getMeshWorkSize())) {
+                stepSizeY = random_range * random.nextGaussian();
+            }
+        }
+
+        // Update particle position
+        particle.x += stepSizeX;
+        particle.y += stepSizeY;
+    }
+
+    /**
+     * Updates the position of a particle considering domain boundaries. This includes adjusting the diffusion coefficient
+     * if the particle is within a domain and handling crossing between domains and the open simulation area.
+     *
+     * @param particle the particle to update.
+     */
+    private void updateParticlePositionWithDomain(Particle2D particle) {
+        Domain domain = domains.findDomainForParticle(particle);
+        double diffusionCoeff = particle.getDiffusionCoefficient();
+
+        // update the diffusion coefficient if the particle is in a domain
+        if (domain != null) {
+            diffusionCoeff /= model.getDoutDinRatio();
+        }
+
+        double random_range = Math.sqrt(2 * diffusionCoeff * tStep);
+        // Calculate step size based on diffusion coefficient
+        double stepSizeX = random_range * random.nextGaussian();
+        double stepSizeY = random_range * random.nextGaussian();
+
+        boolean crossInOut = model.getPout() > random.nextDouble();
+        boolean crossOutIn = model.getPin() > random.nextDouble();
+
+        Particle2D particleAfterMove = new Particle2D(particle.x + stepSizeX, particle.y + stepSizeY);
+        Domain domainAfterMove = domains.findDomainForParticle(particleAfterMove);
+
+        if (domain != null && !domain.equals(domainAfterMove)) {
+            if (crossInOut) {
+                // TODO: Particle is attempting to move out of the domain, which is possible
+            } else {
+                // TODO: Need to generate a new position that stays inside the domain
+            }
+        }
+        if (domain == null && domainAfterMove != null) {
+            if (crossOutIn) {
+                // TODO: Particle is attempting to enter a domain, which is possible
+            } else {
+                // TODO: Need to generate a new position that is outside a domain
+            }
+        }
+
+        particle.x += stepSizeX;
+        particle.y += stepSizeY;
+    }
+
+    /**
+     * Updates the position of a particle. This method decides whether to use the base class method,
+     * mesh-based movement or domain-based movement
+     *
+     * @param particle the particle to update.
+     */
+    protected void updateParticlePosition(Particle2D particle) {
+        if (!model.getIsDomain() && !model.getIsMesh()) {
+            super.updateParticlePosition(particle);
+        } else if (!model.getIsDomain() && model.getIsMesh()) {
+            updateParticlePositionWithMesh(particle);
+        } else if (model.getIsDomain() && !model.getIsMesh()) {
+            updateParticlePositionWithDomain(particle);
+        } else {
+            throw new RuntimeException("Mesh and Domain diffusion has not been implemented yet");
         }
     }
 
