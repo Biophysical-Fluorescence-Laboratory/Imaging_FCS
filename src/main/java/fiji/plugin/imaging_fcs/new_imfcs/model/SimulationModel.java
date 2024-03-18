@@ -316,7 +316,7 @@ public class SimulationModel {
     }
 
     public double getBleachRadiusInterface() {
-        return bleachRadius * PIXEL_SIZE_REAL_SPACE_CONVERSION_FACTOR;
+        return Math.round(bleachRadius * PIXEL_SIZE_REAL_SPACE_CONVERSION_FACTOR);
     }
 
     public int getBleachFrame() {
@@ -336,7 +336,7 @@ public class SimulationModel {
     }
 
     public double getDomainRadiusInterface() {
-        return domainRadius * DOMAIN_MESH_CONVERSION;
+        return Math.round(domainRadius * DOMAIN_MESH_CONVERSION);
     }
 
     public double getDomainDensity() {
