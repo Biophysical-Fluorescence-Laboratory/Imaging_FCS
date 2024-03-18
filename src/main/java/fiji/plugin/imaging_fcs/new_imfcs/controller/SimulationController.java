@@ -38,6 +38,7 @@ public class SimulationController {
      */
     public void onSimulationComplete() {
         simulationView.enableBtnStopSimulation(false);
+        simulationView.enableBtnSimulate(true);
     }
 
     /**
@@ -80,6 +81,7 @@ public class SimulationController {
     public ActionListener btnSimulatePressed() {
         return (ActionEvent ev) -> {
             simulationView.enableBtnStopSimulation(true);
+            simulationView.enableBtnSimulate(false);
             simulationModel.runSimulation();
         };
     }

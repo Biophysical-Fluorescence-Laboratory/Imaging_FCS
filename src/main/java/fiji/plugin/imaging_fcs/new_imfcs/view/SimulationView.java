@@ -310,6 +310,15 @@ public class SimulationView extends JFrame {
     }
 
     /**
+     * Toggles the enable state of the simulate button.
+     *
+     * @param b true to enable, false to disable.
+     */
+    public void enableBtnSimulate(boolean b) {
+        btnSimulate.setEnabled(b);
+    }
+
+    /**
      * Toggles the enable state of the stop simulation button.
      *
      * @param b true to enable, false to disable.
