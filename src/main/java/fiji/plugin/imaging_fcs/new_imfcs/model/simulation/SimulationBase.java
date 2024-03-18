@@ -18,7 +18,7 @@ public abstract class SimulationBase {
     protected final ExpSettingsModel settingsModel;
     protected final RandomCustom random;
     protected double tStep, darkF, pixelSize, wavelength, PSFSize, midPos, sizeLowerLimit, sizeUpperLimit, bleachFactor,
-            blinkOnFactor, blinkOffFactor;
+            blinkOnFactor, blinkOffFactor, sqrtCameraNoiseFactor;
     protected boolean bleachFlag;
     protected long particleGroup1;
     protected long particleGroup2;
@@ -101,6 +101,8 @@ public abstract class SimulationBase {
             bleachFactor = Math.exp(-tStep / model.getTauBleach());
         }
 
+        sqrtCameraNoiseFactor = Math.sqrt(model.getCameraNoiseFactor());
+
         // Initialize the blinking factors for on and off states
         blinkOnFactor = Math.exp(-tStep * model.getKon());
         blinkOffFactor = Math.exp(-tStep * model.getKoff());
@@ -147,8 +149,12 @@ public abstract class SimulationBase {
             if (Thread.currentThread().isInterrupted()) {
                 throw new RuntimeException("Simulation interrupted");
             }
+//            long startTime = System.nanoTime();
             processFrame(n);
             IJ.showProgress(n, model.getNumFrames());
+//            long endTime = System.nanoTime();
+//            long elapsedTime = endTime - startTime;
+//            System.out.println("Elapsed time in nanoseconds: " + elapsedTime);
         }
     }
 
@@ -198,7 +204,7 @@ public abstract class SimulationBase {
         // add the camera offset and a noise term to each pixel
         for (int dx = 0; dx < model.getPixelNum(); dx++) {
             for (int dy = 0; dy < model.getPixelNum(); dy++) {
-                double random_noise = random.nextGaussian() * Math.sqrt(model.getCameraNoiseFactor());
+                double random_noise = random.nextGaussian() * sqrtCameraNoiseFactor;
                 ipSim.putPixelValue(dx, dy, model.getCameraOffset() + random_noise);
             }
         }
@@ -219,8 +225,10 @@ public abstract class SimulationBase {
      */
     protected void updateParticlePosition(Particle2D particle) {
         // Calculate step size based on diffusion coefficient
-        double stepSizeX = Math.sqrt(2 * particle.getDiffusionCoefficient() * tStep) * random.nextGaussian();
-        double stepSizeY = Math.sqrt(2 * particle.getDiffusionCoefficient() * tStep) * random.nextGaussian();
+        double randomRange = Math.sqrt(2 * particle.getDiffusionCoefficient() * tStep);
+
+        double stepSizeX = randomRange * random.nextGaussian();
+        double stepSizeY = randomRange * random.nextGaussian();
 
         // Update particle position
         particle.x += stepSizeX;

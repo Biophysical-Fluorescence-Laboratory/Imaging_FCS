@@ -120,11 +120,11 @@ public class SimulationView extends JFrame {
         tfCameraNoiseFactor = createTextField(model.getCameraNoiseFactor(), "", createFocusListener(model::setCameraNoiseFactor));
         tfBleachRadius = createTextField(model.getBleachRadiusInterface(), "", createFocusListener(model::setBleachRadius));
         tfBleachFrame = createTextField(model.getBleachFrame(), "", createFocusListener(model::setBleachFrame));
-        tfDomainRadius = createTextField(model.getDomainRadius(), "", createFocusListener(model::setDomainRadius));
+        tfDomainRadius = createTextField(model.getDomainRadiusInterface(), "", createFocusListener(model::setDomainRadius));
         tfDomainDensity = createTextField(model.getDomainDensity(), "", createFocusListener(model::setDomainDensity));
         tfPin = createTextField(model.getPin(), "", createFocusListener(model::setPin));
         tfPout = createTextField(model.getPout(), "", createFocusListener(model::setPout));
-        tfMeshworkSize = createTextField(model.getMeshWorkSize(), "", createFocusListener(model::setMeshWorkSize));
+        tfMeshworkSize = createTextField(model.getMeshWorkSizeInterface(), "", createFocusListener(model::setMeshWorkSize));
         tfHopProbability = createTextField(model.getHopProbability(), "", createFocusListener(model::setHopProbability));
     }
 

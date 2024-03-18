@@ -68,7 +68,7 @@ public final class Simulation2D extends SimulationBase {
         int numberOfDomains = (int) Math.ceil(
                 Math.pow(gridLength * SimulationModel.PIXEL_SIZE_REAL_SPACE_CONVERSION_FACTOR, 2) * model.getDomainDensity());
 
-        double cellSize = gridLength / (Math.ceil(gridLength / (model.getDomainRadius() * 10)));
+        double cellSize = model.getDomainRadius() * 2;
         domains = new DomainHashMap(cellSize);
 
         int attempts = 0;
@@ -84,6 +84,7 @@ public final class Simulation2D extends SimulationBase {
                 attempts++;
             } else {
                 domains.insert(domain);
+                createdDomains++;
             }
         }
 
@@ -116,21 +117,21 @@ public final class Simulation2D extends SimulationBase {
      */
     private void updateParticlePositionWithMesh(Particle2D particle) {
         // simulate diffusion on a simple meshwork grid
-        double random_range = Math.sqrt(2 * particle.getDiffusionCoefficient() * tStep);
+        double randomRange = Math.sqrt(2 * particle.getDiffusionCoefficient() * tStep);
         // Calculate step size based on diffusion coefficient
-        double stepSizeX = random_range * random.nextGaussian();
-        double stepSizeY = random_range * random.nextGaussian();
+        double stepSizeX = randomRange * random.nextGaussian();
+        double stepSizeY = randomRange * random.nextGaussian();
 
         // if hop is not true, step inside the mesh only
         if (!(model.getHopProbability() > random.nextDouble())) {
             while (Math.floor(particle.x / model.getMeshWorkSize()) !=
                     Math.floor((particle.x + stepSizeX) / model.getMeshWorkSize())) {
-                stepSizeX = random_range * random.nextGaussian();
+                stepSizeX = randomRange * random.nextGaussian();
             }
 
             while (Math.floor(particle.y / model.getMeshWorkSize()) !=
-                    Math.floor((particle.y + stepSizeX) / model.getMeshWorkSize())) {
-                stepSizeY = random_range * random.nextGaussian();
+                    Math.floor((particle.y + stepSizeY) / model.getMeshWorkSize())) {
+                stepSizeY = randomRange * random.nextGaussian();
             }
         }
 
@@ -154,10 +155,10 @@ public final class Simulation2D extends SimulationBase {
             diffusionCoeff /= model.getDoutDinRatio();
         }
 
-        double random_range = Math.sqrt(2 * diffusionCoeff * tStep);
+        double randomRange = Math.sqrt(2 * diffusionCoeff * tStep);
         // Calculate step size based on diffusion coefficient
-        double stepSizeX = random_range * random.nextGaussian();
-        double stepSizeY = random_range * random.nextGaussian();
+        double stepSizeX = randomRange * random.nextGaussian();
+        double stepSizeY = randomRange * random.nextGaussian();
 
         boolean crossInOut = model.getPout() > random.nextDouble();
         boolean crossOutIn = model.getPin() > random.nextDouble();
@@ -171,8 +172,7 @@ public final class Simulation2D extends SimulationBase {
             } else {
                 // TODO: Need to generate a new position that stays inside the domain
             }
-        }
-        if (domain == null && domainAfterMove != null) {
+        } else if (domain == null && domainAfterMove != null) {
             if (crossOutIn) {
                 // TODO: Particle is attempting to enter a domain, which is possible
             } else {
@@ -215,10 +215,10 @@ public final class Simulation2D extends SimulationBase {
             // Calculate the distance of the particle from the bleach center (0, 0)
             double dx = particle.x - 0;
             double dy = particle.y - 0;
-            double distance = Math.sqrt(dx * dx + dy * dy);
+            double distanceSq = dx * dx + dy * dy;
 
             // If the particle is within the bleach radius, mark it as bleached
-            if (distance <= bleachRadius) {
+            if (distanceSq <= bleachRadius * bleachRadius) {
                 particle.setBleached();
             }
         }

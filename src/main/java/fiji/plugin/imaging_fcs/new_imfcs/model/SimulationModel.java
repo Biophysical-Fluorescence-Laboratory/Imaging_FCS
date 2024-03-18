@@ -15,6 +15,7 @@ import javax.swing.*;
 public class SimulationModel {
     public static final double PIXEL_SIZE_REAL_SPACE_CONVERSION_FACTOR = Math.pow(10, 6);
     private static final double DIFFUSION_COEFFICIENT_BASE = Math.pow(10, 12);
+    private static final double DOMAIN_MESH_CONVERSION = Math.pow(10, 9);
     private final ExpSettingsModel expSettingsModel;
     private final SimulationController controller;
     private SwingWorker<Void, Void> worker;
@@ -40,11 +41,11 @@ public class SimulationModel {
     private double cameraNoiseFactor = 3.0; // noise of CCD camera
     private double bleachRadius = 3.0 / PIXEL_SIZE_REAL_SPACE_CONVERSION_FACTOR; // bleach radius
     private int bleachFrame = 10000000; // frame at which bleach happens
-    private double domainRadius = 30.0; // Radius of domains
+    private double domainRadius = 30.0 / DOMAIN_MESH_CONVERSION; // Radius of domains
     private double domainDensity = 30.0; // Density of domains in number/um2
     private double pin = 1.0; // Probability to enter domain
     private double pout = 0.6; // Probability to exit domain
-    private double meshWorkSize = 100.0; // Size of meshes
+    private double meshWorkSize = 100.0 / DOMAIN_MESH_CONVERSION; // Size of meshes
     private double hopProbability = 1.0; // hop probability over meshwork barriers
 
     /**
@@ -331,7 +332,11 @@ public class SimulationModel {
     }
 
     public void setDomainRadius(String domainRadius) {
-        this.domainRadius = Double.parseDouble(domainRadius);
+        this.domainRadius = Double.parseDouble(domainRadius) / DOMAIN_MESH_CONVERSION;
+    }
+
+    public double getDomainRadiusInterface() {
+        return domainRadius * DOMAIN_MESH_CONVERSION;
     }
 
     public double getDomainDensity() {
@@ -363,7 +368,11 @@ public class SimulationModel {
     }
 
     public void setMeshWorkSize(String meshWorkSize) {
-        this.meshWorkSize = Double.parseDouble(meshWorkSize);
+        this.meshWorkSize = Double.parseDouble(meshWorkSize) / DOMAIN_MESH_CONVERSION;
+    }
+
+    public double getMeshWorkSizeInterface() {
+        return meshWorkSize * DOMAIN_MESH_CONVERSION;
     }
 
     public double getHopProbability() {
