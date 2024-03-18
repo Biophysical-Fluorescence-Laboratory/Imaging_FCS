@@ -6,33 +6,34 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.process.ImageProcessor;
 
+/**
+ * An abstract base class for simulating fluorescence microscopy experiments.
+ * This class provides foundational functionality for simulating the diffusion,
+ * bleaching, and blinking of fluorescent particles within a specified simulation area.
+ */
 public abstract class SimulationBase {
     protected static final double OBSERVATION_WAVELENGTH_CONVERSION_FACTOR = Math.pow(10, 9);
 
     protected final SimulationModel model;
     protected final ExpSettingsModel settingsModel;
     protected final RandomCustom random;
-    protected double tStep;
-    protected double darkF;
-    protected double pixelSize;
-    protected double wavelength;
-    protected double PSFSize;
-    protected double midPos;
-    protected double sizeLowerLimit;
-    protected double sizeUpperLimit;
-    protected double bleachFactor;
+    protected double tStep, darkF, pixelSize, wavelength, PSFSize, midPos, sizeLowerLimit, sizeUpperLimit, bleachFactor,
+            blinkOnFactor, blinkOffFactor;
     protected boolean bleachFlag;
     protected long particleGroup1;
     protected long particleGroup2;
-    protected double blinkOnFactor;
-    protected double blinkOffFactor;
 
     protected ImagePlus image; // Assuming this is your image stack for the simulation
-    protected int width; // Width of the simulation area in pixels
-    protected int height; // Height of the simulation area in pixels
+    protected int width, height; // Width and height of the simulation area in pixels
 
     protected Particle2D[] particles;
 
+    /**
+     * Constructs a SimulationBase instance with specified simulation and experimental settings models.
+     *
+     * @param model         The simulation model containing the simulation parameters.
+     * @param settingsModel The experimental settings model containing settings like pixel size and magnification.
+     */
     protected SimulationBase(SimulationModel model, ExpSettingsModel settingsModel) {
         this.model = model;
         this.settingsModel = settingsModel;
@@ -49,8 +50,15 @@ public abstract class SimulationBase {
         }
     }
 
+    /**
+     * Validates the simulation conditions. Implementations should check for any conditions
+     * that would prevent the simulation from running and throw an exception if such conditions are found.
+     */
     protected abstract void validateSimulationConditions();
 
+    /**
+     * Prepares the simulation by calculating various parameters and initializing the simulation environment.
+     */
     protected void prepareSimulation() {
         // Calculate the time step based on frame time and steps per frame
         tStep = model.getFrameTime() / model.getStepsPerFrame();
@@ -108,6 +116,12 @@ public abstract class SimulationBase {
         particleGroup2 = Math.round(model.getNumParticles() * model.getF2());
     }
 
+    /**
+     * Sets the initial state of a particle based on its index and the simulation parameters.
+     *
+     * @param particle The particle to set the state for.
+     * @param i        The index of the particle in the particles array.
+     */
     protected void setParticleState(Particle2D particle, int i) {
         // Determine if the particle is in a dark state based on the dark fraction (darkF)
         if (model.getBlinkFlag() && (int) ((i + 1) * darkF) > (int) (i * darkF)) {
@@ -124,6 +138,9 @@ public abstract class SimulationBase {
         }
     }
 
+    /**
+     * Runs the simulation, processing each frame according to the simulation model.
+     */
     protected void runSimulation() {
         IJ.showStatus("Simulating ...");
         for (int n = 0; n < model.getNumFrames(); n++) {
@@ -135,6 +152,11 @@ public abstract class SimulationBase {
         }
     }
 
+    /**
+     * Processes a single frame of the simulation.
+     *
+     * @param frameNumber The frame number to process.
+     */
     protected void processFrame(int frameNumber) {
         // Initialize the frame in your visualization or data structure
         // For example, reset the image processor for the current frame if visualizing
@@ -163,6 +185,12 @@ public abstract class SimulationBase {
         IJ.showProgress(frameNumber + 1, model.getNumFrames());
     }
 
+    /**
+     * Initializes the ImageProcessor for a specific frame, applying camera noise and offset.
+     *
+     * @param frameNumber The frame number to initialize the processor for.
+     * @return The initialized ImageProcessor for the specified frame.
+     */
     protected ImageProcessor initializeFrameProcessor(int frameNumber) {
         // Get the ImageProcessor for the current frame. Frames in ImageJ are 1-based.
         ImageProcessor ipSim = image.getStack().getProcessor(frameNumber + 1);
@@ -178,8 +206,17 @@ public abstract class SimulationBase {
         return ipSim; // Return the initialized ImageProcessor for the current frame
     }
 
+    /**
+     * Applies bleaching effects to the simulation. This method should be overridden by subclasses
+     * to implement specific bleaching behavior.
+     */
     protected abstract void applyBleaching();
 
+    /**
+     * Updates the position of a particle based on its diffusion coefficient and the time step.
+     *
+     * @param particle The particle to update.
+     */
     protected void updateParticlePosition(Particle2D particle) {
         // Calculate step size based on diffusion coefficient
         double stepSizeX = Math.sqrt(2 * particle.getDiffusionCoefficient() * tStep) * random.nextGaussian();
@@ -190,6 +227,11 @@ public abstract class SimulationBase {
         particle.y += stepSizeY;
     }
 
+    /**
+     * Handles bleaching and blinking effects for a particle.
+     *
+     * @param particle The particle to handle effects for.
+     */
     protected void handleBleachingAndBlinking(Particle2D particle) {
         // Handle bleaching
         if (bleachFlag && !particle.isBleached()) { // If the particle is not already bleached
@@ -213,6 +255,12 @@ public abstract class SimulationBase {
         }
     }
 
+    /**
+     * Resets a particle's position if it moves out of bounds. This method should be overridden
+     * by subclasses to implement specific out-of-bounds behavior.
+     *
+     * @param particle The particle to reset if necessary.
+     */
     protected abstract void resetParticleIfOutOfBounds(Particle2D particle);
 
     protected void resetParticle2D(Particle2D particle) {
@@ -230,8 +278,22 @@ public abstract class SimulationBase {
         }
     }
 
+    /**
+     * Emits photons for a frame based on the particle's position and state.
+     *
+     * @param ipSim    The ImageProcessor for the current frame.
+     * @param particle The particle to emit photons from.
+     */
     protected abstract void emitPhotonsForFrame(ImageProcessor ipSim, Particle2D particle);
 
+    /**
+     * Simulates the emission of photons from a particle and updates the image processor accordingly.
+     *
+     * @param ipSim      The ImageProcessor for the current frame.
+     * @param particle   The particle emitting photons.
+     * @param numPhotons The number of photons to emit.
+     * @param mean       The mean displacement of the photons from the particle's position.
+     */
     protected void emitPhotons(ImageProcessor ipSim, Particle2D particle, int numPhotons, double mean) {
         for (int i = 0; i < numPhotons; i++) {
             double photonX = particle.x + random.nextGaussian() * mean;
