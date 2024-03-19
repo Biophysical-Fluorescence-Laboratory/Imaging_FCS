@@ -90,7 +90,7 @@ public class SimulationView extends JFrame {
      */
     private void initializeComboBoxes() {
         cbMode = new JComboBox<>(new String[]{
-                "2D (free)", "2D (domains)", "2D (mesh)", "2D (dom+mesh)", "3D (free)"});
+                "2D (free)", "2D (domains)", "2D (mesh)", "3D (free)"});
         cbMode.addActionListener(controller.cbModeChanged());
     }
 

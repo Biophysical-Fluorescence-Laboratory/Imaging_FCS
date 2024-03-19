@@ -134,13 +134,13 @@ public final class Simulation2D extends SimulationBase {
     }
 
     /**
-     * Updates the position of a particle based on simple meshwork grid diffusion simulation.
-     * The movement is constrained by the meshwork size, with a certain probability to hop across mesh cells.
+     * Updates the position of a particle based on simple meshWork grid diffusion simulation.
+     * The movement is constrained by the meshWork size, with a certain probability to hop across mesh cells.
      *
      * @param particle the particle to update.
      */
     private void updateParticlePositionWithMesh(Particle2D particle) {
-        // simulate diffusion on a simple meshwork grid
+        // simulate diffusion on a simple meshWork grid
         double randomRange = Math.sqrt(2 * particle.getDiffusionCoefficient() * tStep);
         // Calculate step size based on diffusion coefficient
         double stepSizeX = randomRange * random.nextGaussian();
@@ -190,14 +190,14 @@ public final class Simulation2D extends SimulationBase {
      */
     private void updateParticlePositionWithDomain(Particle2D particle) {
         Domain domain = domains.findDomainForParticle(particle);
-        double diffusionCoeff = particle.getDiffusionCoefficient();
+        double diffusionCoefficient = particle.getDiffusionCoefficient();
 
         // update the diffusion coefficient if the particle is in a domain
         if (domain != null) {
-            diffusionCoeff /= DoutDinRatio;
+            diffusionCoefficient /= DoutDinRatio;
         }
 
-        double randomRange = Math.sqrt(2 * diffusionCoeff * tStep);
+        double randomRange = Math.sqrt(2 * diffusionCoefficient * tStep);
         // Calculate step size based on diffusion coefficient
         double stepSizeX = randomRange * random.nextGaussian();
         double stepSizeY = randomRange * random.nextGaussian();
@@ -267,14 +267,12 @@ public final class Simulation2D extends SimulationBase {
      * @param particle the particle to update.
      */
     protected void updateParticlePosition(Particle2D particle) {
-        if (!isDomain && !isMesh) {
-            super.updateParticlePosition(particle);
-        } else if (!isDomain && isMesh) {
+        if (!isDomain && isMesh) {
             updateParticlePositionWithMesh(particle);
         } else if (isDomain && !isMesh) {
             updateParticlePositionWithDomain(particle);
         } else {
-            throw new RuntimeException("Mesh and Domain diffusion has not been implemented yet");
+            super.updateParticlePosition(particle);
         }
     }
 
