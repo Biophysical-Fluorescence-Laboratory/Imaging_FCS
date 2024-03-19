@@ -14,7 +14,12 @@ import ij.process.ImageProcessor;
 public final class Simulation2D extends SimulationBase {
     private static final int DOMAIN_MAX_ATTEMPTS = 10;
 
+    // Define the hashmap of domains
     private DomainHashMap domains;
+    private double domainDensity, domainRadius, DoutDinRatio, pIn, pOut;
+    private double meshWorkSize, hopProbability;
+    private double bleachRadius;
+    private boolean isDomain, isMesh;
 
     /**
      * Constructs a Simulation2D instance with specified simulation and experimental settings models.
@@ -31,10 +36,31 @@ public final class Simulation2D extends SimulationBase {
      * and inside domains. Throws RuntimeException if conditions are not met.
      */
     @Override
-    protected void validateSimulationConditions() {
+    protected void validateSimulationConditions(SimulationModel model, ExpSettingsModel settingsModel) {
         if (model.getDoutDinRatio() <= 0) {
             throw new RuntimeException("Dout / Din <= 0 is not allowed");
         }
+    }
+
+    /**
+     * Prepares the simulation by calculating additional 2D-specific parameters and initializing the environment.
+     */
+    @Override
+    protected void prepareSimulation(SimulationModel model, ExpSettingsModel settingsModel) {
+        super.prepareSimulation(model, settingsModel);
+
+        isDomain = model.getIsDomain();
+        domainDensity = model.getDomainDensity();
+        domainRadius = model.getDomainRadius();
+        DoutDinRatio = model.getDoutDinRatio();
+        pIn = model.getPin();
+        pOut = model.getPout();
+
+        isMesh = model.getIsMesh();
+        meshWorkSize = model.getMeshWorkSize();
+        hopProbability = model.getHopProbability();
+
+        bleachRadius = model.getBleachRadius();
     }
 
     /**
@@ -43,16 +69,14 @@ public final class Simulation2D extends SimulationBase {
      * @return An ImagePlus object containing the results of the 2D simulation.
      */
     public ImagePlus simulateACF2D() {
-        prepareSimulation();
-
-        if (model.getIsDomain()) {
+        if (isDomain) {
             initializeDomains();
         }
 
         initializeParticles();
 
         // create the stack of images
-        image = IJ.createImage("2D Simulation", "GRAY16", width, height, model.getNumFrames());
+        image = IJ.createImage("2D Simulation", "GRAY16", width, height, numFrames);
 
         runSimulation();
 
@@ -66,9 +90,9 @@ public final class Simulation2D extends SimulationBase {
     private void initializeDomains() {
         double gridLength = sizeUpperLimit - sizeLowerLimit; // Length of the full simulation grid
         int numberOfDomains = (int) Math.ceil(
-                Math.pow(gridLength * SimulationModel.PIXEL_SIZE_REAL_SPACE_CONVERSION_FACTOR, 2) * model.getDomainDensity());
+                Math.pow(gridLength * SimulationModel.PIXEL_SIZE_REAL_SPACE_CONVERSION_FACTOR, 2) * domainDensity);
 
-        double cellSize = model.getDomainRadius() * 2;
+        double cellSize = domainRadius * 2;
         domains = new DomainHashMap(cellSize);
 
         int attempts = 0;
@@ -76,7 +100,7 @@ public final class Simulation2D extends SimulationBase {
         while (createdDomains < numberOfDomains && attempts < numberOfDomains * DOMAIN_MAX_ATTEMPTS) {
             double x = sizeLowerLimit + random.nextDouble() * (sizeUpperLimit - sizeLowerLimit);
             double y = sizeLowerLimit + random.nextDouble() * (sizeUpperLimit - sizeLowerLimit);
-            double radius = model.getDomainRadius() + random.nextGaussian() * (model.getDomainRadius() / 10);
+            double radius = domainRadius + random.nextGaussian() * (domainRadius / 10);
 
             Domain domain = new Domain(x, y, radius);
 
@@ -97,9 +121,9 @@ public final class Simulation2D extends SimulationBase {
      * Initializes particles within the simulation area. Particles are positioned randomly.
      */
     private void initializeParticles() {
-        particles = new Particle2D[model.getNumParticles()]; // Initialize particles array
+        particles = new Particle2D[numParticles]; // Initialize particles array
 
-        for (int i = 0; i < model.getNumParticles(); i++) {
+        for (int i = 0; i < numParticles; i++) {
             // Randomly position particles within the simulation area
             double x = sizeLowerLimit + random.nextDouble() * (sizeUpperLimit - sizeLowerLimit);
             double y = sizeLowerLimit + random.nextDouble() * (sizeUpperLimit - sizeLowerLimit);
@@ -123,14 +147,14 @@ public final class Simulation2D extends SimulationBase {
         double stepSizeY = randomRange * random.nextGaussian();
 
         // if hop is not true, step inside the mesh only
-        if (!(model.getHopProbability() > random.nextDouble())) {
-            while (Math.floor(particle.x / model.getMeshWorkSize()) !=
-                    Math.floor((particle.x + stepSizeX) / model.getMeshWorkSize())) {
+        if (!(hopProbability > random.nextDouble())) {
+            while (Math.floor(particle.x / meshWorkSize) !=
+                    Math.floor((particle.x + stepSizeX) / meshWorkSize)) {
                 stepSizeX = randomRange * random.nextGaussian();
             }
 
-            while (Math.floor(particle.y / model.getMeshWorkSize()) !=
-                    Math.floor((particle.y + stepSizeY) / model.getMeshWorkSize())) {
+            while (Math.floor(particle.y / meshWorkSize) !=
+                    Math.floor((particle.y + stepSizeY) / meshWorkSize)) {
                 stepSizeY = randomRange * random.nextGaussian();
             }
         }
@@ -170,7 +194,7 @@ public final class Simulation2D extends SimulationBase {
 
         // update the diffusion coefficient if the particle is in a domain
         if (domain != null) {
-            diffusionCoeff /= model.getDoutDinRatio();
+            diffusionCoeff /= DoutDinRatio;
         }
 
         double randomRange = Math.sqrt(2 * diffusionCoeff * tStep);
@@ -178,8 +202,8 @@ public final class Simulation2D extends SimulationBase {
         double stepSizeX = randomRange * random.nextGaussian();
         double stepSizeY = randomRange * random.nextGaussian();
 
-        boolean crossInOut = model.getPout() > random.nextDouble();
-        boolean crossOutIn = model.getPin() > random.nextDouble();
+        boolean crossInOut = pOut > random.nextDouble();
+        boolean crossOutIn = pIn > random.nextDouble();
 
         Particle2D particleAfterMove = new Particle2D(particle.x + stepSizeX, particle.y + stepSizeY);
         Domain domainAfterMove = domains.findDomainForParticle(particleAfterMove);
@@ -194,8 +218,8 @@ public final class Simulation2D extends SimulationBase {
                 double intersection = computeIntersection(relativePositionX, relativePositionY, stepSizeX, stepSizeY,
                         domain.radius);
 
-                stepSizeX *= (intersection + (1 - intersection) * Math.sqrt(model.getDoutDinRatio()));
-                stepSizeY *= (intersection + (1 - intersection) * Math.sqrt(model.getDoutDinRatio()));
+                stepSizeX *= (intersection + (1 - intersection) * Math.sqrt(DoutDinRatio));
+                stepSizeY *= (intersection + (1 - intersection) * Math.sqrt(DoutDinRatio));
             } else {
                 // Generate a new position that stays inside the domain
                 while (!domain.equals(domainAfterMove)) {
@@ -217,8 +241,8 @@ public final class Simulation2D extends SimulationBase {
                 double intersection = computeIntersection(relativePositionX, relativePositionY, stepSizeX, stepSizeY,
                         domainAfterMove.radius);
 
-                stepSizeX *= (intersection + (1 - intersection) / Math.sqrt(model.getDoutDinRatio()));
-                stepSizeY *= (intersection + (1 - intersection) / Math.sqrt(model.getDoutDinRatio()));
+                stepSizeX *= (intersection + (1 - intersection) / Math.sqrt(DoutDinRatio));
+                stepSizeY *= (intersection + (1 - intersection) / Math.sqrt(DoutDinRatio));
             } else {
                 // Generate a new position that stays outside a domain
                 while (domainAfterMove != null) {
@@ -243,11 +267,11 @@ public final class Simulation2D extends SimulationBase {
      * @param particle the particle to update.
      */
     protected void updateParticlePosition(Particle2D particle) {
-        if (!model.getIsDomain() && !model.getIsMesh()) {
+        if (!isDomain && !isMesh) {
             super.updateParticlePosition(particle);
-        } else if (!model.getIsDomain() && model.getIsMesh()) {
+        } else if (!isDomain && isMesh) {
             updateParticlePositionWithMesh(particle);
-        } else if (model.getIsDomain() && !model.getIsMesh()) {
+        } else if (isDomain && !isMesh) {
             updateParticlePositionWithDomain(particle);
         } else {
             throw new RuntimeException("Mesh and Domain diffusion has not been implemented yet");
@@ -260,9 +284,6 @@ public final class Simulation2D extends SimulationBase {
      */
     @Override
     protected void applyBleaching() {
-        // Assuming a bleach radius and a center for the bleach spot. Adjust as needed.
-        double bleachRadius = model.getBleachRadius();
-
         for (Particle2D particle : particles) {
             // Calculate the distance of the particle from the bleach center (0, 0)
             double dx = particle.x - 0;
@@ -303,7 +324,7 @@ public final class Simulation2D extends SimulationBase {
             return;
         }
 
-        int numPhotons = random.nextPoisson(tStep * model.getCPS());
+        int numPhotons = random.nextPoisson(tStep * CPS);
         emitPhotons(ipSim, particle, numPhotons, PSFSize);
     }
 }

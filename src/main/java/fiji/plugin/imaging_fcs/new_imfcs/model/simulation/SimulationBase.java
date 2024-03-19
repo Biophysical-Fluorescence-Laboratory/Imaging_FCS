@@ -14,17 +14,20 @@ import ij.process.ImageProcessor;
 public abstract class SimulationBase {
     protected static final double OBSERVATION_WAVELENGTH_CONVERSION_FACTOR = Math.pow(10, 9);
 
-    protected final SimulationModel model;
-    protected final ExpSettingsModel settingsModel;
     protected final RandomCustom random;
+
+    private int stepsPerFrame, bleachFrame;
     protected double tStep, darkF, pixelSize, wavelength, PSFSize, midPos, sizeLowerLimit, sizeUpperLimit, bleachFactor,
-            blinkOnFactor, blinkOffFactor, sqrtCameraNoiseFactor;
-    protected boolean bleachFlag;
+            blinkOnFactor, blinkOffFactor, sqrtCameraNoiseFactor, D1, D2, D3;
+
+    private int cameraOffset;
+    protected boolean bleachFlag, blinkFlag;
     protected long particleGroup1;
     protected long particleGroup2;
 
     protected ImagePlus image; // Assuming this is your image stack for the simulation
     protected int width, height; // Width and height of the simulation area in pixels
+    protected int numFrames, numParticles, CPS;
 
     protected Particle2D[] particles;
 
@@ -35,11 +38,8 @@ public abstract class SimulationBase {
      * @param settingsModel The experimental settings model containing settings like pixel size and magnification.
      */
     protected SimulationBase(SimulationModel model, ExpSettingsModel settingsModel) {
-        this.model = model;
-        this.settingsModel = settingsModel;
-
         // Validate that we can run the simulation, otherwise throw a runtime exception
-        validateSimulationConditions();
+        validateSimulationConditions(model, settingsModel);
 
         // Set random with the seed if it's different to 0 to make results reproducible
         // Use a custom random class to add a poisson generator
@@ -48,20 +48,27 @@ public abstract class SimulationBase {
         } else {
             random = new RandomCustom(model.getSeed());
         }
+
+        // Initialize the parameters
+        prepareSimulation(model, settingsModel);
     }
 
     /**
      * Validates the simulation conditions. Implementations should check for any conditions
      * that would prevent the simulation from running and throw an exception if such conditions are found.
      */
-    protected abstract void validateSimulationConditions();
+    protected abstract void validateSimulationConditions(SimulationModel model, ExpSettingsModel settingsModel);
 
     /**
      * Prepares the simulation by calculating various parameters and initializing the simulation environment.
      */
-    protected void prepareSimulation() {
+    protected void prepareSimulation(SimulationModel model, ExpSettingsModel settingsModel) {
+        numFrames = model.getNumFrames();
+        stepsPerFrame = model.getStepsPerFrame();
+        bleachFrame = model.getBleachFrame();
+
         // Calculate the time step based on frame time and steps per frame
-        tStep = model.getFrameTime() / model.getStepsPerFrame();
+        tStep = model.getFrameTime() / stepsPerFrame;
 
         // Calculate the fraction of molecules in the dark state
         darkF = model.getKoff() / (model.getKoff() + model.getKon());
@@ -101,11 +108,14 @@ public abstract class SimulationBase {
             bleachFactor = Math.exp(-tStep / model.getTauBleach());
         }
 
-        sqrtCameraNoiseFactor = Math.sqrt(model.getCameraNoiseFactor());
+        blinkFlag = model.getBlinkFlag();
 
         // Initialize the blinking factors for on and off states
         blinkOnFactor = Math.exp(-tStep * model.getKon());
         blinkOffFactor = Math.exp(-tStep * model.getKoff());
+
+        sqrtCameraNoiseFactor = Math.sqrt(model.getCameraNoiseFactor());
+        cameraOffset = model.getCameraOffset();
 
         // Initialize image dimension
         width = model.getPixelNum();
@@ -113,9 +123,16 @@ public abstract class SimulationBase {
 
         double f1 = 1.0 - model.getF2() - model.getF3();
 
+        D1 = model.getD1();
+        D2 = model.getD2();
+        D3 = model.getD3();
+
         // define the groups size for particles
-        particleGroup1 = Math.round(model.getNumParticles() * f1);
-        particleGroup2 = Math.round(model.getNumParticles() * model.getF2());
+        numParticles = model.getNumParticles();
+        particleGroup1 = Math.round(numParticles * f1);
+        particleGroup2 = Math.round(numParticles * model.getF2());
+
+        CPS = model.getCPS();
     }
 
     /**
@@ -126,17 +143,17 @@ public abstract class SimulationBase {
      */
     protected void setParticleState(Particle2D particle, int i) {
         // Determine if the particle is in a dark state based on the dark fraction (darkF)
-        if (model.getBlinkFlag() && (int) ((i + 1) * darkF) > (int) (i * darkF)) {
+        if (blinkFlag && (int) ((i + 1) * darkF) > (int) (i * darkF)) {
             particle.setOff();
         }
 
         // Determine particle diffusion coefficient based on group
         if (i < particleGroup1) {
-            particle.setDiffusionCoefficient(model.getD1());
+            particle.setDiffusionCoefficient(D1);
         } else if (i < particleGroup1 + particleGroup2) {
-            particle.setDiffusionCoefficient(model.getD2());
+            particle.setDiffusionCoefficient(D2);
         } else {
-            particle.setDiffusionCoefficient(model.getD3());
+            particle.setDiffusionCoefficient(D3);
         }
     }
 
@@ -145,16 +162,12 @@ public abstract class SimulationBase {
      */
     protected void runSimulation() {
         IJ.showStatus("Simulating ...");
-        for (int n = 0; n < model.getNumFrames(); n++) {
+        for (int n = 0; n < numFrames; n++) {
             if (Thread.currentThread().isInterrupted()) {
                 throw new RuntimeException("Simulation interrupted");
             }
-//            long startTime = System.nanoTime();
             processFrame(n);
-            IJ.showProgress(n, model.getNumFrames());
-//            long endTime = System.nanoTime();
-//            long elapsedTime = endTime - startTime;
-//            System.out.println("Elapsed time in nanoseconds: " + elapsedTime);
+            IJ.showProgress(n, numFrames);
         }
     }
 
@@ -169,12 +182,12 @@ public abstract class SimulationBase {
         ImageProcessor ipSim = initializeFrameProcessor(frameNumber);
 
         // Handle bleaching at the specified frame
-        if (frameNumber == model.getBleachFrame()) {
+        if (frameNumber == bleachFrame) {
             applyBleaching();
         }
 
         // Iterate through each simulation step within the current frame
-        for (int step = 0; step < model.getStepsPerFrame(); step++) {
+        for (int step = 0; step < stepsPerFrame; step++) {
             for (Particle2D particle : particles) {
                 // Update particle positions based on diffusion and potential domain constraints
                 updateParticlePosition(particle);
@@ -188,7 +201,7 @@ public abstract class SimulationBase {
         }
 
         // Update progress display if applicable
-        IJ.showProgress(frameNumber + 1, model.getNumFrames());
+        IJ.showProgress(frameNumber + 1, numFrames);
     }
 
     /**
@@ -202,10 +215,10 @@ public abstract class SimulationBase {
         ImageProcessor ipSim = image.getStack().getProcessor(frameNumber + 1);
 
         // add the camera offset and a noise term to each pixel
-        for (int dx = 0; dx < model.getPixelNum(); dx++) {
-            for (int dy = 0; dy < model.getPixelNum(); dy++) {
+        for (int dx = 0; dx < height; dx++) {
+            for (int dy = 0; dy < width; dy++) {
                 double random_noise = random.nextGaussian() * sqrtCameraNoiseFactor;
-                ipSim.putPixelValue(dx, dy, model.getCameraOffset() + random_noise);
+                ipSim.putPixelValue(dx, dy, cameraOffset + random_noise);
             }
         }
 
@@ -251,7 +264,7 @@ public abstract class SimulationBase {
         }
 
         // Handle blinking
-        if (model.getBlinkFlag() && !particle.isBleached()) { // Only consider blinking if the particle is not bleached
+        if (blinkFlag && !particle.isBleached()) { // Only consider blinking if the particle is not bleached
             double blinkChance = random.nextDouble();
             if (particle.isOn() && blinkChance > blinkOffFactor) {
                 // If the particle is on and decides to turn off

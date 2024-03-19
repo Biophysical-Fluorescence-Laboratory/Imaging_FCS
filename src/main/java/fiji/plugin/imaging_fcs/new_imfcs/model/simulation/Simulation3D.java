@@ -37,7 +37,7 @@ public final class Simulation3D extends SimulationBase {
      * and numerical aperture values. Throws RuntimeException if conditions are not met.
      */
     @Override
-    protected void validateSimulationConditions() {
+    protected void validateSimulationConditions(SimulationModel model, ExpSettingsModel settingsModel) {
         if (settingsModel.getSigmaZ() <= 0) {
             throw new RuntimeException("SigmaZ (LightSheetThickness) can't be <= 0 (3D only)");
         } else if (settingsModel.getSigmaZ() > 100) {
@@ -50,27 +50,11 @@ public final class Simulation3D extends SimulationBase {
     }
 
     /**
-     * Runs the 3D simulation and returns an ImagePlus object containing the simulated image stack.
-     *
-     * @return An ImagePlus object containing the results of the 3D simulation.
-     */
-    public ImagePlus SimulateACF3D() {
-        prepareSimulation();
-
-        initializeParticles();
-
-        image = IJ.createImage("3D Simulation", "GRAY16", width, height, model.getNumFrames());
-
-        runSimulation();
-        return image;
-    }
-
-    /**
      * Prepares the simulation by calculating additional 3D-specific parameters and initializing the environment.
      */
     @Override
-    protected void prepareSimulation() {
-        super.prepareSimulation();
+    protected void prepareSimulation(SimulationModel model, ExpSettingsModel settingsModel) {
+        super.prepareSimulation(model, settingsModel);
 
         lightSheetThickness = settingsModel.getSigmaZ() * wavelength / settingsModel.getNA() / 2.0;
         sizeZLowerLimit = -Z_EXT_FACTOR * lightSheetThickness;
@@ -79,12 +63,26 @@ public final class Simulation3D extends SimulationBase {
     }
 
     /**
+     * Runs the 3D simulation and returns an ImagePlus object containing the simulated image stack.
+     *
+     * @return An ImagePlus object containing the results of the 3D simulation.
+     */
+    public ImagePlus SimulateACF3D() {
+        initializeParticles();
+
+        image = IJ.createImage("3D Simulation", "GRAY16", width, height, numFrames);
+
+        runSimulation();
+        return image;
+    }
+
+    /**
      * Initializes particles with 3D positions within the simulation bounds.
      */
     private void initializeParticles() {
-        particles = new Particle3D[model.getNumParticles()];
+        particles = new Particle3D[numParticles];
 
-        for (int i = 0; i < model.getNumParticles(); i++) {
+        for (int i = 0; i < numParticles; i++) {
             double x = sizeLowerLimit + random.nextDouble() * (sizeUpperLimit - sizeLowerLimit);
             double y = sizeLowerLimit + random.nextDouble() * (sizeUpperLimit - sizeLowerLimit);
             double z = sizeZLowerLimit + random.nextDouble() * (sizeZUpperLimit - sizeZLowerLimit);
@@ -99,7 +97,7 @@ public final class Simulation3D extends SimulationBase {
      */
     @Override
     protected void applyBleaching() {
-        return; // No implementation using radius for bleaching in 3D
+        // No implementation using radius for bleaching in 3D
     }
 
     /**
@@ -156,7 +154,7 @@ public final class Simulation3D extends SimulationBase {
         Particle3D particle = (Particle3D) particle2D;
 
         double zCor = (PSFSize + (Math.abs(particle.z) * (zFactor / 2)));
-        int randomPoisson = random.nextPoisson(tStep * model.getCPS());
+        int randomPoisson = random.nextPoisson(tStep * CPS);
         int numPhotons = (int) Math.round(Math.abs(
                 randomPoisson * Math.exp(-0.5 * Math.pow(particle.z / lightSheetThickness, 2))));
 
