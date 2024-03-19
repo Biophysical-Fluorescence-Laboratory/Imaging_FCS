@@ -141,6 +141,24 @@ public final class Simulation2D extends SimulationBase {
     }
 
     /**
+     * Calculates the intersection point of a particle's motion with the boundary of a domain.
+     *
+     * @param px     The x-coordinate of the particle's initial position.
+     * @param py     The y-coordinate of the particle's initial position.
+     * @param dx     The x-component of the particle's motion vector.
+     * @param dy     The y-component of the particle's motion vector.
+     * @param radius The radius of the circular domain centered at the origin.
+     * @return The scalar distance along the motion vector to the domain's boundary intersection.
+     */
+    private double computeIntersection(double px, double py, double dx, double dy, double radius) {
+        double a = dx * dx + dy * dy;
+        double b = -(px * dx + py * dy);
+        double c = Math.sqrt(-Math.pow(py * dx - px * dy, 2) + Math.pow(dx * radius, 2) + Math.pow(dy * radius, 2));
+
+        return (b + c) / a;
+    }
+
+    /**
      * Updates the position of a particle considering domain boundaries. This includes adjusting the diffusion coefficient
      * if the particle is within a domain and handling crossing between domains and the open simulation area.
      *
@@ -167,16 +185,50 @@ public final class Simulation2D extends SimulationBase {
         Domain domainAfterMove = domains.findDomainForParticle(particleAfterMove);
 
         if (domain != null && !domain.equals(domainAfterMove)) {
+            // Particle is attempting to move out of the domain, which is possible.
             if (crossInOut) {
-                // TODO: Particle is attempting to move out of the domain, which is possible
+                // Compute the position of the particle relative to the domain center
+                double relativePositionX = particle.x - domain.x;
+                double relativePositionY = particle.y - domain.y;
+
+                double intersection = computeIntersection(relativePositionX, relativePositionY, stepSizeX, stepSizeY,
+                        domain.radius);
+
+                stepSizeX *= (intersection + (1 - intersection) * Math.sqrt(model.getDoutDinRatio()));
+                stepSizeY *= (intersection + (1 - intersection) * Math.sqrt(model.getDoutDinRatio()));
             } else {
-                // TODO: Need to generate a new position that stays inside the domain
+                // Generate a new position that stays inside the domain
+                while (!domain.equals(domainAfterMove)) {
+                    stepSizeX = randomRange * random.nextGaussian();
+                    stepSizeY = randomRange * random.nextGaussian();
+                    particleAfterMove.x = particle.x + stepSizeX;
+                    particleAfterMove.y = particle.y + stepSizeY;
+
+                    domainAfterMove = domains.findDomainForParticle(particleAfterMove);
+                }
             }
         } else if (domain == null && domainAfterMove != null) {
+            // Particle is attempting to enter a domain, which is possible
             if (crossOutIn) {
-                // TODO: Particle is attempting to enter a domain, which is possible
+                // Compute the position of the particle relative to the domain
+                double relativePositionX = particle.x - domainAfterMove.x;
+                double relativePositionY = particle.y - domainAfterMove.y;
+
+                double intersection = computeIntersection(relativePositionX, relativePositionY, stepSizeX, stepSizeY,
+                        domainAfterMove.radius);
+
+                stepSizeX *= (intersection + (1 - intersection) / Math.sqrt(model.getDoutDinRatio()));
+                stepSizeY *= (intersection + (1 - intersection) / Math.sqrt(model.getDoutDinRatio()));
             } else {
-                // TODO: Need to generate a new position that is outside a domain
+                // Generate a new position that stays outside a domain
+                while (domainAfterMove != null) {
+                    stepSizeX = randomRange * random.nextGaussian();
+                    stepSizeY = randomRange * random.nextGaussian();
+                    particleAfterMove.x = particle.x + stepSizeX;
+                    particleAfterMove.y = particle.y + stepSizeY;
+
+                    domainAfterMove = domains.findDomainForParticle(particleAfterMove);
+                }
             }
         }
 
