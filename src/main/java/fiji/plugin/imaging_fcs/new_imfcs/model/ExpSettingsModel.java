@@ -162,7 +162,7 @@ public class ExpSettingsModel {
     }
 
     public void setBinning(String binning) {
-        String[] parts = binning.split(" x ");
+        String[] parts = binning.replace(" ", "").split("x");
         this.binning.x = Integer.parseInt(parts[0]);
         this.binning.y = Integer.parseInt(parts[1]);
     }
@@ -176,7 +176,7 @@ public class ExpSettingsModel {
     }
 
     public void setCCF(String CCF) {
-        String[] parts = CCF.split(" x ");
+        String[] parts = CCF.replace(" ", "").split("x");
         this.CCF.width = Integer.parseInt(parts[0]);
         this.CCF.height = Integer.parseInt(parts[1]);
     }
