@@ -319,11 +319,47 @@ public class SimulationView extends JFrame {
     }
 
     /**
+     * Toggles the enable state of the batch button.
+     *
+     * @param b true to enable, false to disable.
+     */
+    public void enableBtnBatch(boolean b) {
+        btnBatchSim.setEnabled(b);
+    }
+
+    /**
      * Toggles the enable state of the stop simulation button.
      *
      * @param b true to enable, false to disable.
      */
     public void enableBtnStopSimulation(boolean b) {
         btnStopSimulation.setEnabled(b);
+    }
+
+    /**
+     * Update the text field D1
+     *
+     * @param newText The new value of D1
+     */
+    public void updateD1Text(String newText) {
+        tfD1.setText(newText);
+    }
+
+    /**
+     * Update the text field D2
+     *
+     * @param newText The new value of D2
+     */
+    public void updateD2Text(String newText) {
+        tfD2.setText(newText);
+    }
+
+    /**
+     * Update the text field F2
+     *
+     * @param newText The new value of F2
+     */
+    public void updateF2Text(String newText) {
+        tfD2.setText(newText);
     }
 }

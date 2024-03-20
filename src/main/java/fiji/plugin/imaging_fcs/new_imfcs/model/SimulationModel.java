@@ -1,12 +1,12 @@
 package fiji.plugin.imaging_fcs.new_imfcs.model;
 
 import fiji.plugin.imaging_fcs.new_imfcs.controller.SimulationController;
-import fiji.plugin.imaging_fcs.new_imfcs.model.simulation.Simulation2D;
-import fiji.plugin.imaging_fcs.new_imfcs.model.simulation.Simulation3D;
+import fiji.plugin.imaging_fcs.new_imfcs.model.simulation.SimulationWorker;
 import ij.IJ;
-import ij.ImagePlus;
 
-import javax.swing.*;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents the data model for FCS simulation, encapsulating all simulation parameters
@@ -18,7 +18,8 @@ public class SimulationModel {
     private static final double DOMAIN_MESH_CONVERSION = Math.pow(10, 9);
     private final ExpSettingsModel expSettingsModel;
     private final SimulationController controller;
-    private SwingWorker<Void, Void> worker;
+    private List<SimulationWorker> simulationWorkers;
+
     private boolean is2D, isDomain, isMesh, blinkFlag;
     private int seed = 1;
     private int numParticles = 1000; // number of simulated particles
@@ -68,45 +69,69 @@ public class SimulationModel {
      * Starts the simulation process in a background thread, updating UI upon completion.
      */
     public void runSimulation() {
-        SimulationModel model = this;
-        worker = new SwingWorker<Void, Void>() {
-            @Override
-            protected Void doInBackground() throws Exception {
-                ImagePlus image = null;
-                try {
-                    if (is2D) {
-                        Simulation2D simulation = new Simulation2D(model, expSettingsModel);
-                        image = simulation.simulateACF2D();
-                    } else {
-                        Simulation3D simulation = new Simulation3D(model, expSettingsModel);
-                        image = simulation.SimulateACF3D();
-                    }
-
-                    IJ.run(image, "Enhance Contrast", "saturated=0.35");
-                    controller.loadImage(image);
-                } catch (RuntimeException e) {
-                    IJ.showProgress(1);
-                    IJ.showStatus("Simulation Interrupted");
-                    IJ.showMessage(e.getMessage());
-                }
-                return null;
-            }
-
-            @Override
-            protected void done() {
-                controller.onSimulationComplete();
-            }
-        };
-        worker.execute();
+        simulationWorkers = new ArrayList<>();
+        try {
+            simulationWorkers.add(new SimulationWorker(this, expSettingsModel, controller, null));
+            simulationWorkers.get(0).execute();
+        } catch (RuntimeException e) {
+            IJ.showStatus("Instantiation error");
+            IJ.showMessage(e.getMessage());
+            controller.onSimulationComplete();
+        }
     }
 
     /**
-     * Cancels the currently running simulation, if possible.
+     * Initiates batch simulations based on provided parameter ranges, handling each simulation in separate threads.
      *
-     * @param mayInterruptIfRunning true if the thread executing this task should be interrupted; otherwise, in-progress tasks are allowed to complete.
+     * @param path    Directory for saving batch simulation results.
+     * @param batchD1 Range for D1 parameter.
+     * @param batchD2 Range for D2 parameter.
+     * @param batchF2 Range for F2 parameter.
+     */
+    public void runBatch(File path, double[] batchD1, double[] batchD2, double[] batchF2) {
+        simulationWorkers = new ArrayList<>();
+
+        for (double D1 = batchD1[0]; D1 <= batchD1[1]; D1 += batchD1[2]) {
+            this.D1 = D1 / DIFFUSION_COEFFICIENT_BASE;
+            controller.updateD1Text(D1);
+
+            for (double D2 = batchD2[0]; D2 <= batchD2[1]; D2 += batchD2[2]) {
+                this.D2 = D2 / DIFFUSION_COEFFICIENT_BASE;
+                controller.updateD2Text(D2);
+
+                for (double F2 = batchF2[0]; F2 <= batchF2[2]; F2 += batchF2[2]) {
+                    this.F2 = F2;
+                    controller.updateF2Text(F2);
+
+                    try {
+                        SimulationWorker simulationWorker =
+                                new SimulationWorker(this, expSettingsModel, controller, path);
+                        simulationWorkers.add(simulationWorker);
+
+                        controller.incrementSimulationsRunningNumber();
+                        simulationWorker.execute();
+                    } catch (RuntimeException e) {
+                        IJ.showStatus("Instantiation error");
+                        IJ.showMessage(e.getMessage());
+                        controller.incrementSimulationErrorsNumber();
+                        controller.onBatchSimulationComplete();
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Cancels the currently running simulations.
+     *
+     * @param mayInterruptIfRunning true if the thread executing this task should be interrupted;
+     *                              otherwise, in-progress tasks are allowed to complete.
      */
     public void cancel(boolean mayInterruptIfRunning) {
-        worker.cancel(mayInterruptIfRunning);
+        for (SimulationWorker simulationWorker : simulationWorkers) {
+            simulationWorker.cancel(mayInterruptIfRunning);
+        }
     }
 
     // Getter and setter methods follow, providing access to all simulation parameters.

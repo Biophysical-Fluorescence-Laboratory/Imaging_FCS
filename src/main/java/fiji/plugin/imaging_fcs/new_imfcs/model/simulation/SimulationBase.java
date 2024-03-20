@@ -136,6 +136,13 @@ public abstract class SimulationBase {
     }
 
     /**
+     * Runs the 2D/3D simulation and returns an ImagePlus object containing the simulated image stack.
+     *
+     * @return An ImagePlus object containing the results of the simulation.
+     */
+    public abstract ImagePlus simulate();
+
+    /**
      * Sets the initial state of a particle based on its index and the simulation parameters.
      *
      * @param particle The particle to set the state for.

@@ -68,7 +68,8 @@ public final class Simulation2D extends SimulationBase {
      *
      * @return An ImagePlus object containing the results of the 2D simulation.
      */
-    public ImagePlus simulateACF2D() {
+    @Override
+    public ImagePlus simulate() {
         if (isDomain) {
             initializeDomains();
         }

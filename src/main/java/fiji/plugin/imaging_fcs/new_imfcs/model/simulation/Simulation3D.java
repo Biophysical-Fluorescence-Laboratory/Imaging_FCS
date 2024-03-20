@@ -67,7 +67,8 @@ public final class Simulation3D extends SimulationBase {
      *
      * @return An ImagePlus object containing the results of the 3D simulation.
      */
-    public ImagePlus SimulateACF3D() {
+    @Override
+    public ImagePlus simulate() {
         initializeParticles();
 
         image = IJ.createImage("3D Simulation", "GRAY16", width, height, numFrames);
