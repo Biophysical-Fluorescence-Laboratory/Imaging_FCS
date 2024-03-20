@@ -81,6 +81,19 @@ public class SimulationModel {
     }
 
     /**
+     * Resets the diffusion coefficients and fraction values for particles to specified initial values.
+     *
+     * @param initialD1 Initial diffusion coefficient for particle in group 1.
+     * @param initialD2 Initial diffusion coefficient for particle in group 2.
+     * @param initialF2 Initial fraction value for particle in group 2.
+     */
+    private void resetValues(double initialD1, double initialD2, double initialF2) {
+        this.D1 = initialD1;
+        this.D2 = initialD2;
+        this.F2 = initialF2;
+    }
+
+    /**
      * Initiates batch simulations based on provided parameter ranges, handling each simulation in separate threads.
      *
      * @param path    Directory for saving batch simulation results.
@@ -91,17 +104,18 @@ public class SimulationModel {
     public void runBatch(File path, double[] batchD1, double[] batchD2, double[] batchF2) {
         simulationWorkers = new ArrayList<>();
 
+        double initialD1 = this.D1;
+        double initialD2 = this.D2;
+        double initialF2 = this.F2;
+
         for (double D1 = batchD1[0]; D1 <= batchD1[1]; D1 += batchD1[2]) {
             this.D1 = D1 / DIFFUSION_COEFFICIENT_BASE;
-            controller.updateD1Text(D1);
 
             for (double D2 = batchD2[0]; D2 <= batchD2[1]; D2 += batchD2[2]) {
                 this.D2 = D2 / DIFFUSION_COEFFICIENT_BASE;
-                controller.updateD2Text(D2);
 
                 for (double F2 = batchF2[0]; F2 <= batchF2[2]; F2 += batchF2[2]) {
                     this.F2 = F2;
-                    controller.updateF2Text(F2);
 
                     try {
                         SimulationWorker simulationWorker =
@@ -113,6 +127,9 @@ public class SimulationModel {
                     } catch (RuntimeException e) {
                         IJ.showStatus("Instantiation error");
                         IJ.showMessage(e.getMessage());
+
+                        // reset the values to make the UI consistent with the model
+                        resetValues(initialD1, initialD2, initialF2);
                         controller.incrementSimulationErrorsNumber();
                         controller.onBatchSimulationComplete();
                         return;
@@ -120,6 +137,9 @@ public class SimulationModel {
                 }
             }
         }
+
+        // reset the values to make the UI consistent with the model
+        resetValues(initialD1, initialD2, initialF2);
     }
 
     /**

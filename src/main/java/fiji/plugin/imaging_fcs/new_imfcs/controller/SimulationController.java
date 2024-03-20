@@ -199,31 +199,4 @@ public class SimulationController {
     public void loadImage(ImagePlus image) {
         imageController.loadImage(image, true);
     }
-
-    /**
-     * Update the text field D1
-     *
-     * @param D1 the new value of D1
-     */
-    public void updateD1Text(Double D1) {
-        simulationView.updateD1Text(Double.toString(D1));
-    }
-
-    /**
-     * Update the text field D2
-     *
-     * @param D2 The new value of D2
-     */
-    public void updateD2Text(Double D2) {
-        simulationView.updateD2Text(Double.toString(D2));
-    }
-
-    /**
-     * Update the text field F2
-     *
-     * @param F2 The new value of F2
-     */
-    public void updateF2Text(Double F2) {
-        simulationView.updateF2Text(Double.toString(F2));
-    }
 }

@@ -335,31 +335,4 @@ public class SimulationView extends JFrame {
     public void enableBtnStopSimulation(boolean b) {
         btnStopSimulation.setEnabled(b);
     }
-
-    /**
-     * Update the text field D1
-     *
-     * @param newText The new value of D1
-     */
-    public void updateD1Text(String newText) {
-        tfD1.setText(newText);
-    }
-
-    /**
-     * Update the text field D2
-     *
-     * @param newText The new value of D2
-     */
-    public void updateD2Text(String newText) {
-        tfD2.setText(newText);
-    }
-
-    /**
-     * Update the text field F2
-     *
-     * @param newText The new value of F2
-     */
-    public void updateF2Text(String newText) {
-        tfD2.setText(newText);
-    }
 }
