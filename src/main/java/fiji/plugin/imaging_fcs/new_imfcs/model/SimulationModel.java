@@ -104,6 +104,7 @@ public class SimulationModel {
     public void runBatch(File path, double[] batchD1, double[] batchD2, double[] batchF2) {
         simulationWorkers = new ArrayList<>();
 
+        // Store the initial values to restore them later
         double initialD1 = this.D1;
         double initialD2 = this.D2;
         double initialF2 = this.F2;
@@ -114,7 +115,7 @@ public class SimulationModel {
             for (double D2 = batchD2[0]; D2 <= batchD2[1]; D2 += batchD2[2]) {
                 this.D2 = D2 / DIFFUSION_COEFFICIENT_BASE;
 
-                for (double F2 = batchF2[0]; F2 <= batchF2[2]; F2 += batchF2[2]) {
+                for (double F2 = batchF2[0]; F2 <= batchF2[1]; F2 += batchF2[2]) {
                     this.F2 = F2;
 
                     try {

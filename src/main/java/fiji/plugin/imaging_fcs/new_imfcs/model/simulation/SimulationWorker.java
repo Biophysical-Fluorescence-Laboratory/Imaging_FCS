@@ -42,7 +42,7 @@ public class SimulationWorker extends SwingWorker<Void, Void> {
 
         if (path != null) {
             this.batchMode = true;
-            this.path = String.format("%s/sim%.2f-%.2f-%.2f.tif", path.getAbsolutePath(),
+            this.path = String.format("%s/sim-D1=%.2f-D2=%.2f-F2=%.2f.tif", path.getAbsolutePath(),
                     model.getD1Interface(), model.getD2Interface(), model.getF2());
         } else {
             this.batchMode = false;
