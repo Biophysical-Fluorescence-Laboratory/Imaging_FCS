@@ -21,7 +21,7 @@ public class OptionsController {
      */
     public OptionsController(OptionsModel optionsModel) {
         this.optionsModel = optionsModel;
-        this.optionsView = new OptionsView(this);
+        this.optionsView = new OptionsView(this::onDialogOk);
         this.optionsView.displayOptionsDialog(optionsModel);
     }
 

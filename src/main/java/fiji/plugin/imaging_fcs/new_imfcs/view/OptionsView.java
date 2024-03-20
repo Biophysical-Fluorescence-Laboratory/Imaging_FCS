@@ -1,6 +1,5 @@
 package fiji.plugin.imaging_fcs.new_imfcs.view;
 
-import fiji.plugin.imaging_fcs.new_imfcs.controller.OptionsController;
 import fiji.plugin.imaging_fcs.new_imfcs.model.OptionsModel;
 import ij.gui.GenericDialog;
 
@@ -11,14 +10,14 @@ import ij.gui.GenericDialog;
  * the model through the OptionsController upon user confirmation.
  */
 public class OptionsView extends GenericDialog {
-    private final OptionsController listener;
+    private final Runnable listener;
 
     /**
      * Constructs an OptionsView dialog with a specified OptionsController.
      *
-     * @param listener The OptionsController that acts as a listener to the dialog actions.
+     * @param listener The listener to the dialog actions.
      */
-    public OptionsView(OptionsController listener) {
+    public OptionsView(Runnable listener) {
         super("Options");
         this.listener = listener;
     }
@@ -48,7 +47,7 @@ public class OptionsView extends GenericDialog {
 
         // If the OK button was pressed, inform the listener to update the model
         if (wasOKed()) {
-            listener.onDialogOk();
+            listener.run();
         }
     }
 }
