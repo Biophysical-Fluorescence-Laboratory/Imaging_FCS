@@ -248,22 +248,19 @@ public class MainPanelController {
      * This method ensures that the UI reflects the most up-to-date settings.
      */
     private void updateSettingsField() {
-        Runnable doUpdateSettingsField = new Runnable() {
-            @Override
-            public void run() {
-                expSettingsModel.updateSettings();
+        Runnable doUpdateSettingsField = () -> {
+            expSettingsModel.updateSettings();
 
-                // Use scientific notation for these fields
-                Function<Double, String> formatter = value -> String.format("%6.2e", value);
+            // Use scientific notation for these fields
+            Function<Double, String> formatter = value -> String.format("%6.2e", value);
 
-                expSettingsView.setTextParamA(formatter.apply(expSettingsModel.getParamA()));
-                expSettingsView.setTextParamW(formatter.apply(expSettingsModel.getParamW()));
-                expSettingsView.setTextParamW2(formatter.apply(expSettingsModel.getParamW2()));
-                expSettingsView.setTextParamZ(formatter.apply(expSettingsModel.getParamZ()));
-                expSettingsView.setTextParamZ2(formatter.apply(expSettingsModel.getParamZ2()));
-                expSettingsView.setTextParamRx(formatter.apply(expSettingsModel.getParamRx()));
-                expSettingsView.setTextParamRy(formatter.apply(expSettingsModel.getParamRy()));
-            }
+            expSettingsView.setTextParamA(formatter.apply(expSettingsModel.getParamA()));
+            expSettingsView.setTextParamW(formatter.apply(expSettingsModel.getParamW()));
+            expSettingsView.setTextParamW2(formatter.apply(expSettingsModel.getParamW2()));
+            expSettingsView.setTextParamZ(formatter.apply(expSettingsModel.getParamZ()));
+            expSettingsView.setTextParamZ2(formatter.apply(expSettingsModel.getParamZ2()));
+            expSettingsView.setTextParamRx(formatter.apply(expSettingsModel.getParamRx()));
+            expSettingsView.setTextParamRy(formatter.apply(expSettingsModel.getParamRy()));
         };
 
         // Execute the update in the Swing event dispatch thread to ensure thread safety

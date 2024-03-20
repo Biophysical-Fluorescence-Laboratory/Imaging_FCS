@@ -6,9 +6,9 @@ package fiji.plugin.imaging_fcs.new_imfcs.model.simulation;
  * whether a given particle is within this domain.
  */
 public class Domain {
-    public double x;
-    public double y;
-    public double radius;
+    public final double x;
+    public final double y;
+    public final double radius;
 
     /**
      * Constructs a new {@code Domain} instance with specified center coordinates and radius.

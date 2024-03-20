@@ -10,8 +10,8 @@ import java.awt.*;
  */
 public class ExpSettingsModel {
     // User parameters with default values
-    private Point binning = new Point(1, 1);
-    private Dimension CCF = new Dimension(0, 0);
+    private final Point binning = new Point(1, 1);
+    private final Dimension CCF = new Dimension(0, 0);
     private double pixelSize = 24;
     private double magnification = 100;
     private double NA = 1.49;
@@ -22,7 +22,7 @@ public class ExpSettingsModel {
     private double sigmaZ = 1000000;
     private double sigmaZ2 = 1000000;
 
-    // Non user parameters (compute using user parameters)
+    // Non-user parameters (compute using user parameters)
     private double paramA;
     private double paramW;
     private double paramW2;
