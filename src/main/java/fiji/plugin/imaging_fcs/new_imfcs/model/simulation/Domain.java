@@ -6,6 +6,7 @@ package fiji.plugin.imaging_fcs.new_imfcs.model.simulation;
  * whether a given particle is within this domain.
  */
 public class Domain {
+    // All the domain fields are final as a domain is fixed in space, it will not move after instantiation.
     public final double x;
     public final double y;
     public final double radius;

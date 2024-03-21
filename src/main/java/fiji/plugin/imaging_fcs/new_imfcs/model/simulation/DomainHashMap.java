@@ -35,6 +35,7 @@ public class DomainHashMap {
         long ix = (long) Math.floor(x / cellSize);
         long iy = (long) Math.floor(y / cellSize);
 
+        // The GRID_DIMENSION_OFFSET is used to prevent collision
         return ix + iy * GRID_DIMENSION_OFFSET;
     }
 

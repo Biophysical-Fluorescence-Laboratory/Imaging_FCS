@@ -82,6 +82,7 @@ public class SimulationController {
             simulationsRunning = 0;
             numSimulationsErrors = 0;
 
+            // Activate the buttons again
             simulationView.enableBtnStopSimulation(true);
             simulationView.enableBtnSimulate(false);
             simulationView.enableBtnBatch(false);
@@ -95,7 +96,10 @@ public class SimulationController {
      */
     public void onBatchSimulationComplete() {
         simulationsRunning--;
+
+        // All simulations finished running, it can now log to the user
         if (simulationsRunning <= 0) {
+            // Activate the buttons again
             simulationView.enableBtnStopSimulation(false);
             simulationView.enableBtnSimulate(true);
             simulationView.enableBtnBatch(true);
