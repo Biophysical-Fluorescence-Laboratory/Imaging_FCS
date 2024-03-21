@@ -44,7 +44,7 @@ import static fiji.plugin.imaging_fcs.version.VERSION.SDK2_VERSION;
 
 public class AndorSDK2v3 {
 
-    // NOTE: 
+    // NOTE:
     // DCR_VERSION of the used SDK2 library.
     // DCR_VERSION must be updated when .dll/.so files are changed so that they are placed in a new sub-folder named after this DCR_VERSION num in Fiji.App > jars.
     private static void printlogthread(String msg) {
@@ -71,10 +71,10 @@ public class AndorSDK2v3 {
     //SDK2
     private static final String ATMCD64D = "atmcd64d.dll"; //sdk2
 
-    //dll dependencies 
+    //dll dependencies
     private static final String UCRTBASED = "ucrtbased.dll"; //dependencies parent
     private static final String KERNEL32 = "kernel32.dll"; //dependencies parent
-    private static final String VCRUNTIME140D = "vcruntime140d.dll"; //dependencies parent 
+    private static final String VCRUNTIME140D = "vcruntime140d.dll"; //dependencies parent
     private static final String VCRUNTIME140_1D = "vcruntime140_1d.dll"; //dependencies parent
     private static final String MSVCP140D = "msvcp140d.dll"; //dependencies parent
 
@@ -270,7 +270,7 @@ public class AndorSDK2v3 {
             File curr_dir = new File(System.getProperty("java.class.path"));
             File Fiji_jars_dir = curr_dir.getAbsoluteFile().getParentFile();
 
-            //Checking if 5 dll(s) present on Windows/System32 
+            //Checking if 5 dll(s) present on Windows/System32
             printlogdll("-------------START Checking if dlls are present in Windows/System32");
 
             for (int i = 0; i < dllToBeChecked.length; i++) {
@@ -429,7 +429,7 @@ public class AndorSDK2v3 {
 
     public static native int SetFanModeSDK2(int iFan);
 
-    public static native void DoCameraAcquisitionSDK2(); //Trigger acquisition 
+    public static native void DoCameraAcquisitionSDK2(); //Trigger acquisition
 
     public static native void setStopMechanismSDK2(boolean isStopCalled);
 
@@ -641,7 +641,7 @@ public class AndorSDK2v3 {
                         Common.scimp *= 100;// transfrom this into %tage to run ImageJ command
                         IJ.run(Common.imp, "Original Scale", "");
                         IJ.run(Common.imp, "Set... ", "zoom=" + Common.scimp + " x=" + (int) Math.floor(Common.oWidth / 2) + " y=" + (int) Math.floor(Common.oHeight / 2));
-                        IJ.run("In [+]", ""); 	// This needs to be used since ImageJ 1.48v to set the window to the right size; 
+                        IJ.run("In [+]", ""); 	// This needs to be used since ImageJ 1.48v to set the window to the right size;
                         // this might be a bug and is an ad hoc solution for the moment; before only the "Set" command was necessary
 
                         Common.impcan.setFocusable(true);
@@ -736,7 +736,7 @@ public class AndorSDK2v3 {
 
                 Thread.currentThread().setName("runThread_noncumulativeV3");
 
-                final int noThread = 3; // number of working threads 
+                final int noThread = 3; // number of working threads
                 final int fbuffersize = Common.size_a * Common.size_b; // number of frame
 
                 // Control flow reset, buffer reset
@@ -795,7 +795,7 @@ public class AndorSDK2v3 {
 
                 Thread.currentThread().setName("runThread_noncumulativeV3");
 
-                final int noThread = 5; // number of working threads 
+                final int noThread = 5; // number of working threads
                 final int fbuffersize = Common.size_a * Common.size_b; // number of frame
 
                 // Control flow reset, buffer reset
@@ -1000,7 +1000,7 @@ public class AndorSDK2v3 {
 
         Row row;
 
-        //write Metadata 
+        //write Metadata
         int t;
         int nopm = 26;
         String[] metadatatag = new String[nopm];

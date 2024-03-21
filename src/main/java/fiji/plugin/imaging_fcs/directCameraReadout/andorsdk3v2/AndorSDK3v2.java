@@ -45,7 +45,7 @@ import static fiji.plugin.imaging_fcs.version.VERSION.SDK3_VERSION;
 
 public class AndorSDK3v2 {
 
-    // NOTE: 
+    // NOTE:
     // DCR_VERSION of the used SDK3 library.
     // DCR_VERSION must be updated when .dll/.so files are changed so that they are placed in a new sub-folder named after this DCR_VERSION num in Fiji.App > jars.
 //    public static final String SDK3_VERSION = "v1_1_2";
@@ -165,7 +165,7 @@ public class AndorSDK3v2 {
             File curr_dir = new File(System.getProperty("java.class.path"));
             File Fiji_jars_dir = curr_dir.getAbsoluteFile().getParentFile();
 
-            //Checking if 18 dll(s) present on Windows/System32 
+            //Checking if 18 dll(s) present on Windows/System32
             printlogdll("-------------START Checking if dlls are present in Windows/System32");
 
             for (int i = 0; i < dllToBeChecked.length; i++) {
@@ -561,7 +561,7 @@ public class AndorSDK3v2 {
                         Common.scimp *= 100;// transfrom this into %tage to run ImageJ command
                         IJ.run(Common.imp, "Original Scale", "");
                         IJ.run(Common.imp, "Set... ", "zoom=" + Common.scimp + " x=" + (int) Math.floor(Common.oWidth / 2) + " y=" + (int) Math.floor(Common.oHeight / 2));
-                        IJ.run("In [+]", ""); 	// This needs to be used since ImageJ 1.48v to set the window to the right size; 
+                        IJ.run("In [+]", ""); 	// This needs to be used since ImageJ 1.48v to set the window to the right size;
                         // this might be a bug and is an ad hoc solution for the moment; before only the "Set" command was necessary
 
                         Common.impcan.setFocusable(true);
@@ -655,7 +655,7 @@ public class AndorSDK3v2 {
 
                 Thread.currentThread().setName("runThread_noncumulativeV3");
 
-                final int noThread = 3; // number of working threads 
+                final int noThread = 3; // number of working threads
                 final int fbuffersize = Common.size_a * Common.size_b; // number of frame
 
                 // Control flow reset, buffer reset
@@ -712,7 +712,7 @@ public class AndorSDK3v2 {
             protected Void doInBackground() throws Exception {
                 Thread.currentThread().setName("runThread_noncumulativeV3");
 
-                final int noThread = 5; // number of working threads  
+                final int noThread = 5; // number of working threads
                 final int fbuffersize = Common.size_a * Common.size_b; // number of frame
 
                 // Control flow reset, buffer reset
@@ -901,7 +901,7 @@ public class AndorSDK3v2 {
 
         Row row;
 
-        //write Metadata 
+        //write Metadata
         int t;
         int nopm = 41;
         String[] metadatatag = new String[nopm];

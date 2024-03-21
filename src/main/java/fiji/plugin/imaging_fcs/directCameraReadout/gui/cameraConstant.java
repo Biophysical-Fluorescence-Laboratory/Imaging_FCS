@@ -180,7 +180,7 @@ public class cameraConstant {
     public static class Common_Photometrics {
 
         public final static int minHeight = 8;
-        
+
         // Readout speed
         public static int readoutSpeedIndex; //
         public static int readoutPortIndex;//

@@ -78,7 +78,7 @@ public class DisplayImage {
 
         }
 
-      
+
     }
 
     private int[] fillzero(int bin, int maxdimensionX, int maxdimensionY) {
@@ -109,7 +109,7 @@ public class DisplayImage {
 
             if (isPerformROISelection) {
                 DisplayImageObj.performROIselection(DirectCapturePanel.Common.oLeft - 1, DirectCapturePanel.Common.oTop - 1, DirectCapturePanel.Common.oWidth, DirectCapturePanel.Common.oHeight);
-            } 
+            }
             DisplayImageObj.impwin.setVisible(true);
 
         } else {
@@ -141,7 +141,7 @@ public class DisplayImage {
 
         IJ.run(imp, "Original Scale", "");
         IJ.run(imp, "Set... ", "zoom=" + scimp + " x=" + (int) Math.floor(sizeX / 2) + " y=" + (int) Math.floor(sizeX / 2));
-        IJ.run("In [+]", ""); 	// This needs to be used since ImageJ 1.48v to set the window to the right size; 
+        IJ.run("In [+]", ""); 	// This needs to be used since ImageJ 1.48v to set the window to the right size;
         // this might be a bug and is an ad hoc solution for the moment; before only the "Set" command was necessary
 
         impcan.setFocusable(true);
@@ -264,7 +264,7 @@ public class DisplayImage {
 
     MouseListener impcanDisplayImageMouseUsed = new MouseListener() {
         @Override
-        public void mouseClicked(MouseEvent e) {// update acquisition AOIs namely left and top 
+        public void mouseClicked(MouseEvent e) {// update acquisition AOIs namely left and top
 
             if (DirectCapturePanel.Common.isAcquisitionRunning) { // Catch to prevent user changing ROI selector window while camera is running
                 performROIselection(DirectCapturePanel.Common.oLeft - 1, DirectCapturePanel.Common.oTop - 1, DirectCapturePanel.Common.oWidth, DirectCapturePanel.Common.oHeight);

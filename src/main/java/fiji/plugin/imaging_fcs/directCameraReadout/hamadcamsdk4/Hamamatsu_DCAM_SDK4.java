@@ -47,7 +47,7 @@ import static fiji.plugin.imaging_fcs.version.VERSION.HAMASDK_VERSION;
 
 public class Hamamatsu_DCAM_SDK4 {
 
-    // NOTE: 
+    // NOTE:
     // DCR_VERSION of the used SDK4 library.
     // DCR_VERSION must be updated when .dll/.so files are changed so that they are placed in a new sub-folder named after this DCR_VERSION num in Fiji.App > jars.
     private static void printlog(String msg) {
@@ -107,7 +107,7 @@ public class Hamamatsu_DCAM_SDK4 {
             File curr_dir = new File(System.getProperty("java.class.path"));
             File Fiji_jars_dir = curr_dir.getAbsoluteFile().getParentFile();
 
-            //Checking if 18 dll(s) present on Windows/System32 
+            //Checking if 18 dll(s) present on Windows/System32
             printlogdll("-------------START Checking if dlls are present in Windows/System32");
 
             for (int i = 0; i < dllToBeChecked.length; i++) {
@@ -292,7 +292,7 @@ public class Hamamatsu_DCAM_SDK4 {
                             String html = "<html><body width='%1s'><h3>Missing DCAM-API</h3>"
                                     + "<p>To run Hamamatsu camera, please install dcam-api.<br><br>"
                                     + "<p>Link to dcam-api installer: https://dcam-api.com/downloads/";
-                            // change to alter the width 
+                            // change to alter the width
                             int w = 175;
 
                             JOptionPane.showMessageDialog(null, String.format(html, w, w));
@@ -316,7 +316,7 @@ public class Hamamatsu_DCAM_SDK4 {
 
     public native int sayHello();
 
-    public static native int isHAMAconnectedSDK4(); //init and check if camera is connected// //0 - good to go; 1 - no camera; 2 - other error; 3 - missing dependent libraries 
+    public static native int isHAMAconnectedSDK4(); //init and check if camera is connected// //0 - good to go; 1 - no camera; 2 - other error; 3 - missing dependent libraries
 
     public static native String GetModelSDK4(); // will init and uninit before getting camera model
 
@@ -432,7 +432,7 @@ public class Hamamatsu_DCAM_SDK4 {
                         Common.scimp *= 100;// transfrom this into %tage to run ImageJ command
                         IJ.run(Common.imp, "Original Scale", "");
                         IJ.run(Common.imp, "Set... ", "zoom=" + Common.scimp + " x=" + (int) Math.floor(Common.oWidth / 2) + " y=" + (int) Math.floor(Common.oHeight / 2));
-                        IJ.run("In [+]", ""); 	// This needs to be used since ImageJ 1.48v to set the window to the right size; 
+                        IJ.run("In [+]", ""); 	// This needs to be used since ImageJ 1.48v to set the window to the right size;
                         // this might be a bug and is an ad hoc solution for the moment; before only the "Set" command was necessary
 
                         Common.impcan.setFocusable(true);
@@ -526,7 +526,7 @@ public class Hamamatsu_DCAM_SDK4 {
             protected Void doInBackground() throws Exception {
                 Thread.currentThread().setName("runThread_noncumulativeV3");
 
-                final int noThread = 3; // number of working threads 
+                final int noThread = 3; // number of working threads
                 final int fbuffersize = Common.size_a * Common.size_b; // number of frame
 
                 // Control flow reset, buffer reset
@@ -585,7 +585,7 @@ public class Hamamatsu_DCAM_SDK4 {
             protected Void doInBackground() throws Exception {
                 Thread.currentThread().setName("runThread_noncumulativeV3");
 
-                final int noThread = 5; // number of working threads 
+                final int noThread = 5; // number of working threads
                 final int fbuffersize = Common.size_a * Common.size_b; // number of frame
 
                 // Control flow reset, buffer reset
@@ -774,7 +774,7 @@ public class Hamamatsu_DCAM_SDK4 {
 
         Row row;
 
-        //write Metadata 
+        //write Metadata
         int t;
         int nopm = 34;
         String[] metadatatag = new String[nopm];

@@ -47,7 +47,7 @@ public class TimeTaggedStorage {
     private void initialize() {
 
         /* Example of JSON data structure
-    
+
             {
             "other remarks":{"2000": "some remarks"},
             "calibration type":{
@@ -58,7 +58,7 @@ public class TimeTaggedStorage {
                                 "TIRF focus":[[X,X],[X,X],...]
                                 }
             }
-    
+
          */
         map = new HashMap<>();
         map21 = new HashMap<>();

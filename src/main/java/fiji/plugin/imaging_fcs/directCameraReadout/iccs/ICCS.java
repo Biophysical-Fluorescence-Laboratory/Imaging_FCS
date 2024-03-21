@@ -544,9 +544,9 @@ public class ICCS {
         IJ.run(impICCS, "HiLo", "");	// apply LUT to correlelogram
         IJ.run(impICCS, "Original Scale", ""); 	//first set image to original scale
         IJ.run(impICCS, "Set... ", "zoom=" + scimp + " x=" + (int) Math.floor(sizeX / 2) + " y=" + (int) Math.floor(sizeY / 2));//then zoom to fit within application
-        IJ.run("In [+]", ""); 	// This needs to be used since ImageJ 1.48v to set the window to the right size; 
+        IJ.run("In [+]", ""); 	// This needs to be used since ImageJ 1.48v to set the window to the right size;
         // this might be a bug and is an ad hoc solution for the moment; before only the "Set" command was necessary
-        IJ.run(impICCS, "Enhance Contrast", "saturated=0.35");	//autoscaling the contrast for slice 1 
+        IJ.run(impICCS, "Enhance Contrast", "saturated=0.35");	//autoscaling the contrast for slice 1
     }
 
     private void plotScatterPearsonCenterPix(Rectangle rect) {

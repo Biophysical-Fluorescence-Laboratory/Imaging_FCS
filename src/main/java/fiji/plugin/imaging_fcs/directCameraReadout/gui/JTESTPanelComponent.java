@@ -126,7 +126,7 @@ public class JTESTPanelComponent extends JFrame {
     ActionListener btnTest4Pressed = (ActionEvent event) -> {
 //        SystemInfo.explicitGC();
 //        long time = System.nanoTime();
-//        /* 
+//        /*
 //            Excplicit GC
 //         */
 //        Common.bufferArray1D = null;
@@ -205,13 +205,13 @@ public class JTESTPanelComponent extends JFrame {
 //            if (DirectCapturePanel.$camera.equals("EVOLVE- 512")) {
 //                IJ.log("mydata1: " + Photometrics_PVCAM_SDK.debugMyData1PVCAM());
 //                IJ.log("mydata2: " + Photometrics_PVCAM_SDK.debugMyData2PVCAM());
-//                
+//
 //                IJ.log("CPP time elapsed total: " + Photometrics_PVCAM_SDK.getDoubleValuePVCAM("CPPtime1"));
 //                IJ.log("CPP time elapsed setparameter: " + Photometrics_PVCAM_SDK.getDoubleValuePVCAM("CPPtime2"));
 //                IJ.log("CPP average uns16 to float transfer: " + Photometrics_PVCAM_SDK.getDoubleValuePVCAM("CPPtime3"));
 //                IJ.log("CPP average JNI transfer: " + Photometrics_PVCAM_SDK.getDoubleValuePVCAM("CPPtime4"));
 //                IJ.log("CPP average uns16tofloat + JNI: " + Photometrics_PVCAM_SDK.getDoubleValuePVCAM("CPPtime5"));
-//                        
+//
 //                IJ.log("CPP exposuretime: " + Photometrics_PVCAM_SDK.getDoubleValuePVCAM("exposuretime"));
 //                IJ.log("CPP frametime: " + Photometrics_PVCAM_SDK.getDoubleValuePVCAM("frametime"));
 //                IJ.log("CPP width: " + Photometrics_PVCAM_SDK.getDoubleValuePVCAM("width"));
@@ -219,12 +219,12 @@ public class JTESTPanelComponent extends JFrame {
 //                IJ.log("CPP left: " + Photometrics_PVCAM_SDK.getDoubleValuePVCAM("left"));
 //                IJ.log("CPP top: " + Photometrics_PVCAM_SDK.getDoubleValuePVCAM("top"));
 //                IJ.log("CPP incamerabin: " + Photometrics_PVCAM_SDK.getDoubleValuePVCAM("incamerabin"));
-//                
+//
 //                IJ.log("Detector dim X: " + Photometrics_PVCAM_SDK.GetDetectorDimPVCAM()[0]);
 //                IJ.log("Detector dim Y: " + Photometrics_PVCAM_SDK.GetDetectorDimPVCAM()[1]);
 //                IJ.log("Model: " + Photometrics_PVCAM_SDK.GetModelPVCAM());
 //                IJ.log("Cam name: " + Photometrics_PVCAM_SDK.GetCameraNamePVCAM());
-//                
+//
 //            }
 //
 //            IJ.log("isSaveDone: " + Common.isSaveDone);
