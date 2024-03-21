@@ -14,54 +14,40 @@ import static fiji.plugin.imaging_fcs.new_imfcs.view.ButtonFactory.createJToggle
 import static fiji.plugin.imaging_fcs.new_imfcs.view.TextFieldFactory.createTextField;
 import static fiji.plugin.imaging_fcs.new_imfcs.view.UIUtils.createJLabel;
 
+/**
+ * The SimulationView class extends JFrame and is responsible for creating the GUI for the simulation panel.
+ * It initializes and displays various UI components like buttons, text fields, and combo boxes that
+ * allow users to input simulation parameters and control the simulation process.
+ */
 public class SimulationView extends JFrame {
+    // Constants
     private static final GridLayout SIMULATION_LAYOUT = new GridLayout(16, 4);
     private static final Point SIMULATION_LOCATION = new Point(
             Constants.MAIN_PANEL_POS.x + Constants.MAIN_PANEL_DIM.width + 10, 125);
     private static final Dimension SIMULATION_DIM = new Dimension(370, 320);
-    // Controller
+
+    // References to the controller and the model
     private final SimulationController controller;
-    // model
     private final SimulationModel model;
 
     // ComboBoxes
     public JComboBox<String> cbMode;
     // TextFields
-    private JTextField tfSeed;
-    private JTextField tfNumParticle;
-    private JTextField tfCPS;
-    private JTextField tfTauBleach;
-    private JTextField tfPixelNum;
-    private JTextField tfExtensionFactor;
-    private JTextField tfNumFrames;
-    private JTextField tfFrameTime;
-    private JTextField tfStepsPerFrame;
-    private JTextField tfCurrentStepSize;
-    private JTextField tfD1;
-    private JTextField tfDoutDinRatio;
-    private JTextField tfD2;
-    private JTextField tfF2;
-    private JTextField tfD3;
-    private JTextField tfF3;
-    private JTextField tfKon;
-    private JTextField tfKoff;
-    private JTextField tfCameraOffset;
-    private JTextField tfCameraNoiseFactor;
-    private JTextField tfBleachRadius;
-    private JTextField tfBleachFrame;
-    private JTextField tfDomainRadius;
-    private JTextField tfDomainDensity;
-    private JTextField tfPin;
-    private JTextField tfPout;
-    private JTextField tfMeshworkSize;
-    private JTextField tfHopProbability;
+    private JTextField tfSeed, tfNumParticle, tfCPS, tfTauBleach, tfPixelNum, tfExtensionFactor, tfNumFrames,
+            tfFrameTime, tfStepsPerFrame, tfCurrentStepSize, tfD1, tfDoutDinRatio, tfD2, tfF2, tfD3, tfF3, tfKon,
+            tfKoff, tfCameraOffset, tfCameraNoiseFactor, tfBleachRadius, tfBleachFrame, tfDomainRadius, tfDomainDensity,
+            tfPin, tfPout, tfMeshworkSize, tfHopProbability;
 
     // buttons
-    private JButton btnSimulate;
-    private JButton btnBatchSim;
-    private JButton btnStopSimulation;
+    private JButton btnSimulate, btnBatchSim, btnStopSimulation;
     private JToggleButton tbSimTrip;
 
+    /**
+     * Constructor for SimulationView. Initializes the UI components and sets up the controller and model.
+     *
+     * @param controller The SimulationController that handles actions performed on the UI.
+     * @param model      The SimulationModel that holds the data and state of the simulation.
+     */
     public SimulationView(SimulationController controller, SimulationModel model) {
         super("Simulation Panel");
         this.controller = controller;
@@ -69,6 +55,9 @@ public class SimulationView extends JFrame {
         initializeUI();
     }
 
+    /**
+     * Initializes the UI components and configures the layout of the simulation window.
+     */
     private void initializeUI() {
         configureWindow();
         initializeComboBoxes();
@@ -84,6 +73,9 @@ public class SimulationView extends JFrame {
         addComponentsToFrame();
     }
 
+    /**
+     * Configures basic window properties such as size, location, and behavior on close.
+     */
     private void configureWindow() {
         setFocusable(true);
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -93,12 +85,18 @@ public class SimulationView extends JFrame {
         setResizable(false);
     }
 
+    /**
+     * Initializes the combo boxes and sets up their action listeners.
+     */
     private void initializeComboBoxes() {
         cbMode = new JComboBox<>(new String[]{
-                "2D (free)", "2D (domains)", "2D (mesh)", "2D (dom+mesh)", "3D (free)"});
+                "2D (free)", "2D (domains)", "2D (mesh)", "3D (free)"});
         cbMode.addActionListener(controller.cbModeChanged());
     }
 
+    /**
+     * Initializes text fields with model data and focus listeners for updating model values.
+     */
     private void initializeTextFields() {
         tfSeed = createTextField(model.getSeed(), "", createFocusListener(model::setSeed));
         tfNumParticle = createTextField(model.getNumParticles(), "", createFocusListener(model::setNumParticles));
@@ -110,26 +108,29 @@ public class SimulationView extends JFrame {
         tfFrameTime = createTextField(model.getFrameTime(), "", createFocusListener(model::setFrameTime));
         tfStepsPerFrame = createTextField(model.getStepsPerFrame(), "", createFocusListener(model::setStepsPerFrame));
         tfCurrentStepSize = createTextField("20", "");
-        tfD1 = createTextField(model.getD1(), "", createFocusListener(model::setD1));
+        tfD1 = createTextField(model.getD1Interface(), "", createFocusListener(model::setD1));
         tfDoutDinRatio = createTextField(model.getDoutDinRatio(), "", createFocusListener(model::setDoutDinRatio));
-        tfD2 = createTextField(model.getD2(), "", createFocusListener(model::setD2));
+        tfD2 = createTextField(model.getD2Interface(), "", createFocusListener(model::setD2));
         tfF2 = createTextField(model.getF2(), "", createFocusListener(model::setF2));
-        tfD3 = createTextField(model.getD3(), "", createFocusListener(model::setD3));
+        tfD3 = createTextField(model.getD3Interface(), "", createFocusListener(model::setD3));
         tfF3 = createTextField(model.getF3(), "", createFocusListener(model::setF3));
         tfKon = createTextField(model.getKon(), "", createFocusListener(model::setKon));
         tfKoff = createTextField(model.getKoff(), "", createFocusListener(model::setKoff));
         tfCameraOffset = createTextField(model.getCameraOffset(), "", createFocusListener(model::setCameraOffset));
         tfCameraNoiseFactor = createTextField(model.getCameraNoiseFactor(), "", createFocusListener(model::setCameraNoiseFactor));
-        tfBleachRadius = createTextField(model.getBleachRadius(), "", createFocusListener(model::setBleachRadius));
+        tfBleachRadius = createTextField(model.getBleachRadiusInterface(), "", createFocusListener(model::setBleachRadius));
         tfBleachFrame = createTextField(model.getBleachFrame(), "", createFocusListener(model::setBleachFrame));
-        tfDomainRadius = createTextField(model.getDomainRadius(), "", createFocusListener(model::setDomainRadius));
+        tfDomainRadius = createTextField(model.getDomainRadiusInterface(), "", createFocusListener(model::setDomainRadius));
         tfDomainDensity = createTextField(model.getDomainDensity(), "", createFocusListener(model::setDomainDensity));
         tfPin = createTextField(model.getPin(), "", createFocusListener(model::setPin));
         tfPout = createTextField(model.getPout(), "", createFocusListener(model::setPout));
-        tfMeshworkSize = createTextField(model.getMeshWorkSize(), "", createFocusListener(model::setMeshWorkSize));
+        tfMeshworkSize = createTextField(model.getMeshWorkSizeInterface(), "", createFocusListener(model::setMeshWorkSize));
         tfHopProbability = createTextField(model.getHopProbability(), "", createFocusListener(model::setHopProbability));
     }
 
+    /**
+     * Initialize buttons and set their listeners.
+     */
     private void initializeButtons() throws Exception {
         btnSimulate = createJButton("Simulate", "", null, controller.btnSimulatePressed());
         btnBatchSim = createJButton("Batch", "Run multiple simulations", null, controller.btnBatchSimPressed());
@@ -138,6 +139,11 @@ public class SimulationView extends JFrame {
         tbSimTrip = createJToggleButton("Triplet off", "", null, controller.tbSimTripPressed());
     }
 
+    /**
+     * Disables specific fields and buttons upon initialization
+     * This method is crucial for ensuring that users do not interact with parts of the UI that should be
+     * inaccessible due to the default configuration.
+     */
     private void disable_fields() {
         tfCurrentStepSize.setEnabled(false);
         btnStopSimulation.setEnabled(false);
@@ -147,21 +153,41 @@ public class SimulationView extends JFrame {
         domainSetEnable(false);
     }
 
+    /**
+     * Toggles the enable state of triplet-related input fields.
+     *
+     * @param b true to enable, false to disable.
+     */
     public void tripletSetEnable(boolean b) {
         tfKon.setEnabled(b);
         tfKoff.setEnabled(b);
     }
 
+    /**
+     * Toggles the enable state of bleaching-related input fields.
+     *
+     * @param b true to enable, false to disable.
+     */
     public void bleachSetEnable(boolean b) {
         tfBleachRadius.setEnabled(b);
         tfBleachFrame.setEnabled(b);
     }
 
+    /**
+     * Toggles the enable state of meshwork-related input fields.
+     *
+     * @param b true to enable, false to disable.
+     */
     public void meshSetEnable(boolean b) {
         tfMeshworkSize.setEnabled(b);
         tfHopProbability.setEnabled(b);
     }
 
+    /**
+     * Toggles the enable state of domain-related input fields.
+     *
+     * @param b true to enable, false to disable.
+     */
     public void domainSetEnable(boolean b) {
         tfDoutDinRatio.setEnabled(b);
         tfDomainRadius.setEnabled(b);
@@ -170,6 +196,11 @@ public class SimulationView extends JFrame {
         tfPout.setEnabled(b);
     }
 
+    /**
+     * Adds UI components to the frame, organizing them into rows and setting their labels and tooltips.
+     * This method systematically arranges all the interactive and informational elements of the simulation panel,
+     * facilitating user interaction and providing necessary details about each simulation parameter.
+     */
     private void addComponentsToFrame() {
         // row 1
         add(createJLabel("Mode", ""));
@@ -276,5 +307,32 @@ public class SimulationView extends JFrame {
         add(btnBatchSim);
         add(btnStopSimulation);
         add(btnSimulate);
+    }
+
+    /**
+     * Toggles the enable state of the simulate button.
+     *
+     * @param b true to enable, false to disable.
+     */
+    public void enableBtnSimulate(boolean b) {
+        btnSimulate.setEnabled(b);
+    }
+
+    /**
+     * Toggles the enable state of the batch button.
+     *
+     * @param b true to enable, false to disable.
+     */
+    public void enableBtnBatch(boolean b) {
+        btnBatchSim.setEnabled(b);
+    }
+
+    /**
+     * Toggles the enable state of the stop simulation button.
+     *
+     * @param b true to enable, false to disable.
+     */
+    public void enableBtnStopSimulation(boolean b) {
+        btnStopSimulation.setEnabled(b);
     }
 }

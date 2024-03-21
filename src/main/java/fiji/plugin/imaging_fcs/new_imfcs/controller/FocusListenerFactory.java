@@ -47,7 +47,7 @@ public class FocusListenerFactory {
                 JTextField textField = (JTextField) ev.getComponent();
                 try {
                     setter.accept(textField.getText());
-                } catch (NumberFormatException e) {
+                } catch (Exception e) {
                     // The text field was not successfully parsed, a message is shown and the value is restored
                     IJ.showMessage("Error", "Incorrect format for this field");
                     textField.setText(memory);
