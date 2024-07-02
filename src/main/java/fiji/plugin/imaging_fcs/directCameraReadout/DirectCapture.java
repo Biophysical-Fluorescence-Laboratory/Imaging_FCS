@@ -1,6 +1,6 @@
 /*
  *  Supported camera
- *  1) Andor iXon "DU860_BV" "DU888_BV" "DU897_BV", Sona "SONA-4BV11"  
+ *  1) Andor iXon "DU860_BV" "DU888_BV" "DU897_BV", Sona "SONA-4BV11"
  *  2) Photometrics "EVOLVE- 512" "GS144BSI" "TMP-Kinetix"
  *  3) Hamamatsu Orca Flash 4.0 "C11440-22CU" "C11440-22C" "C13440-20CU" "C13440-20C" "C15550-20UP"
  */
@@ -28,7 +28,7 @@ import static fiji.plugin.imaging_fcs.version.VERSION.*;
 
 public class DirectCapture {
 
-    private int isgpupresent;
+    private boolean useGpu;
 
     private String UserSelectedCameraModel;
     private String[] CameraModelAvail = new String[4]; //arraylist would be good
@@ -69,8 +69,8 @@ public class DirectCapture {
     private final int DCDimX = 300;
     private final int DCDimY = 100;
 
-    public DirectCapture(int isgpupresent) {
-        this.isgpupresent = isgpupresent;
+    public DirectCapture(boolean useGpu) {
+        this.useGpu = useGpu;
         System.out.println("Direct Camera Readout: " + DCR_VERSION);
         System.out.println("SDK2: " + SDK2_VERSION + " loaded " + AndorSDK2v3.isSDKload());
         System.out.println("SDK3: " + SDK3_VERSION + " loaded " + AndorSDK3v2.isSDKload());
@@ -106,7 +106,7 @@ public class DirectCapture {
                             Common.$cameraHeadModel = AndorSDK2v3.getHeadModelSDK2();
                             ORpanelobj = new DirectCapturePanel().new ORpanel(CameraType[i]);
                             DirectCapturePanel.JDirectCapturepanelComponentPanel.setVisible(true);
-                            Common.isgpupresent = isgpupresent;
+                            Common.useGpu = useGpu;
                         }
                         break;
 
@@ -132,7 +132,7 @@ public class DirectCapture {
                             Common.$cameraHeadModel = AndorSDK2v3.getHeadModelSDK2();
                             ORpanelobj = new DirectCapturePanel().new ORpanel(CameraType[i]);
                             DirectCapturePanel.JDirectCapturepanelComponentPanel.setVisible(true);
-                            Common.isgpupresent = isgpupresent;
+                            Common.useGpu = useGpu;
                         }
                         break;
 
@@ -158,7 +158,7 @@ public class DirectCapture {
                             Common.$cameraHeadModel = AndorSDK2v3.getHeadModelSDK2();
                             ORpanelobj = new DirectCapturePanel().new ORpanel(CameraType[i]);
                             DirectCapturePanel.JDirectCapturepanelComponentPanel.setVisible(true);
-                            Common.isgpupresent = isgpupresent;
+                            Common.useGpu = useGpu;
                         }
                         break;
 
@@ -184,7 +184,7 @@ public class DirectCapture {
                             Common.$cameraHeadModel = AndorSDK3v2.GetStringValueSDK3("CameraModel");
                             ORpanelobj = new DirectCapturePanel().new ORpanel(CameraType[i]);
                             DirectCapturePanel.JDirectCapturepanelComponentPanel.setVisible(true);
-                            Common.isgpupresent = isgpupresent;
+                            Common.useGpu = useGpu;
                         }
                         break;
 
@@ -207,7 +207,7 @@ public class DirectCapture {
                             Common.$cameraHeadModel = Hamamatsu_DCAM_SDK4.GetStringSDK4("MODEL");
                             ORpanelobj = new DirectCapturePanel().new ORpanel(CameraType[i]);
                             DirectCapturePanel.JDirectCapturepanelComponentPanel.setVisible(true);
-                            Common.isgpupresent = isgpupresent;
+                            Common.useGpu = useGpu;
                         }
                         break;
 
@@ -228,7 +228,7 @@ public class DirectCapture {
                             Common.$cameraHeadModel = Photometrics_PVCAM_SDK.GetModelPVCAM();
                             ORpanelobj = new DirectCapturePanel().new ORpanel(CameraType[i]);
                             DirectCapturePanel.JDirectCapturepanelComponentPanel.setVisible(true);
-                            Common.isgpupresent = isgpupresent;
+                            Common.useGpu = useGpu;
                         }
                         break;
                     case "none":
@@ -274,7 +274,7 @@ public class DirectCapture {
     }
 
     private void TRYmultiplecamera() {
-        //Start ixon860 
+        //Start ixon860
         if (UserSelectedCameraModel == "DU860_BV") {
             // if program alrady running iXon860
             if (isEMCCDpreviouslyConnected) {
@@ -294,7 +294,7 @@ public class DirectCapture {
                     Common.$cameraHeadModel = AndorSDK2v3.getHeadModelSDK2();
                     ORpanelobj = new DirectCapturePanel().new ORpanel(CameraType[0]);
                     DirectCapturePanel.JDirectCapturepanelComponentPanel.setVisible(true);
-                    Common.isgpupresent = isgpupresent;
+                    Common.useGpu = useGpu;
                 }
             }
         }
@@ -318,7 +318,7 @@ public class DirectCapture {
                     Common.$cameraHeadModel = AndorSDK2v3.getHeadModelSDK2();
                     ORpanelobj = new DirectCapturePanel().new ORpanel(CameraType[0]);
                     DirectCapturePanel.JDirectCapturepanelComponentPanel.setVisible(true);
-                    Common.isgpupresent = isgpupresent;
+                    Common.useGpu = useGpu;
                 }
             }
         }
@@ -342,7 +342,7 @@ public class DirectCapture {
                     Common.$cameraHeadModel = AndorSDK2v3.getHeadModelSDK2();
                     ORpanelobj = new DirectCapturePanel().new ORpanel(CameraType[0]);
                     DirectCapturePanel.JDirectCapturepanelComponentPanel.setVisible(true);
-                    Common.isgpupresent = isgpupresent;
+                    Common.useGpu = useGpu;
                 }
             }
         }
@@ -366,7 +366,7 @@ public class DirectCapture {
                     Common.$cameraHeadModel = AndorSDK3v2.GetStringValueSDK3("CameraModel");
                     ORpanelobj = new DirectCapturePanel().new ORpanel(CameraType[1]);
                     DirectCapturePanel.JDirectCapturepanelComponentPanel.setVisible(true);
-                    Common.isgpupresent = isgpupresent;
+                    Common.useGpu = useGpu;
                 }
             }
         }
@@ -384,7 +384,7 @@ public class DirectCapture {
                     Common.$cameraHeadModel = Hamamatsu_DCAM_SDK4.GetStringSDK4("MODEL");
                     ORpanelobj = new DirectCapturePanel().new ORpanel(CameraType[2]);
                     DirectCapturePanel.JDirectCapturepanelComponentPanel.setVisible(true);
-                    Common.isgpupresent = isgpupresent;
+                    Common.useGpu = useGpu;
                 }
             }
         }
@@ -402,7 +402,7 @@ public class DirectCapture {
                     Common.$cameraHeadModel = Hamamatsu_DCAM_SDK4.GetStringSDK4("MODEL");
                     ORpanelobj = new DirectCapturePanel().new ORpanel(CameraType[2]);
                     DirectCapturePanel.JDirectCapturepanelComponentPanel.setVisible(true);
-                    Common.isgpupresent = isgpupresent;
+                    Common.useGpu = useGpu;
                 }
             }
 
@@ -421,7 +421,7 @@ public class DirectCapture {
                     Common.$cameraHeadModel = Hamamatsu_DCAM_SDK4.GetStringSDK4("MODEL");
                     ORpanelobj = new DirectCapturePanel().new ORpanel(CameraType[2]);
                     DirectCapturePanel.JDirectCapturepanelComponentPanel.setVisible(true);
-                    Common.isgpupresent = isgpupresent;
+                    Common.useGpu = useGpu;
                 }
             }
         }
@@ -438,7 +438,7 @@ public class DirectCapture {
                     Common.$cameraHeadModel = Hamamatsu_DCAM_SDK4.GetStringSDK4("MODEL");
                     ORpanelobj = new DirectCapturePanel().new ORpanel(CameraType[2]);
                     DirectCapturePanel.JDirectCapturepanelComponentPanel.setVisible(true);
-                    Common.isgpupresent = isgpupresent;
+                    Common.useGpu = useGpu;
                 }
             }
         }
@@ -455,7 +455,7 @@ public class DirectCapture {
                     Common.$cameraHeadModel = Hamamatsu_DCAM_SDK4.GetStringSDK4("MODEL");
                     ORpanelobj = new DirectCapturePanel().new ORpanel(CameraType[2]);
                     DirectCapturePanel.JDirectCapturepanelComponentPanel.setVisible(true);
-                    Common.isgpupresent = isgpupresent;
+                    Common.useGpu = useGpu;
                 }
             }
         }
@@ -474,7 +474,7 @@ public class DirectCapture {
                     Common.$cameraHeadModel = Photometrics_PVCAM_SDK.GetModelPVCAM();
                     ORpanelobj = new DirectCapturePanel().new ORpanel(CameraType[3]);
                     DirectCapturePanel.JDirectCapturepanelComponentPanel.setVisible(true);
-                    Common.isgpupresent = isgpupresent;
+                    Common.useGpu = useGpu;
                 }
             }
         }
@@ -493,7 +493,7 @@ public class DirectCapture {
                     Common.$cameraHeadModel = Photometrics_PVCAM_SDK.GetModelPVCAM();
                     ORpanelobj = new DirectCapturePanel().new ORpanel(CameraType[3]);
                     DirectCapturePanel.JDirectCapturepanelComponentPanel.setVisible(true);
-                    Common.isgpupresent = isgpupresent;
+                    Common.useGpu = useGpu;
                 }
             }
         }
@@ -512,7 +512,7 @@ public class DirectCapture {
                     Common.$cameraHeadModel = Photometrics_PVCAM_SDK.GetModelPVCAM();
                     ORpanelobj = new DirectCapturePanel().new ORpanel(CameraType[3]);
                     DirectCapturePanel.JDirectCapturepanelComponentPanel.setVisible(true);
-                    Common.isgpupresent = isgpupresent;
+                    Common.useGpu = useGpu;
                 }
             }
         }

@@ -1,12 +1,12 @@
 
 /*
  * Need to be installed:
- * PVCam_3.9.0.4-PMQI_Release_Setup 
+ * PVCam_3.9.0.4-PMQI_Release_Setup
  * bundling pvcam64.dll and pvcamDDI.dll does not work
 
  * develop with PVCAM SDK 3.10.1.1
  * Tested on Photometrics Evolve 512 monochrome EMCCD camera SN A10D1033015
- * Tested on Photometrics 95B "GS144BSI" 
+ * Tested on Photometrics 95B "GS144BSI"
  * Tested on Photometrics TMP-Kinetix
  */
 package fiji.plugin.imaging_fcs.directCameraReadout.pvcamsdk;
@@ -53,7 +53,7 @@ import static fiji.plugin.imaging_fcs.directCameraReadout.gui.cameraConstant.Com
 
 public class Photometrics_PVCAM_SDK {
 
-    // NOTE: 
+    // NOTE:
     // DCR_VERSION of the used PVCAM library.
     // DCR_VERSION must be updated when .dll/.so files are changed so that they are placed in a new sub-folder named after this DCR_VERSION num in Fiji.App > jars.
     private static void printlog(String msg) {
@@ -94,7 +94,7 @@ public class Photometrics_PVCAM_SDK {
         boolean IsWindows = false;
         boolean hasError = false;
         boolean proceed = true;
-//        String[] dllToBeChecked = {PVCAM64, PVCAMDDI}; 
+//        String[] dllToBeChecked = {PVCAM64, PVCAMDDI};
         String[] dllToBeChecked = {}; //user has to install PVCAM release setup to operate Photometrics camera
         Boolean[] isDLLinSystem32 = new Boolean[dllToBeChecked.length];
         Boolean[] WriteDLL = new Boolean[dllToBeChecked.length];
@@ -118,7 +118,7 @@ public class Photometrics_PVCAM_SDK {
             File curr_dir = new File(System.getProperty("java.class.path"));
             File Fiji_jars_dir = curr_dir.getAbsoluteFile().getParentFile();
 
-            //Checking if 18 dll(s) present on Windows/System32 
+            //Checking if 18 dll(s) present on Windows/System32
             printlogdll("-------------START Checking if dlls are present in Windows/System32");
 
             for (int i = 0; i < dllToBeChecked.length; i++) {
@@ -260,7 +260,7 @@ public class Photometrics_PVCAM_SDK {
                             String html = "<html><body width='%1s'><h3>Missing PVCAM driver</h3>"
                                     + "<p>To run Photometrics camera, please install PVCAM driver .<br><br>"
                                     + "<p>Link to installer: https://www.photometrics.com/support/software-and-drivers";
-                            // change to alter the width 
+                            // change to alter the width
                             int w = 175;
 
                             JOptionPane.showMessageDialog(null, String.format(html, w, w));
@@ -316,14 +316,14 @@ public class Photometrics_PVCAM_SDK {
     //3 uns16 buffer to float array (average)
     //4 JNI transfer (average)
     //5 average transfer + JNI
-    
+
     public static native int getPortSize(); //Get available port size
-    
+
     public static native int getSpeedCount(int portIndex); //Get number of available speeds for this port
-    
+
     public static native void setPortAndSpeedPair(int portIndex, int speedIndex);
-    
-    
+
+
 
     /*- inca
     JNI END
@@ -410,7 +410,7 @@ public class Photometrics_PVCAM_SDK {
                         Common.scimp *= 100;// transfrom this into %tage to run ImageJ command
                         IJ.run(Common.imp, "Original Scale", "");
                         IJ.run(Common.imp, "Set... ", "zoom=" + Common.scimp + " x=" + (int) Math.floor(Common.oWidth / 2) + " y=" + (int) Math.floor(Common.oHeight / 2));
-                        IJ.run("In [+]", ""); 	// This needs to be used since ImageJ 1.48v to set the window to the right size; 
+                        IJ.run("In [+]", ""); 	// This needs to be used since ImageJ 1.48v to set the window to the right size;
                         // this might be a bug and is an ad hoc solution for the moment; before only the "Set" command was necessary
 
                         Common.impcan.setFocusable(true);
@@ -510,7 +510,7 @@ public class Photometrics_PVCAM_SDK {
             protected Void doInBackground() throws Exception {
                 Thread.currentThread().setName("runThread_noncumulativeV3");
 
-                final int noThread = 3; // number of working threads 
+                final int noThread = 3; // number of working threads
                 final int fbuffersize = Common.size_a * Common.size_b; // number of frame
 
                 // Control flow reset, buffer reset
@@ -569,7 +569,7 @@ public class Photometrics_PVCAM_SDK {
             protected Void doInBackground() throws Exception {
                 Thread.currentThread().setName("runThread_noncumulativeV3");
 
-                final int noThread = 5; // number of working threads  
+                final int noThread = 5; // number of working threads
                 final int fbuffersize = Common.size_a * Common.size_b; // number of frame
 
                 // Control flow reset, buffer reset
@@ -758,7 +758,7 @@ public class Photometrics_PVCAM_SDK {
 
         Row row;
 
-        //write Metadata 
+        //write Metadata
         int t;
         int nopm = 20;
         String[] metadatatag = new String[nopm];

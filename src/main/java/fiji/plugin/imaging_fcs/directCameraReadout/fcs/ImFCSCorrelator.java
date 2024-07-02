@@ -1,5 +1,5 @@
 /*
- * Remarks: Software correlator scheme adapted from ImFCS version 1.52 
+ * Remarks: Software correlator scheme adapted from ImFCS version 1.52
  *      (https://github.com/ImagingFCS/Imaging_FCS_1_52)
  *      (https://www.dbs.nus.edu.sg/lab/BFL/imfcs_image_j_plugin.html)
  */
@@ -296,13 +296,13 @@ public class ImFCSCorrelator {
     private double scimp;		// scaling factor to adjust window to an acceptable size for the user
 
     //background image
-    private boolean bgrloaded = false;	// flag to indicate whether backgroudn image was loaded by user 
+    private boolean bgrloaded = false;	// flag to indicate whether backgroudn image was loaded by user
     private double[][] bgrmean;			// mean values (pixel, row, coumn) for background file
 
     // Parameter map stack window; in this window the fitted parameters are depicted (e.g. diffusion coefficient maps)
     ImagePlus impPara1;
 
-    // zoom factor: The factor is used to determine the size of the windows on screen; this can be adapted 
+    // zoom factor: The factor is used to determine the size of the windows on screen; this can be adapted
     private final int zoomFactor = 250;
 
     // ImFCS fit panel
@@ -323,7 +323,7 @@ public class ImFCSCorrelator {
     private boolean isCalibFixScale; // setting true will remove autoscaling for 3 calibration plot: diffusion, amplitude, and intensity
     private String tempAnalysisMode; // read whether to calculate cumulative or non-cumulative CF; update parameter from GUI
 
-    // blocking curve will not be plotted by default	
+    // blocking curve will not be plotted by default
     // Plot window
     Plot iplot; //Intensity plot
     Plot acfPlot; //ACF plot
@@ -575,7 +575,7 @@ public class ImFCSCorrelator {
 
         boolean IsGPUCalculationOK = true;
 
-        if ((DirectCapturePanel.Common.isgpupresent == 1) && DirectCapturePanel.Common.RunLiveReadOutOnGPU) {
+        if (DirectCapturePanel.Common.useGpu && DirectCapturePanel.Common.RunLiveReadOutOnGPU) {
 
             // The user can only perform 2 particle fits in the GPU version.
             prepareFit();
@@ -590,7 +590,7 @@ public class ImFCSCorrelator {
         }
 
         // CPU calculations
-        if (DirectCapturePanel.Common.isgpupresent != 1 || !IsGPUCalculationOK || !DirectCapturePanel.Common.RunLiveReadOutOnGPU) {
+        if (!DirectCapturePanel.Common.useGpu || !IsGPUCalculationOK || !DirectCapturePanel.Common.RunLiveReadOutOnGPU) {
 
             Rectangle imprect = improi.getBounds();
             int startXmap = (int) Math.ceil(imprect.getX() / pixbinX);
@@ -796,7 +796,7 @@ public class ImFCSCorrelator {
     public void plotCF(Roi plotroi, int cormode, boolean map) {
 
         // plotroi: roi for which CFs are to be plotted
-        // cormode = 1: plot a single function; correlation calculated between (cpx1, cpy1) to (cpx2, cpy2) 
+        // cormode = 1: plot a single function; correlation calculated between (cpx1, cpy1) to (cpx2, cpy2)
         // cormode = 2: plot all CFs in a ROI; note that this can be ACFs or CCFs depending on the setting
         // of cfXDistance and cfYDistance
         // cormode = 3, plot ACF and CCFs for FCCS
@@ -908,14 +908,14 @@ public class ImFCSCorrelator {
             }
             acfPlot.draw();
             int num1 = 0;
-            if (DirectCapturePanel.Common.isgpupresent == 1) {
+            if (DirectCapturePanel.Common.useGpu) {
                 for (int i = 0; i < noparam; i++) {
                     if (paramfit[i]) {
                         num1++;
                     }
                 }
             }
-//            if (isgpupresent == 1) {
+//            if (useGpu) {
 //                ParametricUnivariateFunction theofunction = new FCS_3p();
 //                double[] parameters = new double[num1];
 //                num1 = 0;
@@ -1035,7 +1035,7 @@ public class ImFCSCorrelator {
 //                            plot.addPoints(lagtime, acf[cftype][x][y], Plot.LINE);
 //                            plot.setColor(java.awt.Color.RED);
 //                            int num1 = 0;
-//                            if (isgpupresent == 1) {
+//                            if (useGpu) {
 //                                for (int i = 0; i < noparam; i++) {
 //                                    if (paramfit[i]) {
 //                                        num1++;
@@ -1043,7 +1043,7 @@ public class ImFCSCorrelator {
 //                                }
 //                            }
 //
-//                            if (isgpupresent == 1) {
+//                            if (useGpu) {
 //                                double[] parameters = new double[num1];
 //                                ParametricUnivariateFunction theofunction;
 //                                theofunction = new FCS_3p();
@@ -1486,7 +1486,7 @@ public class ImFCSCorrelator {
 //                            plot.addPoints(lagtime, acf[cftype][x][y], Plot.LINE);
 //                            plot.setColor(java.awt.Color.RED);
 //                            int num1 = 0;
-//                            if (isgpupresent == 1) {
+//                            if (useGpu) {
 //                                for (int i = 0; i < noparam; i++) {
 //                                    if (paramfit[i]) {
 //                                        num1++;
@@ -1494,7 +1494,7 @@ public class ImFCSCorrelator {
 //                                }
 //                            }
 //
-//                            if (isgpupresent == 1) {
+//                            if (useGpu) {
 //                                double[] parameters = new double[num1];
 //                                ParametricUnivariateFunction theofunction;
 //                                theofunction = new FCS_3p();
@@ -1584,7 +1584,7 @@ public class ImFCSCorrelator {
     // plot the intensity traces
     public void plotIntensityTrace(Roi plotroi, int cormode) {
         // plotroi: roi for which Intensities are to be plotted
-        // cormode = 1: plot all intensity traces for a ROI for ACF 
+        // cormode = 1: plot all intensity traces for a ROI for ACF
         // cormode = 2: plot all intensity traces in a ROI; ACFs or CCFs depending on the setting of cfXDistance and cfYDistance
         // cormode = 3, plot all intensity traces for a ROI for ACF and CCFs for FCCS
 
@@ -1803,7 +1803,7 @@ public class ImFCSCorrelator {
 //
 //            if (cormode == 2) {
 //
-//                int i = chanum;						// find cutoff channel for the whole plot 
+//                int i = chanum;						// find cutoff channel for the whole plot
 //                boolean zerofound = true;
 //                while (zerofound && i > 2) {
 //                    i--;
@@ -2015,7 +2015,7 @@ public class ImFCSCorrelator {
 //                cm = (m + cshift) % 3;
 //                for (int x = 0; x < wx; x++) {
 //                    for (int y = 0; y < hy; y++) {
-//                        if (doFiltering) {											//if thresholding on, apply the thresholds	
+//                        if (doFiltering) {											//if thresholding on, apply the thresholds
 //                            if (filterPix(cm, x + xm, y + ym)) {
 //                                pixvalid[cm][x + xm][y + ym] = 1.0;
 //                            } else {
@@ -2104,11 +2104,11 @@ public class ImFCSCorrelator {
 //            IJ.run(impPara1, "Red Hot", "");	// apply "Fire" LUT
 //            IJ.run(impPara1, "Original Scale", ""); 	//first set image to original scale
 //            IJ.run(impPara1, "Set... ", "zoom=" + scimp + " x=" + (int) Math.floor(wx / 2) + " y=" + (int) Math.floor(hy / 2)); //then zoom to fit within application
-//            IJ.run("In [+]", ""); 	// This needs to be used since ImageJ 1.48v to set the window to the right size; 
+//            IJ.run("In [+]", ""); 	// This needs to be used since ImageJ 1.48v to set the window to the right size;
 //            // this might be a bug and is an ad hoc solution for the moment; before only the "Set" command was necessary
 //
 //            impPara1.setSlice(1);				// set back to slice 1 for viewing
-//            IJ.run(impPara1, "Enhance Contrast", "saturated=0.35");	//autoscaling the contrast for slice 1 
+//            IJ.run(impPara1, "Enhance Contrast", "saturated=0.35");	//autoscaling the contrast for slice 1
 //            Component[] impPara1comp = impPara1Win.getComponents();	// check which component is the scrollbar and add an AdjustmentListener
 //            ScrollbarWithLabel impPara1scrollbar;
 //            for (int i = 0; i < impPara1comp.length; i++) {
@@ -2186,7 +2186,7 @@ public class ImFCSCorrelator {
         }
     }
 
-    // calculate and fit average 
+    // calculate and fit average
     public void calcAveCF(int mode) { //mode 0-average of one functions; 1-average of 3 functions
         int mof;
         if (use2imp && plotJustCCF) {
@@ -2611,7 +2611,7 @@ public class ImFCSCorrelator {
 
         int index = 0;
         boolean resetResults = false; 								// whether Result arrays need to be reset
-        boolean proceed = true;									// whether program should proceed resetting the Results 
+        boolean proceed = true;									// whether program should proceed resetting the Results
         boolean onlySigmaOrBinChanged = true;							// whether sigma0 is the only parameter changed in the panel - PSF calibration is not reset in that case
         boolean onlyBinChanged = true;							// whether binning is the only parameter changed in the panel - diff law is not reset in that case
         String[] newPanelSettings = new String[noSettings];		// an array to temporarily hold the settings from the Panel
@@ -2873,7 +2873,7 @@ public class ImFCSCorrelator {
 //                    }
 //                }
 //            }
-            // initialize arrays required for calculations; they change with each new paramter setting				
+            // initialize arrays required for calculations; they change with each new paramter setting
             base = (int) correlatorp; 		// base = number of channels in first group
             hbase = (int) correlatorp / 2; 	// hbase = number of channels in all higher groups
             mtab = new double[chanum]; 		// number of samples for each correlation channel
@@ -2990,7 +2990,7 @@ public class ImFCSCorrelator {
     }
 
     public void obtainImage() {
-        // define array for this picture which will be used to store the results; as these arrays should stay with the window they are defined here; 
+        // define array for this picture which will be used to store the results; as these arrays should stay with the window they are defined here;
         // other changeable arrays are defined in setParameters(); however, if parameters are changed the arrays are re-initialized.
         //  chanum = (int) (16 + (Integer.parseInt($CorrelQ) - 1) * 8 + 1); 	// value of chanum based on default Q and P, used for arrays initialization
         // NOTE: calculation of chanum has been revised. It is now based on values/settings on GUI. Instead of default values as the commented line above.
@@ -3021,7 +3021,7 @@ public class ImFCSCorrelator {
 //        printlog("CCF x: " + cfXDistance + ", CCF y: " + cfYDistance);
 //        printlog("width: " + width + ", height: " + height + ", frames: " + frames + ", firstframe: " + firstframe + ", lastframe: " + lastframe + ", frametime: " + frametime);
 //        printlog("polyorder: " + polyOrder + ",bleachCorMem: " + bleachCorMem + ", binningX: " + binningX + ", binningY: " + binningY + ", correlator p: " + correlatorp + ", correlator q: " + correlatorq + ", doFit: " + doFit + ", overlap: " + overlap);
-//        printlog("isgpupresent: " + Common.isgpupresent + ", runongpu: " + Common.RunLiveReadOutOnGPU + ", impmin: " + impmin);
+//        printlog("useGpu: " + Common.useGpu + ", runongpu: " + Common.RunLiveReadOutOnGPU + ", impmin: " + impmin);
 //        printlog("--fromImFCSCPUGPU class");
     }
 
@@ -3179,7 +3179,7 @@ public class ImFCSCorrelator {
         String $bcmode = (String) bleachCorMem;
 
         // Sliding window is not selected, correlate the full intensity trace
-        datac = new double[2][num + 1];							// get the intensity data for the correlation 
+        datac = new double[2][num + 1];							// get the intensity data for the correlation
         datac[0] = getIntensity(image, px1, py1, 1, initialframe, finalframe);		// getIntensity for first pixel; performs a bleach correction if indicated in the panel
         if (px1 != px2 || py1 != py2) {						// if the two pixels are not equal (i.e. for a cross-correlation)
             datac[1] = getIntensity(image, px2, py2, 2, initialframe, finalframe);	// getIntensity for second pixel
@@ -3340,7 +3340,7 @@ public class ImFCSCorrelator {
             }
 
             del = lag[x] / currentIncrement;							// calculate the delay, i.e. the correlation time ...
-            prodnum[x] = numbin - del;								// and the number of products for that delay; //(int) (mtab[chanum-1]*(samp[chanum-1]/samp[x]));//IJ.log(Double.toString(prodnum[x])); 
+            prodnum[x] = numbin - del;								// and the number of products for that delay; //(int) (mtab[chanum-1]*(samp[chanum-1]/samp[x]));//IJ.log(Double.toString(prodnum[x]));
             for (int y = 0; y < prodnum[x]; y++) {				// calculate the ...
                 directm[x] += intblock[0][y];						// direct and ...
                 delayedm[x] += intblock[1][y + del];				// delayed monitor
@@ -3402,7 +3402,7 @@ public class ImFCSCorrelator {
 //            }
 //
 //            // Regularize variance-covariance matrix
-//            // first determine the shrinkage weight for the variance 
+//            // first determine the shrinkage weight for the variance
 //            for (int x = 1; x < chanum; x++) {			// get the variance (diagonal of covariance matrix) ...
 //                diagcovmat[x] = covmat[x][x];
 //            }
@@ -3426,7 +3426,7 @@ public class ImFCSCorrelator {
 //                numerator += tmpnum;
 //                denominator += Math.pow(covmat[x][x] - median, 2);
 //            }
-//            lamvar = Math.min(1, numerator / denominator);		// shrinkage weight for the variance	
+//            lamvar = Math.min(1, numerator / denominator);		// shrinkage weight for the variance
 //            lamvar = Math.max(lamvar, 0);
 //
 //            // determine the shrinkage weight for the covariance
@@ -3438,7 +3438,7 @@ public class ImFCSCorrelator {
 //
 //            numerator = 0;
 //            denominator = 0;
-//            double cmx;										// tmp variables to simplify ... 
+//            double cmx;										// tmp variables to simplify ...
 //            double cmy;										// ... in the loop
 //            for (int x = 1; x < chanum; x++) {			// determine the variance of the covariance
 //                tmpnum = 0;
@@ -3457,7 +3457,7 @@ public class ImFCSCorrelator {
 //            lamcov = Math.max(lamcov, 0);
 //
 //            // calculate the off-diagonal elements of the regularized variance-covariance matrix
-//            for (int x = 1; x < chanum; x++) {		// do not include zero lagtime channel as we don't use it for fitting				
+//            for (int x = 1; x < chanum; x++) {		// do not include zero lagtime channel as we don't use it for fitting
 //                for (int y = 1; y < x; y++) {
 //                    cmx = lamvar * median + (1 - lamvar) * covmat[x][x];
 //                    cmy = lamvar * median + (1 - lamvar) * covmat[y][y];
@@ -3490,7 +3490,7 @@ public class ImFCSCorrelator {
 //                impCovWin = impCov.getWindow();
 //                impCovWin.setLocation(covPosX, covPosY);
 //                IJ.run(impCov, "Set... ", "zoom=" + 200 + " x=" + 0 + " y=" + 0); //then zoom to fit within application
-//                IJ.run("In [+]", ""); 	// This needs to be used since ImageJ 1.48v to set the window to the right size; 
+//                IJ.run("In [+]", ""); 	// This needs to be used since ImageJ 1.48v to set the window to the right size;
 //            }
 //        } // end of if GLS selected statement
         Map<String, Object> map = new HashMap<>();
@@ -3514,7 +3514,7 @@ public class ImFCSCorrelator {
         int numbin = num;		// number of data points when they are binned
         int del;				// delay or correlation time expressed in lags
         int currentIncrement;
-        int crwin = 2;			// 3 points that fit the error bar overlap criterion 
+        int crwin = 2;			// 3 points that fit the error bar overlap criterion
         double sumprod = 0.0;		// sum of all intensity products; divide by num to get the average <i(n)i(n+del)>
         double sumprod2 = 0.0;	// sum of all intensity products squared; divide by num to get the average <(i(n)i(n+del))^2>
         double directm = 0.0;		// direct monitor required for ACF normalization
@@ -3573,7 +3573,7 @@ public class ImFCSCorrelator {
                     delayedm += intblock[1][y + del];					// delayed monitor
                 }
                 prodnum[0] = numbin - del; 								// number of correlation products
-                directm /= prodnum[0];									// calculate average of direct and delayed monitor, 
+                directm /= prodnum[0];									// calculate average of direct and delayed monitor,
                 delayedm /= prodnum[0];									// i.e. the average intesity <n(0)> and <n(tau)>
 
                 for (int y = 0; y < prodnum[0]; y++) {					// calculate the correlation
@@ -3602,7 +3602,7 @@ public class ImFCSCorrelator {
 
         for (int x = 0; x < blocknum; x++) {
             varblock[1][x] = Math.sqrt(varblock[1][x]);							// calculate the standard deviation
-            varblock[2][x] = varblock[1][x] / Math.sqrt(2 * (prodnum[x] - 1));	// calculate the error 
+            varblock[2][x] = varblock[1][x] / Math.sqrt(2 * (prodnum[x] - 1));	// calculate the error
             upper[x] = varblock[1][x] + varblock[2][x];							// upper and lower quartile
             lower[x] = varblock[1][x] - varblock[2][x];
         }
@@ -3717,7 +3717,7 @@ public class ImFCSCorrelator {
     public double[] getIntensity(ImagePlus image, int px, int py, int mode, int initialframe, int finalframe) {
         // image: imp form which intensity will be taken
         // px, py: coordinates of pixel within image
-        // mode: determines whether intensity for pixel 1 or pixel 2 is read, and in case of DC-FCCS, 
+        // mode: determines whether intensity for pixel 1 or pixel 2 is read, and in case of DC-FCCS,
         // whether background1 or background 2 is to be subtracted from the intensity trace
         // initialframe and finalframe provide the range of frames to be used
         int num = (finalframe - initialframe + 1);
@@ -3743,7 +3743,7 @@ public class ImFCSCorrelator {
 
         }
 
-        String $bcmode = (String) bleachCorMem;	// perform single or double exponential bleach corrections if selected 
+        String $bcmode = (String) bleachCorMem;	// perform single or double exponential bleach corrections if selected
 
 //        if ("Single Exp".equals($bcmode)) {
 //            SingleExpFit efit = new SingleExpFit();
@@ -3886,7 +3886,7 @@ public class ImFCSCorrelator {
     public double[] getIntensity(ImagePlus image, int px, int py, int mode, int initialframe, int finalframe, int image1or2) {
         // image: imp form which intensity will be taken
         // px, py: coordinates of pixel within image
-        // mode: determines whether intensity for pixel 1 or pixel 2 is read, and in case of DC-FCCS, 
+        // mode: determines whether intensity for pixel 1 or pixel 2 is read, and in case of DC-FCCS,
         // whether background1 or background 2 is to be subtracted from the intensity trace
         // initialframe and finalframe provide the range of frames to be used
 
@@ -3913,7 +3913,7 @@ public class ImFCSCorrelator {
 
         }
 
-        String $bcmode = (String) bleachCorMem;	// perform single or double exponential bleach corrections if selected 
+        String $bcmode = (String) bleachCorMem;	// perform single or double exponential bleach corrections if selected
 
 //        if ("Single Exp".equals($bcmode)) {
 //            SingleExpFit efit = new SingleExpFit();
@@ -4456,7 +4456,7 @@ public class ImFCSCorrelator {
         // corrfunc: correlation function to be inverted
         // psize: pixel size in um
         // psfwidth: psf width in um
-        // psfwidthz: z psf width in um	
+        // psfwidthz: z psf width in um
 
         int cutoffInd = chanum - 1;
         double[] msdarray = new double[chanum]; // array is defined as full length even if it is not completely used
@@ -4588,8 +4588,8 @@ public class ImFCSCorrelator {
 
         String $fitmode = fitModel;
 
-        // always start with the same initial values; the initial values are first defined in createImFCSFit(); 
-        // subsequently they are read in setParameters() from the fit window. One thus should set the prameters to 
+        // always start with the same initial values; the initial values are first defined in createImFCSFit();
+        // subsequently they are read in setParameters() from the fit window. One thus should set the prameters to
         // realistic values, otherwise the fit might not converge and hang the plugin for a long time
         paraminitval[0] = initparam[0];
         paramfit[0] = true; //TODO: currently free N, D and G(inf)
@@ -4693,7 +4693,7 @@ public class ImFCSCorrelator {
             final double[] weights = new double[len];
             final double[] initialGuess;
 
-            int i = 0;				// add data 
+            int i = 0;				// add data
             for (WeightedObservedPoint point : points) {
                 target[i] = point.getY();
                 weights[i] = point.getWeight();
@@ -4797,7 +4797,7 @@ public class ImFCSCorrelator {
                     }
                 }
 
-                chi2aveacf = 0; // initialize chi2 value for this pixel	
+                chi2aveacf = 0; // initialize chi2 value for this pixel
                 for (int i = 1; i < chanum; i++) {
                     chi2aveacf += Math.pow(resaveacf[i], 2) / (chanum - numfreefitpar - 1);	// calculate chi2 value; do not include the 0 lagtime channel which contains shot noise
                 }
@@ -4943,8 +4943,8 @@ public class ImFCSCorrelator {
 
             // w_temp and h_temp are 'intermediate' dimensions after accounting for binning.
             // example, if binning is not 1x1, w_temp x h_temp is an area smaller than win_star x hin_star.
-            // it is essentially binning with stride 1 (even if overlap is false), 
-            // so that we have all the necessary data for all scenarios of our GPU calculations. It simplifies/generalizes the indexing task in our CUDA kernels. 
+            // it is essentially binning with stride 1 (even if overlap is false),
+            // so that we have all the necessary data for all scenarios of our GPU calculations. It simplifies/generalizes the indexing task in our CUDA kernels.
             // else if binning is 1x1, w_temp = win_star and h_temp = hin_star.
             int w_temp = win_star - binningX + 1;
             int h_temp = hin_star - binningY + 1;
@@ -5014,7 +5014,7 @@ public class ImFCSCorrelator {
             boolean WithinSizeLimit = (GPUparams.w_temp * GPUparams.h_temp * GPUparams.framediff) < 96 * 96 * 50000;
 
             if (WithinSizeLimit && GpufitImFCS.isBinningMemorySufficient(GPUparams)) {
-                // Binning on GPU                
+                // Binning on GPU
                 try {
                     GpufitImFCS.calcBinning(pixels_approach2, pixels, GPUparams);
                 } catch (Exception e) {
@@ -5475,7 +5475,7 @@ public class ImFCSCorrelator {
 
         // ********************************************************************************************************************
         // Get pixels.
-        // ******************************************************************************************************************** 
+        // ********************************************************************************************************************
         float[] pixels = new float[GPUparams.w_temp * GPUparams.h_temp * GPUparams.framediff];
         if (IsGPUCalculationOK) {
             IsGPUCalculationOK = GPU_get_pixels(GPUparams, pixels, false);
@@ -5487,7 +5487,7 @@ public class ImFCSCorrelator {
 
         // ********************************************************************************************************************
         // Bleach correction
-        // ********************************************************************************************************************   
+        // ********************************************************************************************************************
         double[] bleachcorr_params = new double[GPUparams.w_temp * GPUparams.h_temp * GPUparams.bleachcorr_order];
         if (GPUparams.bleachcorr_gpu && IsGPUCalculationOK) {
             IsGPUCalculationOK = GPU_Calculate_BleachCorrection(GPUparams, pixels, bleachcorr_params);
@@ -5499,7 +5499,7 @@ public class ImFCSCorrelator {
 
         // ********************************************************************************************************************
         // Calculate ACF
-        // ********************************************************************************************************************  
+        // ********************************************************************************************************************
         // pixels1 is the output array in which the auto and cross-calculations values are stored.
         double[] pixels1 = new double[GPUparams.width * GPUparams.height * GPUparams.chanum];
         double[] blockvararray = new double[GPUparams.width * GPUparams.height * GPUparams.chanum];
@@ -5538,7 +5538,7 @@ public class ImFCSCorrelator {
                 if (doMSD) {
                     for (int x = 0; x < width; x++) {
                         for (int y = 0; y < height; y++) {
-                            if (!MSDmode) { // 2D if MSDmode is false, otherwise 3D                
+                            if (!MSDmode) { // 2D if MSDmode is false, otherwise 3D
                                 msd[0][x][y] = correlationToMSD(acf[0][x][y], pixeldimx * Math.pow(10, 6), psfsize * Math.pow(10, 6));
                             } else {
                                 msd[0][x][y] = correlationToMSD3D(acf[0][x][y], pixeldimx * Math.pow(10, 6), psfsize * Math.pow(10, 6), lsthickness * Math.pow(10, 6));
@@ -5559,7 +5559,7 @@ public class ImFCSCorrelator {
 
         // ********************************************************************************************************************
         // ACF_1D fit
-        // ********************************************************************************************************************       
+        // ********************************************************************************************************************
         if (IsGPUCalculationOK) {
             if (doFit) {
                 IsGPUCalculationOK = GPU_ACF_Fit(GPUparams, pixels1, blockvararray);

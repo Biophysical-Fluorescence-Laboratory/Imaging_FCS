@@ -35,7 +35,7 @@ import static fiji.plugin.imaging_fcs.version.VERSION.GPUFIT_VERSION;
  */
 public class GpufitImFCS {
 
-    // NOTE: 
+    // NOTE:
     // GPUFIT_VERSION of the used Gpufit library.
     // GPUFIT_VERSION must be updated when .dll/.so files are changed so that they are placed in a new sub-folder named after this GPUFIT_VERSION num in Fiji.App > jars.
     public static boolean IsOperatingSystemOK = false;
@@ -58,11 +58,11 @@ public class GpufitImFCS {
             boolean WriteToTempDir = true;
 
             // reference1: https://stackoverflow.com/questions/4691095/java-loading-dlls-by-a-relative-path-and-hide-them-inside-a-jar
-            // reference2: https://stackoverflow.com/questions/2937406/how-to-bundle-a-native-library-and-a-jni-library-inside-a-jar 
-            // NOTE: the "/" before the file name. It indicates the current directory.  
+            // reference2: https://stackoverflow.com/questions/2937406/how-to-bundle-a-native-library-and-a-jni-library-inside-a-jar
+            // NOTE: the "/" before the file name. It indicates the current directory.
             String libDirPath = null;
 
-            // reference: https://www.mkyong.com/java/how-to-detect-os-in-java-systemgetpropertyosname/                        
+            // reference: https://www.mkyong.com/java/how-to-detect-os-in-java-systemgetpropertyosname/
             if (osnamelc.contains("win")) {
                 libName = "agpufit.dll";
                 IsWindows = true;

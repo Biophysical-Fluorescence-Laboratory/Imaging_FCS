@@ -177,7 +177,7 @@ public class DirectCapturePanel {
 
     //JICCSMaps Pane
     private static JICCSPanelComponent JICCSPanelComponentPanel;
-    public static JTextField tfICCSRoi1Coord; //width, height, left, top // index start from 1   
+    public static JTextField tfICCSRoi1Coord; //width, height, left, top // index start from 1
     private static JTextField tfICCSParam; //shiftX, shiftY
     public static ICCS iccsObj1; //root
 
@@ -217,19 +217,19 @@ public class DirectCapturePanel {
         public final static int WarningCounts = 16000; //Above which shows warning to user
         public final static int upperlimitExposureTime = 1;
 
-        public final static Object locker1 = new Object(); //for LiveVideo 
-        public final static Object locker2 = new Object(); //for GUI counter 
+        public final static Object locker1 = new Object(); //for LiveVideo
+        public final static Object locker2 = new Object(); //for GUI counter
 
         public volatile static boolean cIsDisplayLatestFrame;
         public volatile static boolean cIsDisplayGUIcounter;
 
         public volatile static int tempGUIcounter;
 
-        public static int tempWidth; //true width in pixel eg. 128x128 bin 1 = 128x128; 128x128 bin2 = 64x64; 128x128 bin3 = 42x42     
-        public static int tempHeight; //true width in pixel   
+        public static int tempWidth; //true width in pixel eg. 128x128 bin 1 = 128x128; 128x128 bin2 = 64x64; 128x128 bin3 = 42x42
+        public static int tempHeight; //true width in pixel
 
         //ixon seris
-        public static int isCropMode;//0 false, 1 true 
+        public static int isCropMode;//0 false, 1 true
         public static int cWidth;
         public static int cHeight;
         public static int cLeft;
@@ -261,8 +261,8 @@ public class DirectCapturePanel {
         public final static int minPI = 5000;
         public final static int minAllowableFrame = 100; // minimum frame for ACF
         public static int size_a; //calibration //live //cumualtive
-        public static int size_b; //calibration //live //cumualtive //2000 works but slow   
-        public final static int transferFrameInterval = 1; //calibration //live //cumualtive  
+        public static int size_b; //calibration //live //cumualtive //2000 works but slow
+        public final static int transferFrameInterval = 1; //calibration //live //cumualtive
         public final static int fps = 25;
         public static int size_r;
         public static int size_c;
@@ -292,20 +292,20 @@ public class DirectCapturePanel {
 
         public static int BinXSoft;
         public static int BinYSoft;
-        public static int inCameraBinning;// 1x1, 2x2, 3x3, 4x4, 8x8 for sona11 and DU860       
+        public static int inCameraBinning;// 1x1, 2x2, 3x3, 4x4, 8x8 for sona11 and DU860
 
-        public static int CCFdistX; //index start from 0 
-        public static int CCFdistY; //index start from 0 
+        public static int CCFdistX; //index start from 0
+        public static int CCFdistY; //index start from 0
         public static boolean isCCFmode;
 
         public static int chipSizeX;
         public static int chipSizeY;
         public static int MAXpixelwidth;
         public static int MAXpixelheight;
-        public static int oWidth; //index start from 1      
-        public static int oHeight; //index start from 1     
-        public static int oLeft; //index start from 1      
-        public static int oTop; //index start from 1        
+        public static int oWidth; //index start from 1
+        public static int oHeight; //index start from 1
+        public static int oLeft; //index start from 1
+        public static int oTop; //index start from 1
         public static int oRight; //index start from 1
         public static int oBottom; //index start from 1
         public static int mem_oWidth;
@@ -337,7 +337,7 @@ public class DirectCapturePanel {
         public static int background = 1_000_000; //by default is 0; setting background >= 1_000_000 will set min counts as bacgkround. see minDetermination(ImagePlus imp);    //V2
 
         public static boolean RunLiveReadOutOnGPU;
-        public static int isgpupresent;
+        public static boolean useGpu;
 
         // Calibration plot
         public static boolean isCalibFixScale = false; //Setting this to truew ill remove the auto scaling for 3 calibration plot: diffusion, intensity and amplitude   //V2
@@ -350,22 +350,22 @@ public class DirectCapturePanel {
         //PlotCurve display
         public static boolean plotACFCurves;
         public static boolean plotTrace;
-        public static boolean plotAverage; // plot average correlation functions    
-        public static boolean plotJustCCF; //overlay ACFs when plotting CCF in a single graph   
+        public static boolean plotAverage; // plot average correlation functions
+        public static boolean plotJustCCF; //overlay ACFs when plotting CCF in a single graph
         public static boolean showLiveVideoCumul;   //V2
-        public static boolean plotCalibAmplitude;// Average first few points of correlation for focus finder    
-        public static boolean plotCalibDiffusion; //Average fit of D for focus finder       
-        public static boolean plotCalibIntensity;  //Average Intensity for focus finder 
+        public static boolean plotCalibAmplitude;// Average first few points of correlation for focus finder
+        public static boolean plotCalibDiffusion; //Average fit of D for focus finder
+        public static boolean plotCalibIntensity;  //Average Intensity for focus finder
 
-        public static ShortProcessor ip;// live     
-        public static short[] arraysingleS;//singlescan  
-        public static ImagePlus imp; //singlescan //live  
-        public static ImageWindow impwin; //singlescan //live  
-        public static ImageCanvas impcan; //singlescan //live  
-        public static Roi impRoiLive; //live    
-        public static Roi impRoiLive2; //live //for CCF mode   
-        public static double scimp; //live     
-        public final static int zoomFactor = 300; // single capture //live     
+        public static ShortProcessor ip;// live
+        public static short[] arraysingleS;//singlescan
+        public static ImagePlus imp; //singlescan //live
+        public static ImageWindow impwin; //singlescan //live
+        public static ImageCanvas impcan; //singlescan //live
+        public static Roi impRoiLive; //live
+        public static Roi impRoiLive2; //live //for CCF mode
+        public static double scimp; //live
+        public final static int zoomFactor = 300; // single capture //live
 
         public static ImageStack ims_nonCumGreen;
         public static ImageStack ims_nonCumRed;
@@ -373,19 +373,19 @@ public class DirectCapturePanel {
         public static ImageStack ims_cum;
         public static ImagePlus imp_cum;
 
-        public static int arraysize; //calibration //live //cumualtive     
+        public static int arraysize; //calibration //live //cumualtive
         public volatile static short[] bufferArray1D; //live //rseplacing array1Ds  [size_b * size_a * w * h] //V2 //in Java short is signed max value is 32767 instead of 65534. Any counts above 32767 register as 0. Solution is to replace with int[] at expense of doubling RAM usage
 
         public static FrameCounterX framecounterIMSX; //cumulative
         public static FrameCounter framecounter;
 
-        public static int lWidth = 6; //index start from 1  
+        public static int lWidth = 6; //index start from 1
         public static int lHeight = 6; //index start from 1
-        public static int lLeft = 1; //index start from 1  
-        public static int lTop = 1; //index start from 1   
+        public static int lLeft = 1; //index start from 1
+        public static int lTop = 1; //index start from 1
 
         // focus-finder
-        public static int noptsavr = 3; // no of correlation points to be averaged (excluding zero time lag) for amplitude & diffusion focus finder analysis   
+        public static int noptsavr = 3; // no of correlation points to be averaged (excluding zero time lag) for amplitude & diffusion focus finder analysis
 
         // Cumulative CF
         public static int fitStartCumulative = 1;
@@ -1108,7 +1108,7 @@ public class DirectCapturePanel {
 
                 if (Common.isAcquisitionRunning) {
                     Integer count = chunks.get(chunks.size() - 1);
-                    if (Common.selectedMode == modeEnum.ACQUISITION) {//"Acquisition" 
+                    if (Common.selectedMode == modeEnum.ACQUISITION) {//"Acquisition"
                         tfTotalFrame.setText(Integer.toString(count) + " / " + Common.totalFrame);
                     } else {
                         tfTotalFrame.setText(Integer.toString(count));
@@ -1207,7 +1207,7 @@ public class DirectCapturePanel {
             APIcall.runThread_UpdateTemp();
 
             /*
-            Print camera model onto log 
+            Print camera model onto log
              */
             IJ.log("Detected camera model: " + Common.$cameraHeadModel + ", camera ID: " + Common.$serialNumber);
 
@@ -1336,7 +1336,7 @@ public class DirectCapturePanel {
                         //assert speedCount != 0
                         noPortSpeedCombination += speedCount;
                     }
-       
+
                     cameraConstant.Common_Photometrics.readoutSpeedDescription = new String[noPortSpeedCombination][5];
                     int counter = 0;
                     for (int i = 0; i < portSize; i++) {
@@ -1349,7 +1349,7 @@ public class DirectCapturePanel {
                             cameraConstant.Common_Photometrics.readoutSpeedDescription[counter][2] = Double.toString(Photometrics_PVCAM_SDK.getDoubleValuePVCAM("readoutFrequency")); //readout speed (MHz)
                             cameraConstant.Common_Photometrics.readoutSpeedDescription[counter][3] = Double.toString(Photometrics_PVCAM_SDK.getDoubleValuePVCAM("BIT_DEPTH")); //bit depth
                             cameraConstant.Common_Photometrics.readoutSpeedDescription[counter][4] = cameraConstant.Common_Photometrics.readoutSpeedDescription[counter][2] + " MHz " + cameraConstant.Common_Photometrics.readoutSpeedDescription[counter][3] + "-bit"; //descriptin
-                            
+
                             counter++;
                         }
                     }
@@ -1395,7 +1395,7 @@ public class DirectCapturePanel {
             Common.correlator_p = 16;
             Common.correlator_q = 8;
             Common.RunLiveReadOutOnGPU = false;
-            Common.isgpupresent = 0; //TODO remove this // main ImFCS panel will assigne 
+            Common.useGpu = false; //TODO remove this // main ImFCS panel will assigne
 
             Common.plotACFCurves = true;
             Common.plotTrace = true;
@@ -1407,7 +1407,7 @@ public class DirectCapturePanel {
             Common.plotCalibIntensity = false;
 
             //Live video option
-            Common.livevideo_displayFramesMode = 0; //by default display all frames 
+            Common.livevideo_displayFramesMode = 0; //by default display all frames
             Common.livevideo_binningNo = 1;         //by default no binning
 
             Common.isCooling = true;
@@ -1687,7 +1687,7 @@ public class DirectCapturePanel {
                         //single scan, do nothing
                     }
 
-                    if (Common.selectedMode == modeEnum.ICCS) {//"ICCS" 
+                    if (Common.selectedMode == modeEnum.ICCS) {//"ICCS"
                         //reset
                         JICCSPanelComponentPanel.resetFitToggle();
                     }
@@ -1933,7 +1933,7 @@ public class DirectCapturePanel {
 
         private int runSaveMechanism(boolean proceed, ImagePlus imp, int dispImage) {
 
-            int retval = 0;//0-saveOK ; 1-saving in progress 
+            int retval = 0;//0-saveOK ; 1-saving in progress
             if (!proceed) {
                 retval = 1;
                 return retval;
@@ -3140,7 +3140,7 @@ public class DirectCapturePanel {
                     cbReadoutSpeed_photometric.setSelectedIndex(defaultPortSpeedIdx);
                     cameraConstant.Common_Photometrics.readoutPortIndex = Integer.valueOf(cameraConstant.Common_Photometrics.readoutSpeedDescription[defaultPortSpeedIdx][0]);
                     cameraConstant.Common_Photometrics.readoutSpeedIndex = Integer.valueOf(cameraConstant.Common_Photometrics.readoutSpeedDescription[defaultPortSpeedIdx][1]);
-                    
+
 
                     break;
 
@@ -3560,7 +3560,7 @@ public class DirectCapturePanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (rbGPUon.isSelected() == true) {
-                    if (Common.isgpupresent == 1) {
+                    if (Common.useGpu) {
                         Common.RunLiveReadOutOnGPU = true;
                         rbGPUon.setSelected(true);
                     } else {
@@ -4728,7 +4728,7 @@ public class DirectCapturePanel {
         } else {
             Common.isICCSValid = false;
             APIcall.runThread_ICCScalibration();
-            updateTfFrameCounterV3(); //update framecounter 
+            updateTfFrameCounterV3(); //update framecounter
         }
     }
 
@@ -5182,7 +5182,7 @@ public class DirectCapturePanel {
 //        Runnable doUpdateROI = new Runnable() {
         //            @Override
         //            public void run() {
-        //                
+        //
         //            }
         //
         //        };
@@ -5500,7 +5500,7 @@ public class DirectCapturePanel {
         * getRoiCoordinateFromCorner
         * getRoiCoordinateFromCenter
         * istfWHLTValid
-    
+
      */
     public static boolean CCFselectorChecker(int oW, int oH, int ShiftX, int ShiftY, int binX, int binY, int px, int py, int roiW, int roiH) {
         int px2 = px + roiW - 1;
@@ -5617,16 +5617,16 @@ public class DirectCapturePanel {
             -                           -
             -           width           -
             -         * * * *           -   heightMAX
-            -         * X   * height    -        
+            -         * X   * height    -
             -         * * * *           -
             -                           -
-            -                           - 
+            -                           -
             -                           -   X = (centerpx, centerpy)
             -                           -   // all index start from 1. for example 128 x 128 dim. index start from 1 and end at 128
             -                           -
             -----------------------------
-            
-            
+
+
          */
         int[] result = new int[4];
 
@@ -5685,7 +5685,7 @@ public class DirectCapturePanel {
         * fillImagePlusNonCumul
         * fillImagePlusCumul
         * getimp
-    
+
      */
     public static void clearImageStackPlus(int mode) {
         switch (mode) {
@@ -5703,12 +5703,12 @@ public class DirectCapturePanel {
 
     /*
     Snap: single capture
-    
+
      */
  /*
         * Utilities (Control flow)
         * checkCumulativeReady
-    
+
      */
     public static class checkCumulativeReady {
 
@@ -5738,7 +5738,7 @@ public class DirectCapturePanel {
                 }
             }
             return false;
-//            //alternative, step-by-step 
+//            //alternative, step-by-step
 //            double divisor = (double) plotInterval / (double) frameInterval;
 //            double runner = (double) frameCounterStack / (double) frameInterval;
 //            return ((runner / divisor) % 1 == 0);
@@ -5749,7 +5749,7 @@ public class DirectCapturePanel {
         * Utilities (Calcualtor)
         // calculation of the observation area; this is used in the Diffusion Law Plot as the y-axis
         // the calculation of the observation area/volume is provided on our website in CDF files (http://www.dbs.nus.edu.sg/lab/BFL/index.html)
-    
+
      */
     public static double obsvolFCS_ST2D1p(int dim) {
 
@@ -5765,7 +5765,7 @@ public class DirectCapturePanel {
         int binningY = 1;
 
         // general parameters
-        double pi = 3.14159265359;
+        double pi = Math.PI;
         double sqrpi = Math.sqrt(pi);
         double ax = pixeldimx;
 //        IJ.log("pixeldimx: " + pixeldimx);
@@ -5821,7 +5821,7 @@ public class DirectCapturePanel {
         // get minimum frame (independent of frametime)
         // last = min data points in last channel
         public static int getMinFrame(double frametime, int corr_p, int corr_q, int last) {
-            double p = frametime * last * Math.pow(2, corr_q - 1); // given min point of last channel= 1 & include zero timelag, (16,2) = 33 not 31; (16,8) = 2175 not 2047 
+            double p = frametime * last * Math.pow(2, corr_q - 1); // given min point of last channel= 1 & include zero timelag, (16,2) = 33 not 31; (16,8) = 2175 not 2047
             //IJ.log("getMinFrame: " + (int) Math.ceil((p + getTimeLag(frametime, corr_p, corr_q)) / frametime));
             return (int) Math.ceil((p + getTimeLag(frametime, corr_p, corr_q)) / frametime);
         }
@@ -5865,7 +5865,7 @@ public class DirectCapturePanel {
             return (int) ((p + getTimeLag(frameTime, corr_p, corr_q)) / frameTime);
         }
 
-        //return q value given number of frame available 
+        //return q value given number of frame available
         public static int getQgivenFrame(int p, int q, int noframe, int dataPtsLastCorChannel) {
             if (getMinFrame(0.001, p, 1, dataPtsLastCorChannel) > noframe) {
                 return 1;
@@ -5898,7 +5898,7 @@ public class DirectCapturePanel {
 
     /*
         * Update experimental settings:
-        * pixelSize (before in-camera binning), objMag, NA, emlambda, sigmaxy   
+        * pixelSize (before in-camera binning), objMag, NA, emlambda, sigmaxy
      */
     public boolean GetExpSettingsDialogue() {
 

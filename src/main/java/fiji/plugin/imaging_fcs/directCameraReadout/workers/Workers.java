@@ -82,7 +82,7 @@ public class Workers {
             size = width * height;
             this.size_f = (Common.arraysize - (Common.arraysize % size)) / size;
 
-            //reset live ROI 
+            //reset live ROI
             if (width < 6 || height < 6) {
                 Common.lLeft = 1;
                 Common.lTop = 1;
@@ -334,10 +334,10 @@ public class Workers {
             Common.scimp *= 100;// transfrom this into %tage to run ImageJ command
             IJ.run(Common.imp, "Original Scale", "");
             IJ.run(Common.imp, "Set... ", "zoom=" + Common.scimp + " x=" + (int) Math.floor(width / 2) + " y=" + (int) Math.floor(height / 2));
-            IJ.run("In [+]", ""); 	// This needs to be used since ImageJ 1.48v to set the window to the right size; 
+            IJ.run("In [+]", ""); 	// This needs to be used since ImageJ 1.48v to set the window to the right size;
             // this might be a bug and is an ad hoc solution for the moment; before only the "Set" command was necessary
 
-            //setting default ROI selector for live display 
+            //setting default ROI selector for live display
             if (Common.selectedMode == modeEnum.CALIBRATION || Common.selectedMode == modeEnum.ACQUISITION) {
                 Common.impRoiLive = new Roi(Common.lLeft - 1, Common.lTop - 1, Common.lWidth, Common.lHeight);
                 Common.impRoiLive.setStrokeColor(Color.GREEN);
@@ -400,7 +400,7 @@ public class Workers {
                 IJ.log("Warning (Saturation): reduce exposure time or laser power");
             }
 
-            // decide if were to reset dynamic range for every single frame 
+            // decide if were to reset dynamic range for every single frame
             if (Common.selectedMode == modeEnum.LIVEVIDEO || Common.selectedMode == modeEnum.CALIBRATION) {
                 Common.ip.resetMinAndMax(); //reset dynamic range for live mode and calibration mode
             } else { //fix dynamic range for acquisiton mode
@@ -488,7 +488,7 @@ public class Workers {
             size = width * height;
             this.size_f = (Common.arraysize - (Common.arraysize % size)) / size;
 
-            //reset live ROI 
+            //reset live ROI
             resetROIselection(width, height);
             isSettingDynamicRange = true;
             imagewindowready = false;
@@ -682,7 +682,7 @@ public class Workers {
 
         private static void resetROIselection(int w, int h) {
 
-            if (Common.selectedMode != modeEnum.ICCS) {//Iccs 
+            if (Common.selectedMode != modeEnum.ICCS) {//Iccs
                 if (w < 6 || h < 6) {
                     Common.lLeft = 1;
                     Common.lTop = 1;
@@ -747,10 +747,10 @@ public class Workers {
             Common.scimp *= 100;// transfrom this into %tage to run ImageJ command
             IJ.run(Common.imp, "Original Scale", "");
             IJ.run(Common.imp, "Set... ", "zoom=" + Common.scimp + " x=" + (int) Math.floor(width / 2) + " y=" + (int) Math.floor(height / 2));
-            IJ.run("In [+]", ""); 	// This needs to be used since ImageJ 1.48v to set the window to the right size; 
+            IJ.run("In [+]", ""); 	// This needs to be used since ImageJ 1.48v to set the window to the right size;
             // this might be a bug and is an ad hoc solution for the moment; before only the "Set" command was necessary
 
-            //setting default ROI selector for live display 
+            //setting default ROI selector for live display
             if (Common.selectedMode == modeEnum.CALIBRATION || Common.selectedMode == modeEnum.ACQUISITION) {
                 Common.impRoiLive = new Roi(Common.lLeft - 1, Common.lTop - 1, Common.lWidth, Common.lHeight);
                 Common.impRoiLive.setStrokeColor(Color.GREEN);
@@ -1138,7 +1138,7 @@ public class Workers {
                 //Live video
                 if (Common.showLiveVideoCumul && !Common.cIsDisplayLatestFrame) {
                     synchronized (Common.locker1) {
-                        if (checkLiveVideo()) { //else statement valid 
+                        if (checkLiveVideo()) { //else statement valid
                             Common.locker1.notify();
                         }
                     }
@@ -1191,7 +1191,7 @@ public class Workers {
         private boolean isCCFmode;
         private int CCFdistX;
         private int CCFdistY;
-        private int lLeftRed;//coordiante of red channel 
+        private int lLeftRed;//coordiante of red channel
         private int lTopRed;//coordinate of red channel
 
         private int inct1;
@@ -1531,7 +1531,7 @@ public class Workers {
                 }
             }
             return false;
-//            //alternative, step-by-step 
+//            //alternative, step-by-step
 //            double divisor = (double) plotInterval / (double) frameInterval;
 //            double runner = (double) frameCounterStack / (double) frameInterval;
 //            return ((runner / divisor) % 1 == 0);
