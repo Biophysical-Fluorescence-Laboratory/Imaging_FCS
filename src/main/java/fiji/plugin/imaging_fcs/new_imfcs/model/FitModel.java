@@ -20,7 +20,7 @@ public class FitModel {
     private Parameter D, N, F2, F3, D2, D3, G, vx, vy, fTrip, tTrip;
     private double modProb1, modProb2, modProb3, Q2, Q3;
     private int fitStart, fitEnd;
-    private boolean fix = false;
+    private boolean fix = true;
     private boolean GLS = false;
     private boolean bayes = false;
 

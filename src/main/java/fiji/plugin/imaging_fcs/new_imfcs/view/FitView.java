@@ -120,7 +120,7 @@ public class FitView extends BaseView {
         tbGLS.setForeground(Color.LIGHT_GRAY);
         tbBayes = createJToggleButton("Bayes", "", null, controller.tbOptionPressed(model::setBayes));
         tbBayes.setForeground(Color.LIGHT_GRAY);
-        tbFixPar = createJToggleButton("Free", "", null, controller.tbFixParPressed());
+        tbFixPar = createJToggleButton("Fix", "", null, controller.tbFixParPressed());
 
         holdN = createHoldButton(model.getN());
         holdF2 = createHoldButton(model.getF2());

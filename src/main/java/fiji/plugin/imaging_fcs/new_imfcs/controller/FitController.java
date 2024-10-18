@@ -144,8 +144,8 @@ public class FitController {
             JToggleButton button = (JToggleButton) ev.getItemSelectable();
 
             boolean selected = (ev.getStateChange() == ItemEvent.SELECTED);
-            button.setText(selected ? "Fix" : "Free");
-            model.setFix(selected);
+            button.setText(selected ? "Free" : "Fix");
+            model.setFix(!selected);
         };
     }
 
