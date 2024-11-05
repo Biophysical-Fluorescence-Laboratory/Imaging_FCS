@@ -279,6 +279,23 @@ public final class ImageController {
     }
 
     /**
+     * Checks if the specified pixel is fully contained within the given Region of Interest (ROI).
+     * A pixel is considered fully contained if all four corners, defined by the top-left corner (x, y)
+     * and the binning dimensions, are within the ROI.
+     *
+     * @param imgRoi The Region of Interest (ROI) to check against.
+     * @param x      The x-coordinate of the top-left corner of the pixel in the image.
+     * @param y      The y-coordinate of the top-left corner of the pixel in the image.
+     * @return {@code true} if the pixel defined by (x, y) and its binning dimensions
+     * is fully within the ROI; {@code false} otherwise.
+     */
+    private boolean isPixelInRoi(Roi imgRoi, int x, int y) {
+        return imgRoi.contains(x, y) && imgRoi.contains(x + settings.getBinning().x - 1, y) &&
+                imgRoi.contains(x, y + settings.getBinning().y - 1) &&
+                imgRoi.contains(x + settings.getBinning().x - 1, y + settings.getBinning().y - 1);
+    }
+
+    /**
      * Correlates a Region of Interest (ROI) in the image.
      *
      * @param imgRoi The ROI to be correlated.
@@ -305,11 +322,14 @@ public final class ImageController {
         for (int x = xRange.getStart(); x <= xRange.getEnd(); x += xRange.getStep()) {
             for (int y = yRange.getStart(); y <= yRange.getEnd(); y += yRange.getStep()) {
                 try {
-                    Point[] points = correlatePixel(x, y, false);
-                    PixelModel pixelModel = correlator.getPixelModel(points[0].x, points[0].y);
-                    correlatedPixels.add(pixelModel);
+                    if (isPixelInRoi(imgRoi, x * pixelBinning.x, y * pixelBinning.y)) {
+                        Point[] points = correlatePixel(x, y, false);
 
-                    plotFittedParams(points);
+                        PixelModel pixelModel = correlator.getPixelModel(points[0].x, points[0].y);
+                        correlatedPixels.add(pixelModel);
+
+                        plotFittedParams(points);
+                    }
                 } catch (Exception e) {
                     IJ.log(String.format("Fail to correlate points for x=%d, y=%d with error: %s", x, y,
                             e.getMessage()));
