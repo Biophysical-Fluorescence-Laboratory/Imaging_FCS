@@ -609,6 +609,23 @@ public class Plots {
     }
 
     /**
+     * Sets the pixel at (x, y) to NaN across all slices in the image stack,
+     * and updates the parameter histogram window.
+     *
+     * @param x the x-coordinate of the pixel to reset
+     * @param y the y-coordinate of the pixel to reset
+     */
+    public static void resetImgParamPixel(int x, int y) {
+        IntStream.range(1, imgParam.getStackSize() + 1).forEach(slice -> {
+            ImageProcessor ip = imgParam.getStack().getProcessor(slice);
+            ip.putPixelValue(x, y, Double.NaN);
+        });
+
+        IJ.run(imgParam, "Enhance Contrast", "satured=0.35");
+        plotParamHistogramWindow();
+    }
+
+    /**
      * Displays the parameter maps in a window, adapts the image scale, applies a custom LUT,
      * and adds key and mouse listeners for user interaction.
      *

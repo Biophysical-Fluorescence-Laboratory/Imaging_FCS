@@ -527,6 +527,7 @@ public final class ImageController {
      * Creates and returns a MouseListener that responds to mouse clicks on an ImageCanvas.
      * This listener retrieves pixel coordinates from the clicked location, checks if the pixel
      * model is correlated, updates fit parameters on the view, and plots the results.
+     * In case of a double click, it resets this pixel.
      *
      * @return a MouseListener that handles mouse click events on an ImageCanvas.
      */
@@ -561,6 +562,13 @@ public final class ImageController {
 
                     // if the pixel model is not correlated we do not plot
                     if (pixelModel == null || pixelModel.getCorrelationFunction() == null) {
+                        return;
+                    }
+
+                    // if it's a double click, then we reset this pixel model
+                    if (event.getClickCount() == 2) {
+                        correlator.resetPixelModel(x, y);
+                        Plots.resetImgParamPixel(x, y);
                         return;
                     }
 
