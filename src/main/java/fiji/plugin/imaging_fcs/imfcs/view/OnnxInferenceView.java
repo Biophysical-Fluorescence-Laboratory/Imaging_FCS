@@ -5,8 +5,10 @@ import fiji.plugin.imaging_fcs.imfcs.controller.MainPanelController;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.util.function.Function;
 
+import static fiji.plugin.imaging_fcs.imfcs.view.ButtonFactory.createJButton;
 import static fiji.plugin.imaging_fcs.imfcs.view.TextFieldFactory.createTextField;
 import static fiji.plugin.imaging_fcs.imfcs.view.UIUtils.createJLabel;
 
@@ -91,9 +93,13 @@ public final class OnnxInferenceView extends BaseView {
         btnBrowseOnnx.setToolTipText("Select the ONNX model file");
 
         // Input Dimensions
-        tfInputX = createTextField("3", "Model input X dimension (pixels)"); // Default based on example
-        tfInputY = createTextField("3", "Model input Y dimension (pixels)"); // Default based on example
-        tfInputFrames = createTextField("2500", "Model input Frames dimension"); // Default based on example
+        tfInputX = createTextField("", "Model input X dimension (pixels)");
+        tfInputY = createTextField("", "Model input Y dimension (pixels)");
+        tfInputFrames = createTextField("", "Model input Frames dimension");
+        // Disable these fields, as these are read from the model file.
+        tfInputX.setEnabled(false);
+        tfInputY.setEnabled(false);
+        tfInputFrames.setEnabled(false);
 
         // Strides
         tfStrideX = createTextField("1", "Stride in X dimension (pixels)"); // Default based on example
@@ -109,14 +115,11 @@ public final class OnnxInferenceView extends BaseView {
         cbUseGpu.setToolTipText("Attempt to use CUDA for inference if supported");
 
         // Action Button
-        btnRunInference = new JButton("Run Inference");
-        btnRunInference.setToolTipText("Process the current image using the specified settings");
+        btnRunInference = createJButton("Run Inference", "Process the current image using the specified settings", null, (ActionListener) e -> {});
+        btnRunInference.setForeground(Color.RED);
 
         // Status Label
         lblStatus = createJLabel("Status: Ready", "Displays current operation status");
-        // Allow label to change size if message is long
-        // lblStatus.setMinimumSize(new Dimension(100, 20));
-        // lblStatus.setPreferredSize(new Dimension(200, 20));
     }
 
     /**
