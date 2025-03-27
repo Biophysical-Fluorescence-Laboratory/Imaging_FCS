@@ -21,7 +21,7 @@ public final class OnnxInferenceView extends BaseView {
 
     // --- Constants for Layout and Appearance (Adjust as needed) ---
     // Increased rows to accommodate more fields + button + status
-    private static final GridLayout VIEW_LAYOUT = new GridLayout(10, 4, 5, 5); // Rows, Cols, Hgap, Vgap
+    private static final GridLayout VIEW_LAYOUT = new GridLayout(9, 4, 5, 5); // Rows, Cols, Hgap, Vgap
     // Adjust location and size based on where you want it relative to other plugin windows
     private static final Point VIEW_LOCATION =
             new Point(Constants.MAIN_PANEL_POS.x, Constants.MAIN_PANEL_POS.y + Constants.MAIN_PANEL_DIM.height + 10);
@@ -158,31 +158,25 @@ public final class OnnxInferenceView extends BaseView {
         add(createJLabel("", "")); // Spacer
         add(createJLabel("", "")); // Spacer
 
-        // Row 6: Frame Range
-        add(createJLabel("Initial Frame:", "First frame to process (1-based index)"));
-        add(tfInitialFrame);
-        add(createJLabel("Final Frame:", "Last frame to process (-1 for end)"));
-        add(tfFinalFrame);
-
-        // Row 7: GPU Option
+        // Row 6: GPU Option
         add(cbUseGpu);
         add(createJLabel("", "")); // Spacer
         add(createJLabel("", "")); // Spacer
         add(createJLabel("", "")); // Spacer
 
-        // Row 8: Spacer Row (Optional)
+        // Row 7: Spacer Row (Optional)
         add(createJLabel("", ""));
         add(createJLabel("", ""));
         add(createJLabel("", ""));
         add(createJLabel("", ""));
 
-        // Row 9: Run Button
+        // Row 8: Run Button
         add(btnRunInference);
         add(createJLabel("", "")); // Spacer
         add(createJLabel("", "")); // Spacer
         add(createJLabel("", "")); // Spacer
 
-        // Row 10: Status Label
+        // Row 9: Status Label
         add(createJLabel("Status:", "Current operation status"));
         // Make status label span multiple columns for longer messages
         GridBagConstraints gbc = new GridBagConstraints();
