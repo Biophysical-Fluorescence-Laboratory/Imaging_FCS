@@ -40,8 +40,6 @@ public final class OnnxInferenceView extends BaseView {
     private JTextField tfStrideX;
     private JTextField tfStrideY;
     private JTextField tfStrideFrames;
-    private JTextField tfInitialFrame;
-    private JTextField tfFinalFrame;
     private JCheckBox cbUseGpu;
     private JButton btnRunInference;
     private JLabel lblStatus; // To display messages like "Processing...", "Done", errors
@@ -105,10 +103,6 @@ public final class OnnxInferenceView extends BaseView {
         tfStrideX = createTextField("1", "Stride in X dimension (pixels)"); // Default based on example
         tfStrideY = createTextField("1", "Stride in Y dimension (pixels)"); // Default based on example
         tfStrideFrames = createTextField("2500", "Stride in Frames dimension"); // Default based on example
-
-        // Frame Range
-        tfInitialFrame = createTextField("1", "Initial frame to process (1-based index)"); // Default based on example (adjust if 0-based needed)
-        tfFinalFrame = createTextField("-1", "Final frame to process (-1 for end of stack)"); // Default based on example
 
         // GPU Option
         cbUseGpu = new JCheckBox("Use GPU (if available)");
@@ -235,8 +229,6 @@ public final class OnnxInferenceView extends BaseView {
              tfStrideX.setEnabled(!running);
              tfStrideY.setEnabled(!running);
              tfStrideFrames.setEnabled(!running);
-             tfInitialFrame.setEnabled(!running);
-             tfFinalFrame.setEnabled(!running);
              cbUseGpu.setEnabled(!running);
              btnRunInference.setEnabled(!running);
 
