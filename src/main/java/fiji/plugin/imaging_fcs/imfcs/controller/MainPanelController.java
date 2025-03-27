@@ -12,6 +12,7 @@ import fiji.plugin.imaging_fcs.imfcs.model.correlations.MeanSquareDisplacement;
 import fiji.plugin.imaging_fcs.imfcs.utils.*;
 import fiji.plugin.imaging_fcs.imfcs.view.BleachCorrectionView;
 import fiji.plugin.imaging_fcs.imfcs.view.ExpSettingsView;
+import fiji.plugin.imaging_fcs.imfcs.view.OnnxInferenceView;
 import fiji.plugin.imaging_fcs.imfcs.view.MainPanelView;
 import fiji.plugin.imaging_fcs.imfcs.view.Plots;
 import fiji.plugin.imaging_fcs.imfcs.view.dialogs.*;
@@ -64,6 +65,7 @@ public final class MainPanelController {
     private final FilteringController filteringController;
     private final ParameterVideoController parameterVideoController;
     private final Correlator correlator;
+    private final OnnxInferenceView onnxInferenceView;
 
     /**
      * Constructor that initializes models, views, and other controllers needed for the main panel.
@@ -136,6 +138,7 @@ public final class MainPanelController {
         this.expSettingsView = new ExpSettingsView(this, settings);
         updateSettingsField();
         this.view = new MainPanelView(this, this.settings);
+        this.onnxInferenceView = new OnnxInferenceView();
 
         if (workbook != null) {
             // read the Excel file to restore parameters
@@ -1208,5 +1211,16 @@ public final class MainPanelController {
             setter.accept(value);
             fitController.updateFitEnd(settings);
         };
+    }
+
+    // ONNX-related controller options.
+    /**
+     * Returns an item listener to handle the "ONNX Models" toggle button press event.
+     * This listener toggles the visibility of the ONNX Models view.
+     *
+     * @return an ItemListener that processes the "ONNX Models Infernece" toggle button press event
+     */
+    public ItemListener tbOnnxInferencePressed() {
+        return (ItemEvent ev) -> onnxInferenceView.setVisible(ev.getStateChange() == ItemEvent.SELECTED);
     }
 }
