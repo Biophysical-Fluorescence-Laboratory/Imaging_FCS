@@ -1,12 +1,10 @@
 package fiji.plugin.imaging_fcs.imfcs.view;
 
 import fiji.plugin.imaging_fcs.imfcs.constants.Constants;
-import fiji.plugin.imaging_fcs.imfcs.controller.MainPanelController;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.util.function.Function;
 
 import static fiji.plugin.imaging_fcs.imfcs.view.ButtonFactory.createJButton;
 import static fiji.plugin.imaging_fcs.imfcs.view.TextFieldFactory.createTextField;
@@ -87,8 +85,7 @@ public final class OnnxInferenceView extends BaseView {
         // ONNX Model Path
         tfOnnxModelPath = createTextField("", "Path to the ONNX model file (.onnx)");
         tfOnnxModelPath.setEnabled(false); // Path often set via browser button
-        btnBrowseOnnx = new JButton("Browse...");
-        btnBrowseOnnx.setToolTipText("Select the ONNX model file");
+        btnBrowseOnnx = createJButton("Load Model", "Select the ONNX model file", null, (ActionListener) e -> {});
 
         // Input Dimensions
         tfInputX = createTextField("", "Model input X dimension (pixels)");
@@ -102,7 +99,7 @@ public final class OnnxInferenceView extends BaseView {
         // Strides
         tfStrideX = createTextField("1", "Stride in X dimension (pixels)"); // Default based on example
         tfStrideY = createTextField("1", "Stride in Y dimension (pixels)"); // Default based on example
-        tfStrideFrames = createTextField("2500", "Stride in Frames dimension"); // Default based on example
+        tfStrideFrames = createTextField("2500", "Stride in Frames dimension"); // Default from original ImFCSNet model, but will autofill to the loaded model.
 
         // GPU Option
         cbUseGpu = new JCheckBox("Use GPU (if available)");
