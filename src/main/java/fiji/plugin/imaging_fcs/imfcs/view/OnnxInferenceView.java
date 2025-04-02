@@ -11,6 +11,7 @@ import java.awt.event.ActionListener;
 import static fiji.plugin.imaging_fcs.imfcs.view.ButtonFactory.createJButton;
 import static fiji.plugin.imaging_fcs.imfcs.view.TextFieldFactory.createTextField;
 import static fiji.plugin.imaging_fcs.imfcs.view.UIUtils.createJLabel;
+import static fiji.plugin.imaging_fcs.imfcs.view.TextFieldFactory.setText;
 
 /**
  * Provides the user interface for configuring and running ONNX model inference
@@ -241,4 +242,14 @@ public final class OnnxInferenceView extends BaseView {
     // public JCheckBox getGpuCheckbox() { return cbUseGpu; }
     // public String getOnnxPath() { return tfOnnxModelPath.getText(); } // Controller might read directly on action
     // ... etc for other fields
+    //
+    public void updateModelPath(String modelPath) {
+        setText(tfOnnxModelPath, modelPath);
+    }
+
+    public void updateModelInputMetadata(int x, int y, int frames) {
+        setText(tfInputX, x);
+        setText(tfInputY, y);
+        setText(tfInputFrames, frames);
+    }
 }

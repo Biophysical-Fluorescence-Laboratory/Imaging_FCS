@@ -48,6 +48,7 @@ public class OnnxInferenceController {
 
             // Print the file path
             System.out.println("Selected ONNX model file: " + filePath);
+            this.view.updateModelPath(filePath);
         }
     }
     
