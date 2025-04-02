@@ -185,4 +185,11 @@ public class DeepLearningProcessor {
       if (onnxModel != null)
         onnxModel.close();
     }
+
+    public boolean isOnnxSessionStarted() {
+        if (onnxModel != null && onnxModel.getEnvironment() != null) {
+            return true;
+        }
+        return false;
+    }
 }

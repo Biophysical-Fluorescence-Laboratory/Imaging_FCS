@@ -1,6 +1,7 @@
 package fiji.plugin.imaging_fcs.imfcs.view;
 
 import fiji.plugin.imaging_fcs.imfcs.constants.Constants;
+import fiji.plugin.imaging_fcs.imfcs.controller.OnnxInferenceController;
 import fiji.plugin.imaging_fcs.imfcs.model.OnnxInferenceModel;
 
 import javax.swing.*;
@@ -28,7 +29,7 @@ public final class OnnxInferenceView extends BaseView {
 
     // --- Model and Controller References ---
     private final OnnxInferenceModel model;
-    // private final OnnxInferenceController controller;
+    private final OnnxInferenceController controller;
 
     // --- UI Component Fields ---
     private JTextField tfOnnxModelPath;
@@ -52,13 +53,13 @@ public final class OnnxInferenceView extends BaseView {
      * @param model      The model holding ONNX inference parameters and state.
      */
     public OnnxInferenceView(
-        // OnnxInferenceController controller, 
+        OnnxInferenceController controller, 
         OnnxInferenceModel model
     ) {
         // Title for the window
         super("ONNX Inference Settings");
         this.model = model;
-        // this.controller = controller;
+        this.controller = controller;
         initializeUI(); // This calls configureWindow, initializeTextFields, addComponentsToFrame
     }
 
@@ -86,16 +87,14 @@ public final class OnnxInferenceView extends BaseView {
         // ONNX Model Path
         tfOnnxModelPath = createTextField("", "Path to the ONNX model file (.onnx)");
         tfOnnxModelPath.setEnabled(false); // Path often set via browser button
-        btnBrowseOnnx = createJButton("Load Model", "Select the ONNX model file", null, (ActionListener) e -> {});
+        btnBrowseOnnx = createJButton("Load Model", "Select the ONNX model file", null, (ActionListener) e -> controller.btnLoadPressed());
 
-        // Input Dimensions
-        tfInputX = createTextField("", "Model input X dimension (pixels)");
-        tfInputY = createTextField("", "Model input Y dimension (pixels)");
-        tfInputFrames = createTextField("", "Model input Frames dimension");
-        // Disable these fields, as these are read from the model file.
-        tfInputX.setEnabled(false);
-        tfInputY.setEnabled(false);
-        tfInputFrames.setEnabled(false);
+        tfInputX = createTextField("", "Model expected input width (loaded from model)");
+        tfInputX.setEditable(false); // Loaded from model metadata
+        tfInputY = createTextField("", "Model expected input height (loaded from model)");
+        tfInputY.setEditable(false); // Loaded from model metadata
+        tfInputFrames = createTextField("", "Model expected input frames (loaded from model)");
+        tfInputFrames.setEditable(false); // Loaded from model metadata
 
         // Strides
         tfStrideX = createTextField("1", "Stride in X dimension (pixels)"); // Default based on example

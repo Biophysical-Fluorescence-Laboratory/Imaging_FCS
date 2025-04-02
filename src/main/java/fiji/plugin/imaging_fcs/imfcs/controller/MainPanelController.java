@@ -12,7 +12,6 @@ import fiji.plugin.imaging_fcs.imfcs.model.correlations.MeanSquareDisplacement;
 import fiji.plugin.imaging_fcs.imfcs.utils.*;
 import fiji.plugin.imaging_fcs.imfcs.view.BleachCorrectionView;
 import fiji.plugin.imaging_fcs.imfcs.view.ExpSettingsView;
-import fiji.plugin.imaging_fcs.imfcs.view.OnnxInferenceView;
 import fiji.plugin.imaging_fcs.imfcs.view.MainPanelView;
 import fiji.plugin.imaging_fcs.imfcs.view.Plots;
 import fiji.plugin.imaging_fcs.imfcs.view.dialogs.*;

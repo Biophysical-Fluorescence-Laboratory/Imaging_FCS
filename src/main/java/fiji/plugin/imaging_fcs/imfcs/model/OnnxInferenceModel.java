@@ -16,7 +16,7 @@ public class OnnxInferenceModel {
     private int strideFrames;
     private DeepLearningProcessor deepLearningProcessor;
     private BleachCorrectionModel bleachCorrectionModel;
-    private boolean onnxModelReady = false;
+    private boolean onnxModelLoaded = false;
     
     /**
      * Constructs a ONNX inference model with references to the experimental settings.
@@ -25,7 +25,7 @@ public class OnnxInferenceModel {
      */
     public OnnxInferenceModel(BleachCorrectionModel bleachCorrectionModel) {
         this.bleachCorrectionModel = bleachCorrectionModel;
-        this.onnxModelReady = false;
+        this.onnxModelLoaded = false;
     }
 
     private boolean validateModelPath(String onnxModelPath) {
@@ -54,12 +54,12 @@ public class OnnxInferenceModel {
 
         this.deepLearningProcessor = new DeepLearningProcessor(this.bleachCorrectionModel, useGpu);
         this.deepLearningProcessor.loadOnnxModel(onnxModelPath);
-        this.onnxModelReady = true;
+        this.onnxModelLoaded = true;
         return true;
     }
 
-    public void runInference(ImageModel imageModel, ExpSettingsModel expSettingsModel) {
-        if (!this.onnxModelReady) {
+    public Map<String, float[][][]> runInference(ImageModel imageModel, ExpSettingsModel expSettingsModel) throws OrtException {
+        if (!this.onnxModelLoaded) {
             IJ.error("ONNX Model needs to be loaded for inference.");
             throw new Error("ONNX Model is not loaded.");
         }
@@ -103,11 +103,12 @@ public class OnnxInferenceModel {
                     System.out.println(); // Newline after each row (all y values for a given x)
                 }
             }
-
+            return resultsMap;
         } catch (OrtException e) {
             System.err.println("Error during ONNX processing: " + e.getMessage());
             e.printStackTrace();
-            System.exit(1);
+            // Instead of System.exit, re-throw the exception (or wrap it)
+            throw e; // Let the caller handle the OrtException
         } finally {
              // Ensure processor resources are always closed if initialized
             if (this.deepLearningProcessor != null) {
@@ -121,5 +122,23 @@ public class OnnxInferenceModel {
             }
         }
     }
+    
+    /**
+     * Checks if inference should be done.
+     *
+     * @return true if model is loaded and ready for inference.
+     */
+    public boolean canFit() {
+        if (this.onnxModelLoaded && this.deepLearningProcessor != null) {
+            if (this.deepLearningProcessor.isOnnxSessionStarted()) {
+                return true;
+            } else {
+                IJ.error("ONNX Session is not started.");
+                return false;
+            }
+        }
+        return false;
+    }
+
 }
 
