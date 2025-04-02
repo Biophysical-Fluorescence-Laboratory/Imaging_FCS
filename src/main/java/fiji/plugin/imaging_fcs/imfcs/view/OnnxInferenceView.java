@@ -1,6 +1,7 @@
 package fiji.plugin.imaging_fcs.imfcs.view;
 
 import fiji.plugin.imaging_fcs.imfcs.constants.Constants;
+import fiji.plugin.imaging_fcs.imfcs.model.OnnxInferenceModel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,8 +26,8 @@ public final class OnnxInferenceView extends BaseView {
             new Point(Constants.MAIN_PANEL_POS.x, Constants.MAIN_PANEL_POS.y + Constants.MAIN_PANEL_DIM.height + 10);
     private static final Dimension VIEW_DIMENSION = new Dimension(480, 350); // Increased size
 
-    // --- Model and Controller References (Placeholders) ---
-    // private final OnnxInferenceModel model;
+    // --- Model and Controller References ---
+    private final OnnxInferenceModel model;
     // private final OnnxInferenceController controller;
 
     // --- UI Component Fields ---
@@ -52,11 +53,11 @@ public final class OnnxInferenceView extends BaseView {
      */
     public OnnxInferenceView(
         // OnnxInferenceController controller, 
-        // OnnxInferenceModel model
+        OnnxInferenceModel model
     ) {
         // Title for the window
         super("ONNX Inference Settings");
-        // this.model = model;
+        this.model = model;
         // this.controller = controller;
         initializeUI(); // This calls configureWindow, initializeTextFields, addComponentsToFrame
     }
@@ -110,7 +111,7 @@ public final class OnnxInferenceView extends BaseView {
         btnRunInference.setForeground(Color.RED);
 
         // Status Label
-        lblStatus = createJLabel("Status: Ready", "Displays current operation status");
+        lblStatus = createJLabel("Status: Not Ready", "Displays current operation status");
     }
 
     /**

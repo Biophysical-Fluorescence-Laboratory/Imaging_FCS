@@ -65,7 +65,8 @@ public final class MainPanelController {
     private final FilteringController filteringController;
     private final ParameterVideoController parameterVideoController;
     private final Correlator correlator;
-    private final OnnxInferenceView onnxInferenceView;
+    private final OnnxInferenceModel onnxInferenceModel;
+    private final OnnxInferenceController onnxInferenceController;
 
     /**
      * Constructor that initializes models, views, and other controllers needed for the main panel.
@@ -138,7 +139,10 @@ public final class MainPanelController {
         this.expSettingsView = new ExpSettingsView(this, settings);
         updateSettingsField();
         this.view = new MainPanelView(this, this.settings);
-        this.onnxInferenceView = new OnnxInferenceView();
+
+        // ONNX Inference-specific views.
+        this.onnxInferenceModel = new OnnxInferenceModel(bleachCorrectionModel);
+        this.onnxInferenceController = new OnnxInferenceController(this.onnxInferenceModel);
 
         if (workbook != null) {
             // read the Excel file to restore parameters
@@ -1221,6 +1225,9 @@ public final class MainPanelController {
      * @return an ItemListener that processes the "ONNX Models Infernece" toggle button press event
      */
     public ItemListener tbOnnxInferencePressed() {
-        return (ItemEvent ev) -> onnxInferenceView.setVisible(ev.getStateChange() == ItemEvent.SELECTED);
+        return (ItemEvent ev) -> {
+            boolean selected = (ev.getStateChange() == ItemEvent.SELECTED);
+            onnxInferenceController.setVisible(selected);
+        };
     }
 }
