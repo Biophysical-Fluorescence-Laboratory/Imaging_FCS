@@ -140,7 +140,7 @@ public final class MainPanelController {
         this.view = new MainPanelView(this, this.settings);
 
         // ONNX Inference-specific views.
-        this.onnxInferenceModel = new OnnxInferenceModel(bleachCorrectionModel);
+        this.onnxInferenceModel = new OnnxInferenceModel(bleachCorrectionModel, optionsModel.isCuda());
         this.onnxInferenceController = new OnnxInferenceController(this.onnxInferenceModel);
 
         if (workbook != null) {

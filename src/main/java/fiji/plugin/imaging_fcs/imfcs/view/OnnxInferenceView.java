@@ -3,8 +3,13 @@ package fiji.plugin.imaging_fcs.imfcs.view;
 import fiji.plugin.imaging_fcs.imfcs.constants.Constants;
 import fiji.plugin.imaging_fcs.imfcs.controller.OnnxInferenceController;
 import fiji.plugin.imaging_fcs.imfcs.model.OnnxInferenceModel;
+import fiji.plugin.imaging_fcs.imfcs.model.onnx.InputMetadata;
+import ij.IJ;
 
 import javax.swing.*;
+
+import ai.onnxruntime.OrtException;
+
 import java.awt.*;
 import java.awt.event.ActionListener;
 
@@ -43,7 +48,13 @@ public final class OnnxInferenceView extends BaseView {
     private JTextField tfStrideFrames;
     private JCheckBox cbUseGpu;
     private JButton btnRunInference;
-    private JLabel lblStatus; // To display messages like "Processing...", "Done", errors
+    private JLabel lblStatus;
+
+    enum Status {
+        NO_MODEL_LOADED,
+        READY,
+        PROCESSING,
+    }
 
 
     /**
@@ -88,7 +99,14 @@ public final class OnnxInferenceView extends BaseView {
         // ONNX Model Path
         tfOnnxModelPath = createTextField("", "Path to the ONNX model file (.onnx)");
         tfOnnxModelPath.setEnabled(false); // Path often set via browser button
-        btnBrowseOnnx = createJButton("Load Model", "Select the ONNX model file", null, (ActionListener) e -> controller.btnLoadPressed());
+        btnBrowseOnnx = createJButton("Load Model", "Select the ONNX model file", null, (ActionListener) e -> {
+			try {
+				controller.btnLoadPressed();
+			} catch (OrtException e1) {
+                IJ.log(e1.getStackTrace().toString());
+                IJ.error(e1.getMessage());
+			}
+		});
 
         tfInputX = createTextField("", "Model expected input width (loaded from model)");
         tfInputX.setEditable(false); // Loaded from model metadata
@@ -111,7 +129,7 @@ public final class OnnxInferenceView extends BaseView {
         btnRunInference.setForeground(Color.RED);
 
         // Status Label
-        lblStatus = createJLabel("Status: Not Ready", "Displays current operation status");
+        lblStatus = createJLabel("Status: No Model Loaded", "Displays current operation status");
     }
 
     /**
@@ -139,9 +157,9 @@ public final class OnnxInferenceView extends BaseView {
         add(createJLabel("", "")); // Spacer
 
         // Row 4: Stride (X, Y)
-        add(createJLabel("Stride X:", "Stride in X dimension (pixels)"));
+        add(createJLabel("Stride X:", "Stride in X dimension (pixels). Set equal to Model Input X for non-overlapping inference."));
         add(tfStrideX);
-        add(createJLabel("Stride Y:", "Stride in Y dimension (pixels)"));
+        add(createJLabel("Stride Y:", "Stride in Y dimension (pixels). Set equal to Model Input X for non-overlapping inference."));
         add(tfStrideY);
 
         // Row 5: Stride (Frames)
@@ -235,14 +253,6 @@ public final class OnnxInferenceView extends BaseView {
          });
     }
 
-    // Add getter methods for components if the controller needs to directly access them
-    // (Though typically controller modifies model, and view updates from model changes)
-    // Example:
-    // public JButton getRunButton() { return btnRunInference; }
-    // public JCheckBox getGpuCheckbox() { return cbUseGpu; }
-    // public String getOnnxPath() { return tfOnnxModelPath.getText(); } // Controller might read directly on action
-    // ... etc for other fields
-    //
     public void updateModelPath(String modelPath) {
         setText(tfOnnxModelPath, modelPath);
     }
@@ -251,5 +261,22 @@ public final class OnnxInferenceView extends BaseView {
         setText(tfInputX, x);
         setText(tfInputY, y);
         setText(tfInputFrames, frames);
+    }
+
+    public void setModelInputMetadata(InputMetadata inputMetadata) {
+        tfInputX.setText(inputMetadata.getX());
+        tfInputY.setText(inputMetadata.getY());
+        tfInputFrames.setText(inputMetadata.getFrames());
+
+        // Also set the stride in the frames dimension to be equivalent.
+        this.setStrideFrames(inputMetadata.getFrames());
+    }
+
+    private void setStrideFrames(String frames) {
+        this.tfStrideFrames.setText(frames);
+    }
+
+    public boolean getUseGPU() {
+        return cbUseGpu.isSelected();
     }
 }

@@ -2,6 +2,8 @@
 package fiji.plugin.imaging_fcs.imfcs.controller;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -12,6 +14,7 @@ import fiji.plugin.imaging_fcs.imfcs.model.ImageModel;
 import fiji.plugin.imaging_fcs.imfcs.model.OnnxInferenceModel;
 import fiji.plugin.imaging_fcs.imfcs.view.OnnxInferenceView;
 import ij.IJ;
+import ij.ImagePlus;
 
 /**
  * The OnnxInferenceController class handles the interactions between the OnnxInferneceModel and the OnnxInferenceView,
@@ -32,7 +35,7 @@ public class OnnxInferenceController {
     }
     
     // Load an ONNX Model.
-    public void btnLoadPressed() {
+    public void btnLoadPressed() throws OrtException {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         FileNameExtensionFilter filter = new FileNameExtensionFilter("ONNX Protobuf Models", "onnx");
@@ -49,25 +52,100 @@ public class OnnxInferenceController {
             // Print the file path
             System.out.println("Selected ONNX model file: " + filePath);
             this.view.updateModelPath(filePath);
+            this.model.updateModelPath(filePath);
         }
+
+        // Load the model
+        this.model.loadOnnxModel(this.view.getUseGPU());
+
+        // Populate the Model metadata
+        this.view.setModelInputMetadata(this.model.getInputMetadata());
     }
     
-    // TODO: This should return an ImagePlus (?)
-    public void infer(ImageModel imageModel, ExpSettingsModel expSettingsModel) throws OrtException {
-        if (isActivated() && model.canFit()) {
-            try {
-                model.runInference(imageModel, expSettingsModel);
-                // double[] modProbs = model.fit(pixelModel, modelName, lagTimes, correlationMatrix);
-                // // update view
-                // view.updateFitParams(pixelModel.getFitParams());
-                // if (model.isBayes()) {
-                //     view.updateModProbs(modProbs);
-                //     view.updateHoldStatus();
-                // }
-            } catch (RuntimeException e) {
-                IJ.log(String.format("%s at pixel x=%d, y=%d"));
-            }
+    /**
+     * Performs ONNX inference using the loaded model and provided settings.
+     * Always returns a map, which will be empty if inference cannot be run
+     * (due to state checks) or if an error occurs during processing.
+     *
+     * @param imageModel The input image data (adjust type as needed).
+     * @param expSettingsModel The experiment settings (adjust type as needed).
+     * @return A Map where keys are output names and values are the resulting ImagePlus stacks.
+     *         Returns an empty map if inference is skipped or fails.
+     */
+    public Map<String, ImagePlus> infer(ImageModel imageModel, ExpSettingsModel expSettingsModel) {
+
+        // 1. Initialize the result map - Default to empty
+        Map<String, ImagePlus> imagePlusResultsMap = new HashMap<>();// Use HashMap for mutability
+
+        // 2. Check preconditions BEFORE the try-catch block
+        if (!isActivated()) {
+            System.out.println("Inference skipped: System is not activated.");
+            IJ.log("Inference skipped: System is not activated."); // Optional ImageJ log
+            return imagePlusResultsMap; // Return empty map
         }
+        if (!model.canFit()) { // Assuming model.canFit() exists and checks readiness
+            System.out.println("Inference skipped: Model cannot fit (e.g., not loaded or dimensions mismatch?).");
+            IJ.log("Inference skipped: Model cannot fit."); // Optional ImageJ log
+            return imagePlusResultsMap; // Return empty map
+        }
+
+        // 3. Perform inference and conversion within a try-catch block
+        try {
+            // --- Run Inference ---
+            // This might throw OrtException or potentially others
+            Map<String, float[][][]> modelOutsArray = model.runInference(imageModel, expSettingsModel);
+
+            // --- Optional: Debug Printing (Consider removing or making conditional for production) ---
+            if (modelOutsArray != null) {
+                System.out.println("Raw inference output received. Processing " + modelOutsArray.size() + " output(s).");
+                for (Map.Entry<String, float[][][]> entry : modelOutsArray.entrySet()) {
+                    String outputName = entry.getKey();
+                    float[][][] resultArray = entry.getValue();
+
+                    System.out.println("\n=== Raw Output Details: " + outputName + " ===");
+                    if (resultArray == null || resultArray.length == 0 || resultArray[0] == null || resultArray[0].length == 0 || resultArray[0][0] == null || resultArray[0][0].length == 0) {
+                        System.out.println("  (Result array is null or empty for this output)");
+                    } else {
+                        System.out.println("  Result Array Dimensions: [" + resultArray.length + "][" + resultArray[0].length + "][" + resultArray[0][0].length + "]");
+                        // Consider limiting the full printout for large arrays in production
+                        // printArrayContents(resultArray); // Maybe extract printing if complex
+                    }
+                }
+            } else {
+                 System.out.println("Warning: model.runInference returned a null map.");
+                 // Continue, castArrayToImagePlus should handle null input map
+            }
+
+
+            // --- Convert array map to ImagePlus map ---
+            // This method should internally handle null/empty input map and invalid arrays
+            // Assign the result directly to our return variable
+            imagePlusResultsMap = model.castArrayToImagePlus(modelOutsArray);
+
+            System.out.println("Successfully converted inference results to ImagePlus map.");
+        } catch (OrtException e) {
+            // Handle ONNX specific errors during runInference or potentially during setup called within it
+            System.err.println("!!! ONNX Runtime Exception during inference: " + e.getMessage());
+            e.printStackTrace(); // Print stack trace for detailed debugging
+            IJ.handleException(e); // Use ImageJ's exception handler for user feedback / logging
+            // imagePlusResultsMap remains empty (its initial state)
+        } catch (RuntimeException e) {
+            // Handle unexpected runtime errors during inference or conversion
+            System.err.println("!!! Runtime Exception during inference/conversion: " + e.getMessage());
+            e.printStackTrace();
+            // IJ.log(String.format("%s at pixel x=%d, y=%d", ...)); // Original log format needs context (pixel info) which isn't available here easily.
+            IJ.handleException(e); // Use generic ImageJ handler
+            // imagePlusResultsMap remains empty
+        } catch (Exception e) {
+            // Catch any other possible checked exceptions as a safety net
+             System.err.println("!!! Unexpected Exception during inference/conversion: " + e.getMessage());
+             e.printStackTrace();
+             IJ.handleException(e);
+             // imagePlusResultsMap remains empty
+        }
+
+        // 4. Always return the map (populated if successful, empty otherwise)
+        return imagePlusResultsMap;
     }
 
     /**

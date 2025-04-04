@@ -192,4 +192,8 @@ public class DeepLearningProcessor {
         }
         return false;
     }
+
+    public InputMetadata getInputMetadata() {
+        return this.onnxModel.getInputMetadata();
+    }
 }
