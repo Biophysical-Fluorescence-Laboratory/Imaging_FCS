@@ -129,7 +129,7 @@ public class DeepLearningProcessor {
                     inputShape))
             {
                 Map<String, OnnxTensor> inputMap = new HashMap<>();
-                inputMap.put(onnxModel.getInputNames().get(0), onnxTensor); // Assuming only one input
+                inputMap.put(onnxModel.getInputNames(), onnxTensor); // Assuming only one input
 
                 // Run inference - This now returns Map<String, Float>
                 // ONNX resources related to output are managed within runInference

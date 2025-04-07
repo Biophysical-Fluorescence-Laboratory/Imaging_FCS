@@ -19,7 +19,6 @@ public class OnnxPredictor implements AutoCloseable {
 
     private final OrtEnvironment env;
     private OrtSession session;
-    private final List<String> inputNames;
     private InputMetadata inputMetadata;
     private final List<String> outputNames;
     private final Map<String, long[]> outputShapes;
@@ -43,7 +42,6 @@ public class OnnxPredictor implements AutoCloseable {
      */
     public OnnxPredictor(String modelPath, boolean useGpu) throws OrtException {
         this.env = OrtEnvironment.getEnvironment();
-        this.inputNames = new ArrayList<>();
         this.outputNames = new ArrayList<>();
         this.outputShapes = new HashMap<>();
 
@@ -96,7 +94,7 @@ public class OnnxPredictor implements AutoCloseable {
             TensorInfo info = (TensorInfo) entry.getValue().getInfo();
             // Check if this is the specific input we want metadata from
             if (name.equals(TARGET_INPUT_NAME)) {
-                 // Ensure the NodeInfo is actually TensorInfo
+                // Ensure the NodeInfo is actually TensorInfo
                 if (info instanceof TensorInfo) {
                     long[] shape = info.getShape();
 
@@ -134,8 +132,8 @@ public class OnnxPredictor implements AutoCloseable {
         return env;
     }
 
-    public List<String> getInputNames() {
-        return inputNames;
+    public String getInputNames() {
+        return TARGET_INPUT_NAME;
     }
 
     public InputMetadata getInputMetadata() {

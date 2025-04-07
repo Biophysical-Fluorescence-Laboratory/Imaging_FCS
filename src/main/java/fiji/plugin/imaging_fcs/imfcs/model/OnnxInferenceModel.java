@@ -4,7 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.InvalidPathException;
 
-import ij.IJ;  // Import ImageJ
+import ij.IJ; // Import ImageJ
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.process.FloatProcessor;
@@ -30,10 +30,11 @@ public class OnnxInferenceModel {
     private int modelInputFrames;
     private String modelPath;
     private boolean useGpu;
-    private OnnxRuntimeStatus currentStatus = OnnxRuntimeStatus.NO_MODEL_LOADED; 
-    
+    private OnnxRuntimeStatus currentStatus = OnnxRuntimeStatus.NO_MODEL_LOADED;
+
     /**
-     * Constructs a ONNX inference model with references to the experimental settings.
+     * Constructs a ONNX inference model with references to the experimental
+     * settings.
      *
      * @param expSettingsModel the experimental settings model.
      */
@@ -80,7 +81,8 @@ public class OnnxInferenceModel {
         return true;
     }
 
-    public Map<String, float[][][]> runInference(ImageModel imageModel, ExpSettingsModel expSettingsModel) throws OrtException {
+    public Map<String, float[][][]> runInference(ImageModel imageModel, ExpSettingsModel expSettingsModel)
+            throws OrtException {
         if (this.currentStatus != OnnxRuntimeStatus.READY) {
             IJ.error("ONNX Model needs to be loaded for inference.");
             throw new Error("ONNX Model is not loaded.");
@@ -104,13 +106,16 @@ public class OnnxInferenceModel {
 
                 System.out.println("\n=== Output Name: " + outputName + " ===");
 
-                // Defensive check if the array dimensions are valid before trying to access elements
-                if (resultArray == null || resultArray.length == 0 || resultArray[0].length == 0 || resultArray[0][0].length == 0) {
+                // Defensive check if the array dimensions are valid before trying to access
+                // elements
+                if (resultArray == null || resultArray.length == 0 || resultArray[0].length == 0
+                        || resultArray[0][0].length == 0) {
                     System.out.println(" (Result array is null or empty for this output)");
                     continue; // Skip to the next output name
                 }
 
-                System.out.println("Result Array Dimensions: [" + resultArray.length + "][" + resultArray[0].length + "][" + resultArray[0][0].length + "]");
+                System.out.println("Result Array Dimensions: [" + resultArray.length + "][" + resultArray[0].length
+                        + "][" + resultArray[0][0].length + "]");
                 System.out.println("--------------------------");
 
                 // Print the contents of this specific resultArray
@@ -119,7 +124,8 @@ public class OnnxInferenceModel {
                     for (int y = 0; y < resultArray[0].length; y++) {
                         System.out.print("  ["); // Indent slightly for readability
                         for (int frame = 0; frame < resultArray[0][0].length; frame++) {
-                            System.out.print(resultArray[x][y][frame] + (frame < resultArray[0][0].length - 1 ? ", " : ""));
+                            System.out.print(
+                                    resultArray[x][y][frame] + (frame < resultArray[0][0].length - 1 ? ", " : ""));
                         }
                         System.out.print("] ");
                     }
@@ -135,7 +141,7 @@ public class OnnxInferenceModel {
             // Instead of System.exit, re-throw the exception (or wrap it)
             throw e; // Let the caller handle the OrtException
         } finally {
-             // Ensure processor resources are always closed if initialized
+            // Ensure processor resources are always closed if initialized
             if (this.deepLearningProcessor != null) {
                 try {
                     this.deepLearningProcessor.close();
@@ -147,7 +153,7 @@ public class OnnxInferenceModel {
             }
         }
     }
-    
+
     /**
      * Checks if inference should be done.
      *
@@ -184,53 +190,62 @@ public class OnnxInferenceModel {
             return imagePlusMap;
         }
 
-        // 3. Iterate through each entry (output name -> 3D float array) in the input map.
+        // 3. Iterate through each entry (output name -> 3D float array) in the input
+        // map.
         for (Map.Entry<String, float[][][]> entry : inferenceResults.entrySet()) {
-            String outputName = entry.getKey();       // The identifier/name for this image stack.
+            String outputName = entry.getKey(); // The identifier/name for this image stack.
             float[][][] dataArray = entry.getValue(); // The 3D array [WIDTH][HEIGHT][FRAMES].
 
             // 4. --- Input Validation for the current dataArray ---
             // Check if the array itself is null.
             if (dataArray == null) {
-                 System.err.println("Skipping conversion for output '" + outputName + "': Input data array is null.");
-                 continue; // Move to the next entry in the map.
+                System.err.println("Skipping conversion for output '" + outputName + "': Input data array is null.");
+                continue; // Move to the next entry in the map.
             }
             // Check if the first dimension (WIDTH) is valid.
             if (dataArray.length == 0) {
-                 System.err.println("Skipping conversion for output '" + outputName + "': Width dimension (dataArray.length) is 0.");
-                 continue;
+                System.err.println("Skipping conversion for output '" + outputName
+                        + "': Width dimension (dataArray.length) is 0.");
+                continue;
             }
-            // Check if the second dimension (HEIGHT) is valid. Assumes rectangular structure.
+            // Check if the second dimension (HEIGHT) is valid. Assumes rectangular
+            // structure.
             // Need to check if dataArray[0] is null before accessing its length.
             if (dataArray[0] == null || dataArray[0].length == 0) {
-                System.err.println("Skipping conversion for output '" + outputName + "': Height dimension (dataArray[0].length) is 0 or dataArray[0] is null.");
+                System.err.println("Skipping conversion for output '" + outputName
+                        + "': Height dimension (dataArray[0].length) is 0 or dataArray[0] is null.");
                 continue;
             }
             // Check if the third dimension (FRAMES) is valid. Assumes consistent depth.
             // Need to check if dataArray[0][0] is null before accessing its length.
             if (dataArray[0][0] == null || dataArray[0][0].length == 0) {
-                System.err.println("Skipping conversion for output '" + outputName + "': Frames dimension (dataArray[0][0].length) is 0 or dataArray[0][0] is null.");
+                System.err.println("Skipping conversion for output '" + outputName
+                        + "': Frames dimension (dataArray[0][0].length) is 0 or dataArray[0][0] is null.");
                 continue;
             }
             // --- End Input Validation ---
 
             // 5. Determine the dimensions from the validated array.
-            int width = dataArray.length;          // Width from the first dimension.
-            int height = dataArray[0].length;       // Height from the second dimension.
-            int nFrames = dataArray[0][0].length;   // Number of frames/slices from the third dimension.
+            int width = dataArray.length; // Width from the first dimension.
+            int height = dataArray[0].length; // Height from the second dimension.
+            int nFrames = dataArray[0][0].length; // Number of frames/slices from the third dimension.
 
             // 6. Create a new ImageJ ImageStack to hold the individual 2D slices (frames).
             // The stack is defined by the width and height of each slice.
             ImageStack imageStack = new ImageStack(width, height);
 
-            // 7. Iterate through each frame (which corresponds to a slice in the ImageStack).
+            // 7. Iterate through each frame (which corresponds to a slice in the
+            // ImageStack).
             for (int frameIndex = 0; frameIndex < nFrames; frameIndex++) {
 
-                // 8. Create a 1D float array to hold the pixel data for the *current* frame/slice.
-                // ImageJ processors expect pixel data as a flat 1D array. Size is width * height.
+                // 8. Create a 1D float array to hold the pixel data for the *current*
+                // frame/slice.
+                // ImageJ processors expect pixel data as a flat 1D array. Size is width *
+                // height.
                 float[] slicePixels = new float[width * height];
 
-                // 9. Populate the 1D slicePixels array from the 3D dataArray for the current frameIndex.
+                // 9. Populate the 1D slicePixels array from the 3D dataArray for the current
+                // frameIndex.
                 // ImageJ's standard pixel order in 1D arrays is row-by-row.
                 // So, the pixel at (x, y) should be at index (y * width + x) in the 1D array.
                 for (int y = 0; y < height; y++) {
@@ -255,14 +270,16 @@ public class OnnxInferenceModel {
             } // End of loop through frames (all slices added to imageStack)
 
             // 12. Create the final ImagePlus object.
-            // It uses the original outputName as its title and contains the populated ImageStack.
+            // It uses the original outputName as its title and contains the populated
+            // ImageStack.
             ImagePlus imagePlus = new ImagePlus(outputName, imageStack);
 
             // 13. Add the newly created ImagePlus object to the result map, using the
             // original output name as the key.
             imagePlusMap.put(outputName, imagePlus);
 
-            System.out.println("Successfully converted output '" + outputName + "' to ImagePlus (" + width + "x" + height + "x" + nFrames + ").");
+            System.out.println("Successfully converted output '" + outputName + "' to ImagePlus (" + width + "x"
+                    + height + "x" + nFrames + ").");
 
         } // End of loop through the input map entries
 
@@ -273,5 +290,19 @@ public class OnnxInferenceModel {
     public OnnxRuntimeStatus getCurrentStatus() {
         return this.currentStatus;
     }
-}
 
+    public void setStrideX(String strideX) {
+        this.strideX = Integer.parseInt(strideX);
+        System.out.printf("Updated model strideX %d", this.strideX);
+    }
+
+    public void setStrideY(String strideY) {
+        this.strideY = Integer.parseInt(strideY);
+        System.out.printf("Updated model strideY %d", this.strideY);
+    }
+
+    public void setStrideFrames(String strideFrames) {
+        this.strideFrames = Integer.parseInt(strideFrames);
+        System.out.printf("Updated model strideFrames %d", this.strideFrames);
+    }
+}

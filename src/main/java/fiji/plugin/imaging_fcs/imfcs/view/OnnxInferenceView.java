@@ -13,6 +13,7 @@ import ai.onnxruntime.OrtException;
 import java.awt.*;
 import java.awt.event.ActionListener;
 
+import static fiji.plugin.imaging_fcs.imfcs.controller.FieldListenerFactory.createFocusListener;
 import static fiji.plugin.imaging_fcs.imfcs.view.ButtonFactory.createJButton;
 import static fiji.plugin.imaging_fcs.imfcs.view.TextFieldFactory.createTextField;
 import static fiji.plugin.imaging_fcs.imfcs.view.UIUtils.createJLabel;
@@ -20,7 +21,8 @@ import static fiji.plugin.imaging_fcs.imfcs.view.TextFieldFactory.setText;
 
 /**
  * Provides the user interface for configuring and running ONNX model inference
- * within the imaging FCS plugin. Users can specify the model path, input/stride dimensions,
+ * within the imaging FCS plugin. Users can specify the model path, input/stride
+ * dimensions,
  * frame ranges, and trigger the inference process.
  */
 public final class OnnxInferenceView extends BaseView {
@@ -28,9 +30,10 @@ public final class OnnxInferenceView extends BaseView {
     // --- Constants for Layout and Appearance (Adjust as needed) ---
     // Increased rows to accommodate more fields + button + status
     private static final GridLayout VIEW_LAYOUT = new GridLayout(9, 4, 5, 5); // Rows, Cols, Hgap, Vgap
-    // Adjust location and size based on where you want it relative to other plugin windows
-    private static final Point VIEW_LOCATION =
-            new Point(Constants.MAIN_PANEL_POS.x, Constants.MAIN_PANEL_POS.y + Constants.MAIN_PANEL_DIM.height + 10);
+    // Adjust location and size based on where you want it relative to other plugin
+    // windows
+    private static final Point VIEW_LOCATION = new Point(Constants.MAIN_PANEL_POS.x,
+            Constants.MAIN_PANEL_POS.y + Constants.MAIN_PANEL_DIM.height + 10);
     private static final Dimension VIEW_DIMENSION = new Dimension(480, 350); // Increased size
 
     // --- Model and Controller References ---
@@ -56,7 +59,6 @@ public final class OnnxInferenceView extends BaseView {
         PROCESSING,
     }
 
-
     /**
      * Constructs an OnnxInferenceView with references to its controller and model.
      * Initializes the UI components for the ONNX inference settings window.
@@ -65,9 +67,8 @@ public final class OnnxInferenceView extends BaseView {
      * @param model      The model holding ONNX inference parameters and state.
      */
     public OnnxInferenceView(
-        OnnxInferenceController controller, 
-        OnnxInferenceModel model
-    ) {
+            OnnxInferenceController controller,
+            OnnxInferenceModel model) {
         // Title for the window
         super("ONNX Inference Settings");
         this.model = model;
@@ -91,7 +92,8 @@ public final class OnnxInferenceView extends BaseView {
     }
 
     /**
-     * Initialize text fields, buttons, and checkbox with default values and tooltips.
+     * Initialize text fields, buttons, and checkbox with default values and
+     * tooltips.
      * No listeners are attached at this stage.
      */
     @Override
@@ -100,13 +102,13 @@ public final class OnnxInferenceView extends BaseView {
         tfOnnxModelPath = createTextField("", "Path to the ONNX model file (.onnx)");
         tfOnnxModelPath.setEnabled(false); // Path often set via browser button
         btnBrowseOnnx = createJButton("Load Model", "Select the ONNX model file", null, (ActionListener) e -> {
-			try {
-				controller.btnLoadPressed();
-			} catch (OrtException e1) {
+            try {
+                controller.btnLoadPressed();
+            } catch (OrtException e1) {
                 IJ.log(e1.getStackTrace().toString());
                 IJ.error(e1.getMessage());
-			}
-		});
+            }
+        });
 
         tfInputX = createTextField("", "Model expected input width (loaded from model)");
         tfInputX.setEditable(false); // Loaded from model metadata
@@ -116,16 +118,21 @@ public final class OnnxInferenceView extends BaseView {
         tfInputFrames.setEditable(false); // Loaded from model metadata
 
         // Strides
-        tfStrideX = createTextField("1", "Stride in X dimension (pixels)"); // Default based on example
-        tfStrideY = createTextField("1", "Stride in Y dimension (pixels)"); // Default based on example
-        tfStrideFrames = createTextField("2500", "Stride in Frames dimension"); // Default from original ImFCSNet model, but will autofill to the loaded model.
+        tfStrideX = createTextField("1", "Stride in X dimension (pixels)", createFocusListener(model::setStrideX));
+        tfStrideY = createTextField("1", "Stride in Y dimension (pixels)", createFocusListener(model::setStrideY));
+        // Default from original ImFCSNet model, but will autofill to the loaded model.
+        tfStrideFrames = createTextField("2500", "Stride in Frames dimension",
+                createFocusListener(model::setStrideFrames));
 
         // GPU Option
         cbUseGpu = new JCheckBox("Use GPU (if available)");
         cbUseGpu.setToolTipText("Attempt to use CUDA for inference if supported");
 
         // Action Button
-        btnRunInference = createJButton("Run Inference", "Process the current image using the specified settings", null, (ActionListener) e -> {});
+        btnRunInference = createJButton("Run Inference", "Process the current image using the specified settings", null,
+            (ActionListener) e -> {
+                controller.infer();
+            });
         btnRunInference.setForeground(Color.RED);
 
         // Status Label
@@ -157,9 +164,11 @@ public final class OnnxInferenceView extends BaseView {
         add(createJLabel("", "")); // Spacer
 
         // Row 4: Stride (X, Y)
-        add(createJLabel("Stride X:", "Stride in X dimension (pixels). Set equal to Model Input X for non-overlapping inference."));
+        add(createJLabel("Stride X:",
+                "Stride in X dimension (pixels). Set equal to Model Input X for non-overlapping inference."));
         add(tfStrideX);
-        add(createJLabel("Stride Y:", "Stride in Y dimension (pixels). Set equal to Model Input X for non-overlapping inference."));
+        add(createJLabel("Stride Y:",
+                "Stride in Y dimension (pixels). Set equal to Model Input X for non-overlapping inference."));
         add(tfStrideY);
 
         // Row 5: Stride (Frames)
@@ -206,7 +215,8 @@ public final class OnnxInferenceView extends BaseView {
         // add(createJLabel("", "")); // Spacer
         // --- Re-evaluate layout for status ---
         // Let's just put status label in col 2
-        // add(createJLabel("Status:", "Current operation status")); // Already added in prev row
+        // add(createJLabel("Status:", "Current operation status")); // Already added in
+        // prev row
         // add(lblStatus);
         // add(createJLabel("", "")); // Spacer
         // add(createJLabel("", "")); // Spacer
@@ -220,6 +230,7 @@ public final class OnnxInferenceView extends BaseView {
     /**
      * Updates the status message displayed to the user.
      * (To be called by the Controller).
+     * 
      * @param message The status message to display.
      */
     public void updateStatus(String message) {
@@ -232,25 +243,27 @@ public final class OnnxInferenceView extends BaseView {
     /**
      * Enables or disables UI components based on whether processing is running.
      * (To be called by the Controller).
-     * @param running True if processing is starting, false if it has finished or errored.
+     * 
+     * @param running True if processing is starting, false if it has finished or
+     *                errored.
      */
     public void setRunningState(boolean running) {
-         SwingUtilities.invokeLater(() -> {
-             // Disable input fields and buttons while running
-             tfOnnxModelPath.setEnabled(!running);
-             btnBrowseOnnx.setEnabled(!running);
-             tfInputX.setEnabled(!running);
-             tfInputY.setEnabled(!running);
-             tfInputFrames.setEnabled(!running);
-             tfStrideX.setEnabled(!running);
-             tfStrideY.setEnabled(!running);
-             tfStrideFrames.setEnabled(!running);
-             cbUseGpu.setEnabled(!running);
-             btnRunInference.setEnabled(!running);
+        SwingUtilities.invokeLater(() -> {
+            // Disable input fields and buttons while running
+            tfOnnxModelPath.setEnabled(!running);
+            btnBrowseOnnx.setEnabled(!running);
+            tfInputX.setEnabled(!running);
+            tfInputY.setEnabled(!running);
+            tfInputFrames.setEnabled(!running);
+            tfStrideX.setEnabled(!running);
+            tfStrideY.setEnabled(!running);
+            tfStrideFrames.setEnabled(!running);
+            cbUseGpu.setEnabled(!running);
+            btnRunInference.setEnabled(!running);
 
-             // Optionally change Run button text
-             btnRunInference.setText(running ? "Processing..." : "Run Inference");
-         });
+            // Optionally change Run button text
+            btnRunInference.setText(running ? "Processing..." : "Run Inference");
+        });
     }
 
     public void updateModelPath(String modelPath) {
@@ -279,4 +292,16 @@ public final class OnnxInferenceView extends BaseView {
     public boolean getUseGPU() {
         return cbUseGpu.isSelected();
     }
+
+	public String getStrideX() {
+        return this.tfStrideX.getText();
+	}
+
+	public String getStrideY() {
+        return this.tfStrideY.getText();
+	}
+
+	public String getStrideFrames() {
+        return this.tfStrideFrames.getText();
+	}
 }

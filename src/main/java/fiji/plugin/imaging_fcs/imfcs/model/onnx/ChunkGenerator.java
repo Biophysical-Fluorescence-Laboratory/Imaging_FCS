@@ -58,10 +58,20 @@ public class ChunkGenerator {
     }
 
     public float[][][] generateResultArray() {
+        System.out.println(imageDimX);
+        System.out.println(imageDimY);
+        System.out.println(imageDimFrames);
+        System.out.println(strideX);
+        System.out.println(strideY);
+        System.out.println(strideFrames);
+
         int resultDimX = (imageDimX - modelInputX) / strideX + 1;
         int resultDimY = (imageDimY - modelInputY) / strideY + 1;
         int resultDimFrames = (imageDimFrames - modelInputFrames) / strideFrames + 1;
-
+        
+        System.out.println(resultDimX);
+        System.out.println(resultDimY);
+        System.out.println(resultDimFrames);
         return new float[resultDimX][resultDimY][resultDimFrames];
     }
     

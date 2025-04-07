@@ -141,7 +141,7 @@ public final class MainPanelController {
 
         // ONNX Inference-specific views.
         this.onnxInferenceModel = new OnnxInferenceModel(bleachCorrectionModel, optionsModel.isCuda());
-        this.onnxInferenceController = new OnnxInferenceController(this.onnxInferenceModel);
+        this.onnxInferenceController = new OnnxInferenceController(this.onnxInferenceModel, imageModel, settings);
 
         if (workbook != null) {
             // read the Excel file to restore parameters
