@@ -229,16 +229,17 @@ public class OnnxInferenceController {
     // TODO: Add functionality to display windows.
     public void btnRunInferencePressed() {
         Map<String, ImagePlus> outputMaps = this.infer();
-        
+
         // TODO: Close existing maps before spawning new ones.
         showOnnxOutputMaps(outputMaps);
     }
 
-/**
+    /**
      * Displays each ImagePlus from the map in its own separate window.
      * Uses the map key as the initial window title.
      *
-     * @param outputMaps A map where keys are desired titles and values are ImagePlus objects.
+     * @param outputMaps A map where keys are desired titles and values are
+     *                   ImagePlus objects.
      */
     public static void showOnnxOutputMaps(Map<String, ImagePlus> outputMaps) {
         if (outputMaps == null || outputMaps.isEmpty()) {
@@ -249,8 +250,8 @@ public class OnnxInferenceController {
         // --- Optional: Basic Window Positioning Logic ---
         int initialX = 50; // Starting X position for the first window
         int initialY = 50; // Starting Y position
-        int xOffset = 30;  // How much to shift each subsequent window horizontally
-        int yOffset = 30;  // How much to shift vertically
+        int xOffset = 30; // How much to shift each subsequent window horizontally
+        int yOffset = 30; // How much to shift vertically
         int currentX = initialX;
         int currentY = initialY;
         int screenWidth = Constants.MAIN_PANEL_DIM.width;
@@ -278,9 +279,9 @@ public class OnnxInferenceController {
                 } else {
                     // If positioning is critical, might need WindowManager.getImageWindow(name)
                     // or a slight delay, but usually setLocation works.
-                    System.err.println("Warning: Could not get window reference immediately for '" + name + "' to set location.");
+                    System.err.println(
+                            "Warning: Could not get window reference immediately for '" + name + "' to set location.");
                 }
-
 
                 // 4. Calculate position for the next window (simple tiling)
                 currentX += xOffset;
@@ -293,7 +294,7 @@ public class OnnxInferenceController {
                 }
                 // If we go off the bottom, wrap back to the top (optional)
                 if (currentY + approxWindowHeight > screenHeight) {
-                     currentY = initialY;
+                    currentY = initialY;
                 }
 
             } else {
