@@ -1,6 +1,7 @@
 
 package fiji.plugin.imaging_fcs.imfcs.controller;
 
+import java.awt.Dimension;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,7 +9,10 @@ import java.util.Map;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import com.sun.org.apache.bcel.internal.classfile.Constant;
+
 import ai.onnxruntime.OrtException;
+import fiji.plugin.imaging_fcs.imfcs.constants.Constants;
 import fiji.plugin.imaging_fcs.imfcs.model.ExpSettingsModel;
 import fiji.plugin.imaging_fcs.imfcs.model.ImageModel;
 import fiji.plugin.imaging_fcs.imfcs.model.OnnxInferenceModel;
@@ -225,10 +229,80 @@ public class OnnxInferenceController {
     // TODO: Add functionality to display windows.
     public void btnRunInferencePressed() {
         Map<String, ImagePlus> outputMaps = this.infer();
-
+        
+        // TODO: Close existing maps before spawning new ones.
+        showOnnxOutputMaps(outputMaps);
     }
 
-	public void startOnnxSession() {
+/**
+     * Displays each ImagePlus from the map in its own separate window.
+     * Uses the map key as the initial window title.
+     *
+     * @param outputMaps A map where keys are desired titles and values are ImagePlus objects.
+     */
+    public static void showOnnxOutputMaps(Map<String, ImagePlus> outputMaps) {
+        if (outputMaps == null || outputMaps.isEmpty()) {
+            System.out.println("No output maps to display.");
+            return;
+        }
+
+        // --- Optional: Basic Window Positioning Logic ---
+        int initialX = 50; // Starting X position for the first window
+        int initialY = 50; // Starting Y position
+        int xOffset = 30;  // How much to shift each subsequent window horizontally
+        int yOffset = 30;  // How much to shift vertically
+        int currentX = initialX;
+        int currentY = initialY;
+        int screenWidth = Constants.MAIN_PANEL_DIM.width;
+        int screenHeight = Constants.MAIN_PANEL_DIM.height;
+        int approxWindowHeight = 200; // Estimate or get from first imp if possible
+
+        // --- Iterate and Show ---
+        for (Map.Entry<String, ImagePlus> entry : outputMaps.entrySet()) {
+            String name = entry.getKey();
+            ImagePlus imp = entry.getValue();
+
+            if (imp != null) {
+                // 1. Set the title *before* showing for clarity
+                imp.setTitle(name);
+
+                // 2. Show the ImagePlus - this creates and displays the window
+                imp.show();
+
+                // 3. Optional: Try to position the window
+                // Getting the window immediately after show() can sometimes be tricky,
+                // but often works. imp.getWindow() returns the ImageWindow.
+                if (imp.getWindow() != null) {
+                    imp.getWindow().setLocation(currentX, currentY);
+                    approxWindowHeight = imp.getWindow().getHeight(); // Update height estimate
+                } else {
+                    // If positioning is critical, might need WindowManager.getImageWindow(name)
+                    // or a slight delay, but usually setLocation works.
+                    System.err.println("Warning: Could not get window reference immediately for '" + name + "' to set location.");
+                }
+
+
+                // 4. Calculate position for the next window (simple tiling)
+                currentX += xOffset;
+                // If we go too far right, move to the next row
+                // Use imp.getWindow().getWidth() if available for better accuracy
+                int approxWindowWidth = (imp.getWindow() != null) ? imp.getWindow().getWidth() : 200;
+                if (currentX + approxWindowWidth > screenWidth) {
+                    currentX = initialX; // Reset X
+                    currentY += yOffset + approxWindowHeight; // Move down by offset + estimated height
+                }
+                // If we go off the bottom, wrap back to the top (optional)
+                if (currentY + approxWindowHeight > screenHeight) {
+                     currentY = initialY;
+                }
+
+            } else {
+                System.out.println("Skipping null ImagePlus associated with key: " + name);
+            }
+        }
+    }
+
+    public void startOnnxSession() {
         this.model.startOnnxSession();
-	}
+    }
 }
