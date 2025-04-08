@@ -150,6 +150,7 @@ public class OnnxInferenceModel {
      */
     public boolean canFit() {
         if (this.currentStatus == OnnxRuntimeStatus.READY && this.deepLearningProcessor != null) {
+            // TODO: This check seems extraneous
             if (this.deepLearningProcessor.isOnnxSessionStarted()) {
                 return true;
             } else {
@@ -300,9 +301,27 @@ public class OnnxInferenceModel {
             try {
                 this.deepLearningProcessor.close();
                 System.out.println("\nProcessor resources closed.");
-                this.currentStatus = OnnxRuntimeStatus.NO_MODEL_LOADED;
+                this.currentStatus = OnnxRuntimeStatus.MODEL_SELECTED;
             } catch (OrtException e) {
                 System.err.println("Error closing processor resources: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void startOnnxSession() {
+        if (getCurrentStatus() == OnnxRuntimeStatus.NO_MODEL_LOADED) {
+            System.err.println("No ONNX model loaded, nothing to initialize.");
+            IJ.error("No ONNX model loaded, cannot initialize.");
+        }
+
+        if (this.deepLearningProcessor != null) {
+            try {
+                this.deepLearningProcessor.getOnnxPredictor().create_session();
+                System.out.println("\nOnnx inference session created.");
+                this.currentStatus = OnnxRuntimeStatus.READY;
+            } catch (OrtException e) {
+                System.err.println("Error creating ONNX inference session: " + e.getMessage());
                 e.printStackTrace();
             }
         }

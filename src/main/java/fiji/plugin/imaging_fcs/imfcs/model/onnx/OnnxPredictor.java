@@ -22,6 +22,8 @@ public class OnnxPredictor implements AutoCloseable {
     private InputMetadata inputMetadata;
     private final List<String> outputNames;
     private final Map<String, long[]> outputShapes;
+    private final String modelPath;
+    private boolean useGpu;
 
     // Define the expected name of the input tensor containing the shape info
     private static final String TARGET_INPUT_NAME = "input";
@@ -44,7 +46,16 @@ public class OnnxPredictor implements AutoCloseable {
         this.env = OrtEnvironment.getEnvironment();
         this.outputNames = new ArrayList<>();
         this.outputShapes = new HashMap<>();
+        this.modelPath = modelPath;
+        this.useGpu = useGpu;
 
+        this.create_session();
+
+        // Extract metadata (input/output names and shapes) - same as before
+        extractMetadata();
+    }
+
+    public void create_session() throws OrtException {
         // Use try-with-resources for SessionOptions to ensure it's closed automatically
         try (SessionOptions options = new SessionOptions()) {
 
@@ -56,7 +67,7 @@ public class OnnxPredictor implements AutoCloseable {
             options.setOptimizationLevel(OptLevel.NO_OPT);
             // --- END DISABLE OPTIMIZATIONS ---
 
-            if (useGpu) {
+            if (this.useGpu) {
                 System.out.println("Attempting to configure ONNX Runtime session for GPU (CUDA).");
                 try {
                     // Add the CUDA execution provider (device 0 is typically the default GPU)
@@ -76,14 +87,11 @@ public class OnnxPredictor implements AutoCloseable {
             }
 
             // Create the session using the configured options
-            this.session = env.createSession(modelPath, options);
+            this.session = env.createSession(this.modelPath, options);
         } // SessionOptions 'options' is automatically closed here
+	}
 
-        // Extract metadata (input/output names and shapes) - same as before
-        extractMetadata();
-    }
-
-    // Helper method to keep constructor cleaner
+	// Helper method to keep constructor cleaner
     private void extractMetadata() throws OrtException {
         if (this.session == null) {
             throw new IllegalStateException("Session is not initialized.");

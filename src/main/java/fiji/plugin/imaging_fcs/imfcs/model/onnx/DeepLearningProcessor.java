@@ -200,4 +200,8 @@ public class DeepLearningProcessor {
     public InputMetadata getInputMetadata() {
         return this.onnxModel.getInputMetadata();
     }
+    
+    public OnnxPredictor getOnnxPredictor() {
+        return this.onnxModel;
+    }
 }

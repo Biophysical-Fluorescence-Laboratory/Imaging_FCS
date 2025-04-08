@@ -43,6 +43,7 @@ public final class OnnxInferenceView extends BaseView {
     // --- UI Component Fields ---
     private JTextField tfOnnxModelPath;
     private JButton btnBrowseOnnx;
+    private JButton btnInitOnnx;
     private JTextField tfInputX;
     private JTextField tfInputY;
     private JTextField tfInputFrames;
@@ -109,6 +110,8 @@ public final class OnnxInferenceView extends BaseView {
                 IJ.error(e1.getMessage());
             }
         });
+        btnInitOnnx = createJButton("Init Model", "Start the ONNX environment for inference", null, 
+            (ActionListener) e -> controller.startOnnxSession());
 
         tfInputX = createTextField("", "Model expected input width (loaded from model)");
         tfInputX.setEditable(false); // Loaded from model metadata
@@ -149,8 +152,8 @@ public final class OnnxInferenceView extends BaseView {
         add(createJLabel("ONNX Model:", "Path to the ONNX model file (.onnx)"));
         add(tfOnnxModelPath);
         add(btnBrowseOnnx);
-        add(createJLabel("", "")); // Spacer
-
+        add(btnInitOnnx);
+        
         // Row 2: Input Dimensions (X, Y)
         add(createJLabel("Input X:", "Model input X dimension (pixels)"));
         add(tfInputX);
@@ -293,15 +296,15 @@ public final class OnnxInferenceView extends BaseView {
         return cbUseGpu.isSelected();
     }
 
-	public String getStrideX() {
+    public String getStrideX() {
         return this.tfStrideX.getText();
-	}
+    }
 
-	public String getStrideY() {
+    public String getStrideY() {
         return this.tfStrideY.getText();
-	}
+    }
 
-	public String getStrideFrames() {
+    public String getStrideFrames() {
         return this.tfStrideFrames.getText();
-	}
+    }
 }

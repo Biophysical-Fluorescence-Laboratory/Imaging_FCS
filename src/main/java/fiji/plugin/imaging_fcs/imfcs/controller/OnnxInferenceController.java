@@ -226,4 +226,8 @@ public class OnnxInferenceController {
         Map<String, ImagePlus> outputMaps = this.infer();
 
     }
+
+	public void startOnnxSession() {
+        this.model.startOnnxSession();
+	}
 }
