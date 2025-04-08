@@ -144,6 +144,7 @@ public class OnnxInferenceController {
             // Assign the result directly to our return variable
             imagePlusResultsMap = model.castArrayToImagePlus(modelOutsArray);
 
+            this.view.updateStatus(OnnxRuntimeStatus.READY.getDisplayLabel());
             System.out.println("Successfully converted inference results to ImagePlus map.");
         } catch (OrtException e) {
             // Handle ONNX specific errors during runInference or potentially during setup
