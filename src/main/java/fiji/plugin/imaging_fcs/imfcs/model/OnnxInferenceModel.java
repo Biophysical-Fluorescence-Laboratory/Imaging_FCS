@@ -140,18 +140,7 @@ public class OnnxInferenceModel {
             e.printStackTrace();
             // Instead of System.exit, re-throw the exception (or wrap it)
             throw e; // Let the caller handle the OrtException
-        } finally {
-            // Ensure processor resources are always closed if initialized
-            if (this.deepLearningProcessor != null) {
-                try {
-                    this.deepLearningProcessor.close();
-                    System.out.println("\nProcessor resources closed.");
-                } catch (OrtException e) {
-                    System.err.println("Error closing processor resources: " + e.getMessage());
-                    e.printStackTrace();
-                }
-            }
-        }
+        } 
     }
 
     /**
@@ -304,5 +293,18 @@ public class OnnxInferenceModel {
     public void setStrideFrames(String strideFrames) {
         this.strideFrames = Integer.parseInt(strideFrames);
         System.out.printf("Updated model strideFrames %d", this.strideFrames);
+    }
+
+    public void closeOnnxSession() {
+        if (this.deepLearningProcessor != null) {
+            try {
+                this.deepLearningProcessor.close();
+                System.out.println("\nProcessor resources closed.");
+                this.currentStatus = OnnxRuntimeStatus.NO_MODEL_LOADED;
+            } catch (OrtException e) {
+                System.err.println("Error closing processor resources: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
     }
 }

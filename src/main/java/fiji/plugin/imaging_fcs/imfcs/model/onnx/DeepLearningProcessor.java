@@ -41,13 +41,15 @@ public class DeepLearningProcessor {
         this.imageArr = new float[this.imageDimX][this.imageDimY][this.imageDimFrames];
     }
 
-    // Prepare the pixels by extracting values and doing bleach correction if requested.
+    // Prepare the pixels by extracting values and doing bleach correction if
+    // requested.
     private void preparePixels(int initialFrame, int finalFrame) {
-        System.out.println(initialFrame);
-        System.out.println(finalFrame);
         for (int x = 0; x < this.imageDimX; x++) {
             for (int y = 0; y < this.imageDimY; y++) {
-                double[] intensityData = bleachCorrectionModel.getIntensity(this.loadedImage, x, y, 1, initialFrame, finalFrame);
+                // NOTE: This step is technically not needed for no bleach correction.
+                bleachCorrectionModel.calcIntensityTrace(this.loadedImage, x, y, initialFrame, finalFrame);
+                double[] intensityData = bleachCorrectionModel.getIntensity(this.loadedImage, x, y, 1, initialFrame,
+                        finalFrame);
 
                 // Iterate through the frames within the specified range
                 for (int t = initialFrame; t < finalFrame; t++) {
@@ -55,7 +57,7 @@ public class DeepLearningProcessor {
                     int intensityIndex = t - initialFrame;
 
                     // Store the bleach-corrected intensity.
-                    //  - Cast the double to a float.
+                    // - Cast the double to a float.
                     this.imageArr[x][y][t] = (float) intensityData[intensityIndex];
                 }
             }
@@ -66,25 +68,25 @@ public class DeepLearningProcessor {
         this.onnxModel = new OnnxPredictor(modelPath, this.useGpu);
     }
 
-
- /**
+    /**
      * Processes the loaded image by iterating through chunks, running inference,
      * and aggregating results for each named output of the ONNX model.
      *
-     * @param modelInputX    Model input X dimension.
-     * @param modelInputY    Model input Y dimension.
+     * @param modelInputX      Model input X dimension.
+     * @param modelInputY      Model input Y dimension.
      * @param modelInputFrames Model input frame dimension.
-     * @param strideX        Stride in X dimension.
-     * @param strideY        Stride in Y dimension.
-     * @param strideFrames   Stride in frame dimension.
-     * @param initialFrame   Initial frame to process.
-     * @param finalFrame     Final frame to process.
+     * @param strideX          Stride in X dimension.
+     * @param strideY          Stride in Y dimension.
+     * @param strideFrames     Stride in frame dimension.
+     * @param initialFrame     Initial frame to process.
+     * @param finalFrame       Final frame to process.
      * @return A Map where keys are the ONNX model output names and values are
-     *         3D float arrays (float[][][]) containing the aggregated results for that output.
+     *         3D float arrays (float[][][]) containing the aggregated results for
+     *         that output.
      * @throws OrtException If there is an error during ONNX processing.
      */
     public Map<String, float[][][]> processImage(int strideX, int strideY, int strideFrames,
-                                                 int initialFrame, int finalFrame) throws OrtException {
+            int initialFrame, int finalFrame) throws OrtException {
         // Extract model input properties from the metadata.
         InputMetadata inputMetadata = onnxModel.getInputMetadata();
         int modelInputX = (int) inputMetadata.modelInputX;
@@ -119,15 +121,15 @@ public class DeepLearningProcessor {
             // Add channel dimension for ONNX model (Batch=1, Channel=1)
             // The shape should be [Batch, Channel, Frames, X, Y]
             // chunk dimensions are [Frames][X][Y]
-            // Shape for createTensor should match model input spec: [1, 1, modelInputFrames, modelInputX, modelInputY]
-            long[] inputShape = new long[]{1, 1, modelInputFrames, modelInputX, modelInputY};
+            // Shape for createTensor should match model input spec: [1, 1,
+            // modelInputFrames, modelInputX, modelInputY]
+            long[] inputShape = new long[] { 1, 1, modelInputFrames, modelInputX, modelInputY };
 
             // Prepare input tensor within a try-with-resources block for auto-closing
             try (OnnxTensor onnxTensor = OnnxTensor.createTensor(
                     onnxModel.getEnvironment(),
                     FloatBuffer.wrap(flattenChunk(chunk)), // Use a specific flatten for the chunk
-                    inputShape))
-            {
+                    inputShape)) {
                 Map<String, OnnxTensor> inputMap = new HashMap<>();
                 inputMap.put(onnxModel.getInputNames(), onnxTensor); // Assuming only one input
 
@@ -143,10 +145,12 @@ public class DeepLearningProcessor {
                     // Get the correct result array from the map based on the output name
                     float[][][] targetArray = resultsMap.get(outputName);
 
-                    // Defensive check (should not happen if initialized correctly based on model metadata)
+                    // Defensive check (should not happen if initialized correctly based on model
+                    // metadata)
                     if (targetArray == null) {
-                         System.err.println("Warning: No result array found in resultsMap for output name: " + outputName + ". Skipping.");
-                         continue; // Skip this output if structure wasn't pre-allocated
+                        System.err.println("Warning: No result array found in resultsMap for output name: " + outputName
+                                + ". Skipping.");
+                        continue; // Skip this output if structure wasn't pre-allocated
                     }
 
                     // Fill the specific result array at the calculated indices
@@ -182,8 +186,8 @@ public class DeepLearningProcessor {
 
     // Close methods to prevent resource leaks
     public void close() throws OrtException {
-      if (onnxModel != null)
-        onnxModel.close();
+        if (onnxModel != null)
+            onnxModel.close();
     }
 
     public boolean isOnnxSessionStarted() {

@@ -98,12 +98,12 @@ public class OnnxInferenceController {
         }
         if (!isActivated()) {
             System.out.println("Inference skipped: System is not activated.");
-            IJ.log("Inference skipped: System is not activated."); // Optional ImageJ log
+            IJ.error("Inference skipped: System is not activated."); // Optional ImageJ log
             return imagePlusResultsMap; // Return empty map
         }
         if (!model.canFit()) { // Assuming model.canFit() exists and checks readiness
             System.out.println("Inference skipped: Model cannot fit (e.g., not loaded or dimensions mismatch?).");
-            IJ.log("Inference skipped: Model cannot fit."); // Optional ImageJ log
+            IJ.error("Inference skipped: Model cannot fit."); // Optional ImageJ log
             return imagePlusResultsMap; // Return empty map
         }
 
@@ -172,12 +172,21 @@ public class OnnxInferenceController {
         return imagePlusResultsMap;
     }
 
+    public void teardownOnnxSession() {
+        this.model.closeOnnxSession();
+        this.view.updateStatus(this.model.getCurrentStatus().getDisplayLabel());
+    }
+
     /**
      * Sets the visibility of the view.
      *
      * @param b The visibility status.
      */
     public void setVisible(boolean b) {
+        // Perform teardown when closing.
+        if (!b) {
+            this.teardownOnnxSession();
+        }
         view.setVisible(b);
     }
 
@@ -210,5 +219,11 @@ public class OnnxInferenceController {
 
     public OnnxInferenceView getView() {
         return view;
+    }
+
+    // TODO: Add functionality to display windows.
+    public void btnRunInferencePressed() {
+        Map<String, ImagePlus> outputMaps = this.infer();
+
     }
 }

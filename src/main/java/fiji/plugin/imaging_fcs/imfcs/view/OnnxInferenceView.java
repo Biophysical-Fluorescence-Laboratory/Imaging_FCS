@@ -131,7 +131,7 @@ public final class OnnxInferenceView extends BaseView {
         // Action Button
         btnRunInference = createJButton("Run Inference", "Process the current image using the specified settings", null,
             (ActionListener) e -> {
-                controller.infer();
+                controller.btnRunInferencePressed();
             });
         btnRunInference.setForeground(Color.RED);
 
