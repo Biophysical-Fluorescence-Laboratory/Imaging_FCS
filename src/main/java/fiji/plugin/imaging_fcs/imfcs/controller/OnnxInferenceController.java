@@ -17,9 +17,12 @@ import fiji.plugin.imaging_fcs.imfcs.model.ExpSettingsModel;
 import fiji.plugin.imaging_fcs.imfcs.model.ImageModel;
 import fiji.plugin.imaging_fcs.imfcs.model.OnnxInferenceModel;
 import fiji.plugin.imaging_fcs.imfcs.model.onnx.OnnxRuntimeStatus;
+import fiji.plugin.imaging_fcs.imfcs.utils.ApplyCustomLUT;
 import fiji.plugin.imaging_fcs.imfcs.view.OnnxInferenceView;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.WindowManager;
+import ij.gui.ImageWindow;
 
 /**
  * The OnnxInferenceController class handles the interactions between the
@@ -31,6 +34,14 @@ public class OnnxInferenceController {
     private final OnnxInferenceView view;
     private final ImageModel imageModel;
     private ExpSettingsModel expSettingsModel;
+
+
+    // Keep track of window positions globally or pass state if needed
+    private static int nextX = 50;
+    private static int nextY = 50;
+    private static final int X_OFFSET = 30;
+    private static final int Y_OFFSET = 30;
+    private static int lastRowHeight = 200; // Keep track of height in the current 'row'
 
     /**
      * Constructs a new OnnxInferenceController with the given OnnxInferenceModel.
@@ -226,7 +237,6 @@ public class OnnxInferenceController {
         return view;
     }
 
-    // TODO: Add functionality to display windows.
     public void btnRunInferencePressed() {
         Map<String, ImagePlus> outputMaps = this.infer();
 
@@ -241,7 +251,7 @@ public class OnnxInferenceController {
      * @param outputMaps A map where keys are desired titles and values are
      *                   ImagePlus objects.
      */
-    public static void showOnnxOutputMaps(Map<String, ImagePlus> outputMaps) {
+    public static void _showOnnxOutputMaps(Map<String, ImagePlus> outputMaps) {
         if (outputMaps == null || outputMaps.isEmpty()) {
             System.out.println("No output maps to display.");
             return;
@@ -267,8 +277,11 @@ public class OnnxInferenceController {
                 // 1. Set the title *before* showing for clarity
                 imp.setTitle(name);
 
-                // 2. Show the ImagePlus - this creates and displays the window
+                // create the window and adapt the image scale
                 imp.show();
+                ImageWindow window = imp.getWindow();
+                ImageModel.adaptImageScale(imp);
+                ApplyCustomLUT.applyCustomLUT(imp, "Red Hot");
 
                 // 3. Optional: Try to position the window
                 // Getting the window immediately after show() can sometimes be tricky,
@@ -301,6 +314,125 @@ public class OnnxInferenceController {
                 System.out.println("Skipping null ImagePlus associated with key: " + name);
             }
         }
+    }
+
+    /**
+     * Displays each ImagePlus from the map. If a window with the same title
+     * (map key) already exists, its content is updated. Otherwise, a new
+     * window is created and positioned.
+     *
+     * @param outputMaps A map where keys are desired titles and values are
+     *                   ImagePlus objects.
+     */
+    public static void showOnnxOutputMaps(Map<String, ImagePlus> outputMaps) {
+        if (outputMaps == null || outputMaps.isEmpty()) {
+            System.out.println("No output maps to display.");
+            return;
+        }
+
+        // Reset starting position for each fresh call if desired, or maintain state
+        // For this example, let's reset positioning each time for simplicity,
+        // although maintaining state across calls might be useful in some plugins.
+        nextX = 50;
+        nextY = 50;
+        lastRowHeight = 200; // Reset estimated height
+
+        // Get screen dimensions
+        Dimension screenSize = ij.IJ.getScreenSize();
+        int screenWidth = screenSize.width - 50; // Leave margin
+        int screenHeight = screenSize.height - 100;// Leave margin
+
+        System.out.println("Displaying/Updating windows...");
+        for (Map.Entry<String, ImagePlus> entry : outputMaps.entrySet()) {
+            String name = entry.getKey();
+            ImagePlus newImp = entry.getValue(); // The new image data
+
+            if (newImp == null) {
+                System.out.println("Skipping null ImagePlus associated with key: " + name);
+                continue; // Skip to the next entry
+            }
+
+            // Set the title on the new ImagePlus regardless, needed for comparison/display
+            newImp.setTitle(name);
+
+            // --- Check if a window with this title already exists ---
+            ImagePlus existingImp = WindowManager.getImage(name);
+
+            if (existingImp != null && existingImp.getWindow() != null) {
+                // --- Update existing window ---
+                System.out.println("Updating existing window: " + name);
+
+                // 1. Replace the image stack
+                // Important: Use the stack from the *new* ImagePlus
+                existingImp.setStack(newImp.getStack());
+
+                // 2. Copy calibration/metadata if necessary (optional, depends on needs)
+                existingImp.setCalibration(newImp.getCalibration());
+                // You might want to copy other properties if they change
+
+                // 3. Ensure title is correct (might be redundant but safe)
+                existingImp.setTitle(name);
+
+                // 4. Refresh the display
+                existingImp.updateAndDraw();
+                ImageModel.adaptImageScale(existingImp);
+                ApplyCustomLUT.applyCustomLUT(existingImp, "Red Hot");
+
+                // 5. Optional: Bring the updated window to the front
+                existingImp.getWindow().toFront();
+
+                // Note: We DON'T position existing windows here, leave them be.
+
+            } else {
+                // --- Show as a new window ---
+                System.out.println("Creating new window: " + name);
+
+                // 1. Show the new ImagePlus
+                newImp.show(); // Creates the window
+                ImageWindow win = newImp.getWindow();
+                ImageModel.adaptImageScale(newImp);
+                ApplyCustomLUT.applyCustomLUT(newImp, "Red Hot");
+
+                // 2. Position the *new* window
+                if (win != null) {
+                    int actualWindowWidth = win.getWidth();
+                    int actualWindowHeight = win.getHeight();
+                    lastRowHeight = Math.max(lastRowHeight, actualWindowHeight); // Track max height in row
+
+                    // Check if placing at nextX overflows screen width
+                    if (nextX + actualWindowWidth > screenWidth) {
+                        nextX = 50; // Reset X to initial
+                        nextY += Y_OFFSET + lastRowHeight; // Move down by offset + max height of previous row
+                        lastRowHeight = actualWindowHeight; // Reset max height for the new row
+                    }
+                    // Check if placing at nextY overflows screen height
+                    if (nextY + actualWindowHeight > screenHeight) {
+                        nextY = 50; // Reset Y (wrap around)
+                        nextX = 50; // Reset X too for wrap
+                        lastRowHeight = actualWindowHeight; // Reset height track
+                    }
+
+                    win.setLocation(nextX, nextY);
+
+                    // 3. Calculate position for the *next* potential new window
+                    nextX += X_OFFSET; // Prepare for next window slightly offset right
+
+                } else {
+                    System.err.println(
+                            "Warning: Could not get window reference immediately for '" + name + "' to set location.");
+                    // Fallback positioning increment if window ref fails immediately
+                    nextX += X_OFFSET;
+                    if (nextX + 200 > screenWidth) { // Use estimate
+                        nextX = 50;
+                        nextY += Y_OFFSET + lastRowHeight;
+                    }
+                    if (nextY + 200 > screenHeight) {
+                        nextY = 50;
+                    }
+                }
+            }
+        }
+        System.out.println("Finished displaying/updating windows.");
     }
 
     public void startOnnxSession() {

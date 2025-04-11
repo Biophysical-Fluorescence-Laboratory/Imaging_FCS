@@ -326,4 +326,8 @@ public class OnnxInferenceModel {
             }
         }
     }
+
+    public boolean getGpu() {
+        return this.useGpu;
+    }
 }
