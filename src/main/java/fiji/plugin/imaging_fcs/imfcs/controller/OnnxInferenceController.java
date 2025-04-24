@@ -9,8 +9,6 @@ import java.util.Map;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import com.sun.org.apache.bcel.internal.classfile.Constant;
-
 import ai.onnxruntime.OrtException;
 import fiji.plugin.imaging_fcs.imfcs.constants.Constants;
 import fiji.plugin.imaging_fcs.imfcs.model.ExpSettingsModel;
@@ -19,6 +17,7 @@ import fiji.plugin.imaging_fcs.imfcs.model.OnnxInferenceModel;
 import fiji.plugin.imaging_fcs.imfcs.model.onnx.OnnxRuntimeStatus;
 import fiji.plugin.imaging_fcs.imfcs.utils.ApplyCustomLUT;
 import fiji.plugin.imaging_fcs.imfcs.view.OnnxInferenceView;
+import fiji.plugin.imaging_fcs.imfcs.model.OnnxInferenceWorker;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -34,7 +33,6 @@ public class OnnxInferenceController {
     private final OnnxInferenceView view;
     private final ImageModel imageModel;
     private ExpSettingsModel expSettingsModel;
-
 
     // Keep track of window positions globally or pass state if needed
     private static int nextX = 50;
@@ -122,6 +120,9 @@ public class OnnxInferenceController {
             return imagePlusResultsMap; // Return empty map
         }
 
+        // Disable the RunInference button.
+        this.view.disableRunInferenceButton();
+
         // 3. Perform inference and conversion within a try-catch block
         try {
             // --- Run Inference ---
@@ -184,6 +185,9 @@ public class OnnxInferenceController {
             // imagePlusResultsMap remains empty
         }
 
+        // Re-enable the run inference button on completion.
+        this.view.enableRunInferenceButton();
+
         // 4. Always return the map (populated if successful, empty otherwise)
         return imagePlusResultsMap;
     }
@@ -238,82 +242,8 @@ public class OnnxInferenceController {
     }
 
     public void btnRunInferencePressed() {
-        Map<String, ImagePlus> outputMaps = this.infer();
-
-        // TODO: Close existing maps before spawning new ones.
-        showOnnxOutputMaps(outputMaps);
-    }
-
-    /**
-     * Displays each ImagePlus from the map in its own separate window.
-     * Uses the map key as the initial window title.
-     *
-     * @param outputMaps A map where keys are desired titles and values are
-     *                   ImagePlus objects.
-     */
-    public static void _showOnnxOutputMaps(Map<String, ImagePlus> outputMaps) {
-        if (outputMaps == null || outputMaps.isEmpty()) {
-            System.out.println("No output maps to display.");
-            return;
-        }
-
-        // --- Optional: Basic Window Positioning Logic ---
-        int initialX = 50; // Starting X position for the first window
-        int initialY = 50; // Starting Y position
-        int xOffset = 30; // How much to shift each subsequent window horizontally
-        int yOffset = 30; // How much to shift vertically
-        int currentX = initialX;
-        int currentY = initialY;
-        int screenWidth = Constants.MAIN_PANEL_DIM.width;
-        int screenHeight = Constants.MAIN_PANEL_DIM.height;
-        int approxWindowHeight = 200; // Estimate or get from first imp if possible
-
-        // --- Iterate and Show ---
-        for (Map.Entry<String, ImagePlus> entry : outputMaps.entrySet()) {
-            String name = entry.getKey();
-            ImagePlus imp = entry.getValue();
-
-            if (imp != null) {
-                // 1. Set the title *before* showing for clarity
-                imp.setTitle(name);
-
-                // create the window and adapt the image scale
-                imp.show();
-                ImageWindow window = imp.getWindow();
-                ImageModel.adaptImageScale(imp);
-                ApplyCustomLUT.applyCustomLUT(imp, "Red Hot");
-
-                // 3. Optional: Try to position the window
-                // Getting the window immediately after show() can sometimes be tricky,
-                // but often works. imp.getWindow() returns the ImageWindow.
-                if (imp.getWindow() != null) {
-                    imp.getWindow().setLocation(currentX, currentY);
-                    approxWindowHeight = imp.getWindow().getHeight(); // Update height estimate
-                } else {
-                    // If positioning is critical, might need WindowManager.getImageWindow(name)
-                    // or a slight delay, but usually setLocation works.
-                    System.err.println(
-                            "Warning: Could not get window reference immediately for '" + name + "' to set location.");
-                }
-
-                // 4. Calculate position for the next window (simple tiling)
-                currentX += xOffset;
-                // If we go too far right, move to the next row
-                // Use imp.getWindow().getWidth() if available for better accuracy
-                int approxWindowWidth = (imp.getWindow() != null) ? imp.getWindow().getWidth() : 200;
-                if (currentX + approxWindowWidth > screenWidth) {
-                    currentX = initialX; // Reset X
-                    currentY += yOffset + approxWindowHeight; // Move down by offset + estimated height
-                }
-                // If we go off the bottom, wrap back to the top (optional)
-                if (currentY + approxWindowHeight > screenHeight) {
-                    currentY = initialY;
-                }
-
-            } else {
-                System.out.println("Skipping null ImagePlus associated with key: " + name);
-            }
-        }
+        IJ.showStatus("Doing ONNX Inference");
+        new OnnxInferenceWorker(this).execute();
     }
 
     /**
@@ -366,22 +296,18 @@ public class OnnxInferenceController {
                 // Important: Use the stack from the *new* ImagePlus
                 existingImp.setStack(newImp.getStack());
 
-                // 2. Copy calibration/metadata if necessary (optional, depends on needs)
-                existingImp.setCalibration(newImp.getCalibration());
-                // You might want to copy other properties if they change
-
-                // 3. Ensure title is correct (might be redundant but safe)
+                // 2. Ensure title is correct (might be redundant but safe)
                 existingImp.setTitle(name);
 
-                // 4. Refresh the display
+                // 3. Refresh the display
                 existingImp.updateAndDraw();
                 ImageModel.adaptImageScale(existingImp);
                 ApplyCustomLUT.applyCustomLUT(existingImp, "Red Hot");
 
-                // 5. Optional: Bring the updated window to the front
+                // 4. Optional: Bring the updated window to the front
                 existingImp.getWindow().toFront();
 
-                // Note: We DON'T position existing windows here, leave them be.
+                // Skip positioning for existing windows.
 
             } else {
                 // --- Show as a new window ---

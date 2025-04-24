@@ -307,4 +307,12 @@ public final class OnnxInferenceView extends BaseView {
     public String getStrideFrames() {
         return this.tfStrideFrames.getText();
     }
+
+    public void disableRunInferenceButton() {
+        this.btnRunInference.setEnabled(false);
+    }
+
+    public void enableRunInferenceButton() {
+        this.btnRunInference.setEnabled(true);
+    }
 }
