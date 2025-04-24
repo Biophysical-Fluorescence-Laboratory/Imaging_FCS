@@ -17,6 +17,7 @@ public class ChunkGenerator {
     private final int strideX;
     private final int strideY;
     private final int strideFrames;
+    private int totalChunks;
 
     public ChunkGenerator(int imageDimX, int imageDimY, int imageDimFrames,
                    int modelInputX, int modelInputY, int modelInputFrames,
@@ -31,6 +32,7 @@ public class ChunkGenerator {
         this.strideX = strideX;
         this.strideY = strideY;
         this.strideFrames = strideFrames;
+        this.totalChunks = 0;       // Calculated dynamically.
     }
 
     public List<ChunkIndices> generateChunkIndicesList() {
@@ -43,6 +45,7 @@ public class ChunkGenerator {
                     int endY = y + modelInputY;
                     int endFrame = frame + modelInputFrames;
                     indicesList.add(new ChunkIndices(x, endX, y, endY, frame, endFrame));
+                    ++this.totalChunks;
                 }
             }
         }
@@ -110,5 +113,9 @@ public class ChunkGenerator {
 
           return new Pair<>(chunk, resultIndices); // Return chunk and ResultIndices
         }
+    }
+
+    public int getTotalChunks() {
+        return this.totalChunks;
     }
 }

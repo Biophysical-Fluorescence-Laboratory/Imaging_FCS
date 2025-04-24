@@ -2,6 +2,7 @@ package fiji.plugin.imaging_fcs.imfcs.model.onnx;
 
 import ai.onnxruntime.OnnxTensor;
 import ai.onnxruntime.OrtException;
+import ij.IJ;
 import ij.ImagePlus;
 
 import java.util.HashMap;
@@ -111,9 +112,13 @@ public class DeepLearningProcessor {
 
         // Get the chunk iterator
         Iterator<Pair<float[][][], ResultIndices>> chunkIterator = chunker.getChunkIterator(imageArr);
+        
+        int currentChunkInd = 0;
+        int totalChunks = chunker.getTotalChunks();
 
         // Process each chunk
         while (chunkIterator.hasNext()) {
+            ++currentChunkInd;
             Pair<float[][][], ResultIndices> pair = chunkIterator.next();
             float[][][] chunk = pair.getLeft();
             ResultIndices resultIndices = pair.getRight();
@@ -159,6 +164,8 @@ public class DeepLearningProcessor {
                 // input 'onnxTensor' is closed automatically by try-with-resources
 
             } // End try-with-resources for input onnxTensor
+            // Update ImageJ progress bar
+            IJ.showProgress((double) currentChunkInd / (double) totalChunks);
         } // End while loop over chunks
 
         // Return the map containing all aggregated result arrays

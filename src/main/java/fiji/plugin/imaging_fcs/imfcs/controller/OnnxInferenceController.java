@@ -242,7 +242,7 @@ public class OnnxInferenceController {
     }
 
     public void btnRunInferencePressed() {
-        IJ.showStatus("Doing ONNX Inference");
+        IJ.showStatus("Executing ONNX Inference");
         new OnnxInferenceWorker(this).execute();
     }
 
