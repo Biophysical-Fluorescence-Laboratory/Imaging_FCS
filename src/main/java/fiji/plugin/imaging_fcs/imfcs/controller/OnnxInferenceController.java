@@ -364,4 +364,47 @@ public class OnnxInferenceController {
     public void startOnnxSession() {
         this.model.startOnnxSession();
     }
+
+    public boolean canDoInference() {
+        return this.model.canFit();
+    }
+
+    // Function for saving during the Batch mode inference.
+    // Designed to interface well with the existing Batch processing.
+    // NOTE: The reason this is separate is because the existing batch processing is
+    // a bit constrained.
+    // i.e. windows are only ever saved as PNG files, and only saved when "Save
+    // Plots" is toggled.
+    // This function guarantees that ONNX inference outputs are saved.
+    public static void saveOnnxOutputMaps(Map<String, ImagePlus> outputMaps, String path) {
+        for (Map.Entry<String, ImagePlus> entry : outputMaps.entrySet()) {
+            String title = entry.getKey();
+            ImagePlus imp = entry.getValue(); // The new image data
+
+            if (imp == null) {
+                System.out.println("Skipping null ImagePlus associated with key: " + title);
+                continue; // Skip to the next entry
+            }
+
+            // Set the title on the new ImagePlus regardless, needed for comparison/display
+            imp.setTitle(title);
+
+            // Remove the last part with parentheses, if present
+            title = title.replaceAll("\\s*\\([^)]*\\)", "");
+
+            // Trim any trailing whitespace after removing parentheses
+            title = title.trim();
+
+            // Replace spaces with underscores
+            title = title.replace(" ", "_");
+
+            // Replace slashes with "up" (this prevents error since / is used to separate
+            // folders)
+            title = title.replace("/", "up");
+            // Same here since \ is used for Windows
+            title = title.replace("\\", "down");
+
+            IJ.saveAsTiff(imp, path + "_onnx" + title + ".tiff");
+        }
+    }
 }

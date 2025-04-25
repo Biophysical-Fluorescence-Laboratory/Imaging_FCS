@@ -5,6 +5,7 @@ import ai.onnxruntime.OrtException;
 import ij.IJ;
 import ij.ImagePlus;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -37,7 +38,7 @@ public class DeepLearningProcessor {
         // Initialize the array store.
         this.imageDimX = img.getWidth();
         this.imageDimY = img.getHeight();
-        this.imageDimFrames = img.getNSlices();
+        this.imageDimFrames = img.getImageStackSize();
 
         this.imageArr = new float[this.imageDimX][this.imageDimY][this.imageDimFrames];
     }
