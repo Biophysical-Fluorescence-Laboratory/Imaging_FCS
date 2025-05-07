@@ -81,6 +81,8 @@ public class OnnxInferenceController {
         // Populate the Model metadata
         this.view.setModelInputMetadata(this.model.getInputMetadata());
         this.view.updateStatus(this.model.getCurrentStatus().getDisplayLabel());
+        // Only enable the inference button once model is loaded.
+        this.view.enableRunInferenceButton();
     }
 
     private void updateModelPath(String filePath) {
@@ -195,6 +197,7 @@ public class OnnxInferenceController {
     public void teardownOnnxSession() {
         this.model.closeOnnxSession();
         this.view.updateStatus(this.model.getCurrentStatus().getDisplayLabel());
+        this.view.disableRunInferenceButton();
     }
 
     /**
@@ -363,6 +366,7 @@ public class OnnxInferenceController {
 
     public void startOnnxSession() {
         this.model.startOnnxSession();
+        this.view.enableRunInferenceButton();
     }
 
     public boolean canDoInference() {

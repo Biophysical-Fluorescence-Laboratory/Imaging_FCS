@@ -29,7 +29,7 @@ public class OnnxPredictor implements AutoCloseable {
     private static final String TARGET_INPUT_NAME = "input";
     // Define the expected indices based on [BATCH, CHANNELS, FRAMES, WIDTH, HEIGHT]
     private static final int FRAMES_INDEX = 2;
-    private static final int WIDTH_INDEX = 3;  // Assuming width is 3rd dim (index 3)
+    private static final int WIDTH_INDEX = 3; // Assuming width is 3rd dim (index 3)
     private static final int HEIGHT_INDEX = 4; // Assuming height is 4th dim (index 4)
     private static final int EXPECTED_DIMS = 5; // Expected number of dimensions
 
@@ -38,9 +38,12 @@ public class OnnxPredictor implements AutoCloseable {
      * with graph optimizations DISABLED for maximum numerical reproducibility.
      *
      * @param modelPath The file path to the .onnx model.
-     * @param useGpu    If true, attempts to configure the session with the CUDA execution provider.
-     *                  If false, or if CUDA configuration fails, uses the CPU provider.
-     * @throws OrtException If the model file cannot be loaded or the session cannot be created.
+     * @param useGpu    If true, attempts to configure the session with the CUDA
+     *                  execution provider.
+     *                  If false, or if CUDA configuration fails, uses the CPU
+     *                  provider.
+     * @throws OrtException If the model file cannot be loaded or the session cannot
+     *                      be created.
      */
     public OnnxPredictor(String modelPath, boolean useGpu) throws OrtException {
         this.env = OrtEnvironment.getEnvironment();
@@ -48,7 +51,9 @@ public class OnnxPredictor implements AutoCloseable {
         this.outputShapes = new HashMap<>();
         this.modelPath = modelPath;
         this.useGpu = useGpu;
-
+        
+        // We need to init the session here as extracting metadata requires an OrtSession.
+        // A bit magic, but we can move up the UX for initializing a session up to this point.
         this.create_session();
 
         // Extract metadata (input/output names and shapes) - same as before
@@ -77,8 +82,8 @@ public class OnnxPredictor implements AutoCloseable {
                 } catch (OrtException e) {
                     // Handle failure to add CUDA provider
                     System.err.println("WARNING: Failed to add CUDA Execution Provider. " +
-                                       "Ensure Nvidia drivers and CUDA toolkit are compatible and installed. " +
-                                       "Falling back to CPU. Error: " + e.getMessage());
+                            "Ensure Nvidia drivers and CUDA toolkit are compatible and installed. " +
+                            "Falling back to CPU. Error: " + e.getMessage());
                     // The OptLevel is already set to NO_OPTIMIZATION for the CPU fallback
                 }
             } else {
@@ -89,9 +94,9 @@ public class OnnxPredictor implements AutoCloseable {
             // Create the session using the configured options
             this.session = env.createSession(this.modelPath, options);
         } // SessionOptions 'options' is automatically closed here
-	}
+    }
 
-	// Helper method to keep constructor cleaner
+    // Helper method to keep constructor cleaner
     private void extractMetadata() throws OrtException {
         if (this.session == null) {
             throw new IllegalStateException("Session is not initialized.");
@@ -109,7 +114,8 @@ public class OnnxPredictor implements AutoCloseable {
                     // Validate shape - Ensure it has enough dimensions
                     if (shape.length == EXPECTED_DIMS) {
                         // Populate the metadata object
-                        // Note the cast from long to int - potential overflow if dims > Integer.MAX_VALUE
+                        // Note the cast from long to int - potential overflow if dims >
+                        // Integer.MAX_VALUE
                         long modelInputFrames = shape[FRAMES_INDEX];
                         long modelInputX = shape[WIDTH_INDEX];
                         long modelInputY = shape[HEIGHT_INDEX];
@@ -117,13 +123,13 @@ public class OnnxPredictor implements AutoCloseable {
                     } else {
                         // Handle error: Shape does not have the expected number of dimensions
                         throw new IllegalStateException(
-                            "Input tensor '" + TARGET_INPUT_NAME + "' has shape " + Arrays.toString(shape) +
-                            ", but expected " + EXPECTED_DIMS + " dimensions.");
+                                "Input tensor '" + TARGET_INPUT_NAME + "' has shape " + Arrays.toString(shape) +
+                                        ", but expected " + EXPECTED_DIMS + " dimensions.");
                     }
                 } else {
-                     // Handle error: The node with the target name is not a Tensor
-                     throw new IllegalStateException(
-                        "Input node '" + TARGET_INPUT_NAME + "' is not of type TensorInfo.");
+                    // Handle error: The node with the target name is not a Tensor
+                    throw new IllegalStateException(
+                            "Input node '" + TARGET_INPUT_NAME + "' is not of type TensorInfo.");
                 }
             }
         }
@@ -156,14 +162,17 @@ public class OnnxPredictor implements AutoCloseable {
         return outputShapes;
     }
 
- /**
+    /**
      * Runs inference using the provided input tensor map.
      * Extracts the first float value from each output tensor.
      * Manages the lifecycle of the session result and output tensors internally.
      *
-     * @param input Map where keys are input tensor names and values are the OnnxTensor inputs.
-     * @return A Map where keys are the output tensor names and values are the single float result extracted from each.
-     * @throws OrtException If there is an error during inference or tensor processing.
+     * @param input Map where keys are input tensor names and values are the
+     *              OnnxTensor inputs.
+     * @return A Map where keys are the output tensor names and values are the
+     *         single float result extracted from each.
+     * @throws OrtException If there is an error during inference or tensor
+     *                      processing.
      */
     public Map<String, Float> runInference(Map<String, OnnxTensor> input) throws OrtException {
         Map<String, Float> outputDataMap = new HashMap<>();
@@ -206,11 +215,12 @@ public class OnnxPredictor implements AutoCloseable {
         }
     }
 
-    //Inner class to contain input shapes
+    // Inner class to contain input shapes
     public class InputShape {
-      public List<String> shape;
-      public String type;
+        public List<String> shape;
+        public String type;
 
-      public InputShape() {}
+        public InputShape() {
+        }
     }
 }

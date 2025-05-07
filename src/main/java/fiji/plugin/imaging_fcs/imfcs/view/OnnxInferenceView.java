@@ -131,12 +131,15 @@ public final class OnnxInferenceView extends BaseView {
         cbUseGpu = new JCheckBox("Use GPU (if available)");
         cbUseGpu.setToolTipText("Attempt to use CUDA for inference if supported");
 
-        // Action Button
+        // Inference Button
         btnRunInference = createJButton("Run Inference", "Process the current image using the specified settings", null,
             (ActionListener) e -> {
                 controller.btnRunInferencePressed();
             });
         btnRunInference.setForeground(Color.RED);
+
+        // Start the inference button as disabled. Only enable explicitly once model is loaded.
+        this.disableRunInferenceButton();
 
         // Status Label
         lblStatus = createJLabel("Status: No Model Loaded", "Displays current operation status");
