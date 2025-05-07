@@ -195,9 +195,11 @@ public class OnnxInferenceController {
     }
 
     public void teardownOnnxSession() {
-        this.model.closeOnnxSession();
-        this.view.updateStatus(this.model.getCurrentStatus().getDisplayLabel());
-        this.view.disableRunInferenceButton();
+        if (this.model != null) {
+            this.model.closeOnnxSession();
+            this.view.updateStatus(this.model.getCurrentStatus().getDisplayLabel());
+            this.view.disableRunInferenceButton();
+        }
     }
 
     /**

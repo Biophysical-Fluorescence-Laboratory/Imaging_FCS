@@ -212,6 +212,7 @@ public class OnnxPredictor implements AutoCloseable {
     public void close() throws OrtException {
         if (session != null) {
             session.close();
+            session = null;
         }
     }
 
