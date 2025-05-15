@@ -64,6 +64,8 @@ public final class MainPanelController {
     private final FilteringController filteringController;
     private final ParameterVideoController parameterVideoController;
     private final Correlator correlator;
+    private final OnnxInferenceModel onnxInferenceModel;
+    private final OnnxInferenceController onnxInferenceController;
 
     /**
      * Constructor that initializes models, views, and other controllers needed for the main panel.
@@ -136,6 +138,10 @@ public final class MainPanelController {
         this.expSettingsView = new ExpSettingsView(this, settings);
         updateSettingsField();
         this.view = new MainPanelView(this, this.settings);
+
+        // ONNX Inference-specific views.
+        this.onnxInferenceModel = new OnnxInferenceModel(bleachCorrectionModel, optionsModel.isCuda());
+        this.onnxInferenceController = new OnnxInferenceController(this.onnxInferenceModel, imageModel, settings);
 
         if (workbook != null) {
             // read the Excel file to restore parameters
@@ -586,6 +592,17 @@ public final class MainPanelController {
      * @param run a Map containing options for batch processing, specifying which operations to perform on each image
      */
     private void runBatch(Map<String, Object> run) {
+        // Early cast to boolean, as this value will be reused.
+        boolean doOnnxInference = (boolean) run.get("ONNX Inference");
+        
+        // If ONNX Inference is requested, check to see if model is loaded.
+        if (doOnnxInference) {
+            if (!onnxInferenceController.canDoInference()) {
+                IJ.error("ONNX Inference was requested, but ONNX model is not loaded.");
+                return;
+            }
+        }
+
         fitController.setVisible((boolean) run.get("Fit"));
 
         JFileChooser fileChooser = new JFileChooser(imageController.getDirectory());
@@ -597,6 +614,10 @@ public final class MainPanelController {
 
             new BackgroundTaskWorker<Void, Void>(() -> {
                 for (File file : files) {
+                    // Initializing dummy value for ONNX Inference Output maps.
+                    // Mainly to silence compiler errors.
+                    Map<String, ImagePlus> outputMaps = null; 
+
                     try {
                         imageController.loadImage(IJ.openImage(file.getAbsolutePath()), null);
                     } catch (Exception e) {
@@ -629,6 +650,11 @@ public final class MainPanelController {
                     if ((boolean) run.get("Diffusion Law")) {
                         diffusionLawController.runCalculate();
                         diffusionLawController.btnFitPressed().actionPerformed(null);
+                    }
+
+                    if (doOnnxInference) {
+                        // Produce output maps for Onnx inference, used for saving later on.
+                        outputMaps = onnxInferenceController.infer();
                     }
 
                     if ((boolean) run.get("Vertical DCCF")) {
@@ -678,6 +704,14 @@ public final class MainPanelController {
 
                     if ((boolean) run.get("Save plot windows")) {
                         Plots.saveWindows(absolutePathNoExt + suffix);
+                    }
+                    
+                    // NOTE: ONNX inference relies on a slightly different save format
+                    // Hence the separated logic.
+                    if (doOnnxInference && outputMaps != null) {
+                        OnnxInferenceController.saveOnnxOutputMaps(outputMaps, absolutePathNoExt + suffix);
+                    } else if (doOnnxInference && outputMaps == null) {
+                        IJ.log("Warning: ONNX Inference was run for " + file.getName() + " but resulted in null output maps. Skipping save.");
                     }
 
                     Plots.closePlots();
@@ -1207,6 +1241,20 @@ public final class MainPanelController {
         return (String value) -> {
             setter.accept(value);
             fitController.updateFitEnd(settings);
+        };
+    }
+
+    // ONNX-related controller options.
+    /**
+     * Returns an item listener to handle the "ONNX Models" toggle button press event.
+     * This listener toggles the visibility of the ONNX Models view.
+     *
+     * @return an ItemListener that processes the "ONNX Models Infernece" toggle button press event
+     */
+    public ItemListener tbOnnxInferencePressed() {
+        return (ItemEvent ev) -> {
+            boolean selected = (ev.getStateChange() == ItemEvent.SELECTED);
+            onnxInferenceController.setVisible(selected);
         };
     }
 }
