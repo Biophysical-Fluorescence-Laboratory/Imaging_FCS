@@ -102,16 +102,6 @@ public final class OnnxInferenceView extends BaseView {
         // ONNX Model Path
         tfOnnxModelPath = createTextField("", "Path to the ONNX model file (.onnx)");
         tfOnnxModelPath.setEnabled(false); // Path often set via browser button
-        btnBrowseOnnx = createJButton("Load Model", "Select the ONNX model file", null, (ActionListener) e -> {
-            try {
-                controller.btnLoadPressed();
-            } catch (OrtException e1) {
-                IJ.log(e1.getStackTrace().toString());
-                IJ.error(e1.getMessage());
-            }
-        });
-        btnInitOnnx = createJButton("Init Model", "Start the ONNX environment for inference", null, 
-            (ActionListener) e -> controller.startOnnxSession());
 
         tfInputX = createTextField("", "Model expected input width (loaded from model)");
         tfInputX.setEditable(false); // Loaded from model metadata
@@ -131,6 +121,23 @@ public final class OnnxInferenceView extends BaseView {
         cbUseGpu = new JCheckBox("Use GPU (if available)");
         cbUseGpu.setToolTipText("Attempt to use CUDA for inference if supported");
 
+        // Status Label
+        lblStatus = createJLabel("Status: No Model Loaded", "Displays current operation status");
+    }
+
+    @Override
+    protected void initializeButtons() {
+        btnBrowseOnnx = createJButton("Load Model", "Select the ONNX model file", null, (ActionListener) e -> {
+            try {
+                controller.btnLoadPressed();
+            } catch (OrtException e1) {
+                IJ.log(e1.getStackTrace().toString());
+                IJ.error(e1.getMessage());
+            }
+        });
+        btnInitOnnx = createJButton("Init Model", "Start the ONNX environment for inference", null, 
+            (ActionListener) e -> controller.startOnnxSession());
+
         // Inference Button
         btnRunInference = createJButton("Run Inference", "Process the current image using the specified settings", null,
             (ActionListener) e -> {
@@ -141,8 +148,6 @@ public final class OnnxInferenceView extends BaseView {
         // Start the inference button as disabled. Only enable explicitly once model is loaded.
         this.disableRunInferenceButton();
 
-        // Status Label
-        lblStatus = createJLabel("Status: No Model Loaded", "Displays current operation status");
     }
 
     /**
