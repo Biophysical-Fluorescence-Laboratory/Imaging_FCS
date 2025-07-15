@@ -51,13 +51,22 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <!-- Skip tests if necessary, but consider enabling and writing tests for better software quality -->
-        <maven.test.skip>true</maven.test.skip>
+        <maven.test.skip>false</maven.test.skip>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.6.0</junit.version>
     </properties>
 
     <dependencies>
+        
+        <!-- JUnit for testing -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+            <scope>test</scope>
+        </dependency>
+        
         <dependency>
             <groupId>com.github.pjfanning</groupId>
             <artifactId>excel-streaming-reader</artifactId>
