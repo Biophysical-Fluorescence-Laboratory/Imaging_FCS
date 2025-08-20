@@ -66,4 +66,5 @@ add_library(agpufit SHARED
 
 target_link_libraries(agpufit PRIVATE CUDA::cudart_static)
 
+# Issue here with 52 being unsupported on more recent versions of CUDA toolkit.
 set_target_properties(agpufit PROPERTIES CUDA_ARCHITECTURES "52;61;75;86")
