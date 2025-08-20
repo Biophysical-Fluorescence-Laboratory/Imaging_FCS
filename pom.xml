@@ -22,7 +22,7 @@
                         <configuration>
                             <transformers>
                                 <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>fiji.plugin.imaging_fcs.imfcs.ImagingFCS</mainClass>
                                 </transformer>
                             </transformers>
@@ -44,6 +44,59 @@
                 </configuration>
             </plugin>
         </plugins>
+        <resources>
+            <!-- First, include the standard resources directory -->
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            
+            <!-- Now, add a resource entry for each compiled DLL -->
+            
+            <!-- Resource for gpufit.dll -->
+            <resource>
+                <directory>${project.basedir}/src/main/cpp/build/gpufit/Release</directory>
+                <targetPath>libs/gpufit</targetPath>
+                <includes>
+                    <include>agpufit.dll</include>
+                </includes>
+            </resource>
+            
+            <!-- Resource for JNIAndorSDK2v3.dll -->
+            <resource>
+                <directory>${project.basedir}/src/main/cpp/build/cameras/sdk2/Release</directory>
+                <targetPath>libs/camera_readout/sdk2</targetPath>
+                <includes>
+                    <include>JNIAndorSDK2v3.dll</include>
+                </includes>
+            </resource>
+            
+            <!-- Resource for JNIAndorSDK3v2.dll -->
+            <resource>
+                <directory>${project.basedir}/src/main/cpp/build/cameras/sdk3/Release</directory>
+                <targetPath>libs/camera_readout/sdk3</targetPath>
+                <includes>
+                    <include>JNIAndorSDK3v2.dll</include>
+                </includes>
+            </resource>
+            
+            <!-- Resource for JNIHamamatsuDCAMsdk4.dll -->
+            <resource>
+                <directory>${project.basedir}/src/main/cpp/build/cameras/dcam/Release</directory>
+                <targetPath>libs/camera_readout/dcam</targetPath>
+                <includes>
+                    <include>JNIHamamatsuDCAMsdk4.dll</include>
+                </includes>
+            </resource>
+            
+            <!-- Resource for JNIPhotometricsPVCAMsdk.dll -->
+            <resource>
+                <directory>${project.basedir}/src/main/cpp/build/cameras/pvcam/Release</directory>
+                <targetPath>libs/camera_readout/pvcam</targetPath>
+                <includes>
+                    <include>JNIPhotometricsPVCAMsdk.dll</include>
+                </includes>
+            </resource>
+        </resources>
     </build>
 
     <properties>
@@ -228,7 +281,7 @@
                         <artifactId>exec-maven-plugin</artifactId>
                         <version>3.2.0</version>
                         <executions>
-                            <execution>
+                            <!-- <execution>
                                 <id>cmake-configure</id>
                                 <phase>compile</phase>
                                 <goals>
@@ -242,25 +295,31 @@
                                         <argument>-DCMAKE_BUILD_TYPE=Release</argument>
                                     </arguments>
                                 </configuration>
-                            </execution>
+                            </execution> -->
 
+                                
                             <execution>
-                                <id>cmake-build</id>
+                                <id>cmake-configure</id>
                                 <phase>compile</phase>
                                 <goals>
                                     <goal>exec</goal>
                                 </goals>
                                 <configuration>
                                     <executable>cmake</executable>
-                                    <workingDirectory>${project.basedir}/src/main/cpp/build</workingDirectory>
+                                    <workingDirectory>${project.basedir}/src/main/cpp</workingDirectory>
                                     <arguments>
-                                        <argument>--build</argument>
-                                        <argument>.</argument>
-                                        <argument>--config</argument>
-                                        <argument>Release</argument>
+                                        <argument>-Bbuild</argument>
+                                        <!-- Add the Generator and Architecture flags just like in the GitHub Action -->
+                                        <argument>-G</argument>
+                                        <argument>Visual Studio 17 2022</argument>
+                                        <argument>-A</argument>
+                                        <argument>x64</argument>
+                                        <argument>-DCMAKE_BUILD_TYPE=Release</argument>
                                     </arguments>
                                 </configuration>
                             </execution>
+
+  
                         </executions>
                     </plugin>
                 </plugins>
