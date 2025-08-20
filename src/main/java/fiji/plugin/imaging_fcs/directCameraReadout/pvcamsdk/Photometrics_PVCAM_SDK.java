@@ -11,45 +11,54 @@
  */
 package fiji.plugin.imaging_fcs.directCameraReadout.pvcamsdk;
 
-import ij.IJ;
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.process.ShortProcessor;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.SwingWorker;
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
+
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import fiji.plugin.imaging_fcs.directCameraReadout.gui.DirectCapturePanel;
-import fiji.plugin.imaging_fcs.directCameraReadout.gui.DirectCapturePanel.Common;
 import fiji.plugin.imaging_fcs.directCameraReadout.control.FrameCounter;
 import fiji.plugin.imaging_fcs.directCameraReadout.control.FrameCounterX;
-import fiji.plugin.imaging_fcs.directCameraReadout.gui.cameraConstant;
+import fiji.plugin.imaging_fcs.directCameraReadout.gui.DirectCapturePanel;
+import fiji.plugin.imaging_fcs.directCameraReadout.gui.DirectCapturePanel.Common;
+import fiji.plugin.imaging_fcs.directCameraReadout.gui.cameraConstant.Common_Photometrics;
 import fiji.plugin.imaging_fcs.directCameraReadout.workers.Workers.*;
-import static fiji.plugin.imaging_fcs.directCameraReadout.workers.Workers.LiveVideoWorkerV2Instant;
-import static fiji.plugin.imaging_fcs.directCameraReadout.workers.Workers.SynchronizerWorkerInstant;
-import static fiji.plugin.imaging_fcs.directCameraReadout.workers.Workers.LiveVideoWorkerV3Instant;
+import fiji.plugin.imaging_fcs.directCameraReadout.workers.Workers.BufferToStackWorker;
 import static fiji.plugin.imaging_fcs.directCameraReadout.workers.Workers.BufferToStackWorkerInstant;
+import fiji.plugin.imaging_fcs.directCameraReadout.workers.Workers.CppTOJavaTransferWorkerV2;
+import fiji.plugin.imaging_fcs.directCameraReadout.workers.Workers.CumulativeACFWorkerV3;
 import static fiji.plugin.imaging_fcs.directCameraReadout.workers.Workers.CumulativeACFWorkerV3Instant;
+import fiji.plugin.imaging_fcs.directCameraReadout.workers.Workers.ICCSWorker;
 import static fiji.plugin.imaging_fcs.directCameraReadout.workers.Workers.ICCSWorkerInstant;
+import fiji.plugin.imaging_fcs.directCameraReadout.workers.Workers.LiveVideoWorkerV2;
+import static fiji.plugin.imaging_fcs.directCameraReadout.workers.Workers.LiveVideoWorkerV2Instant;
+import fiji.plugin.imaging_fcs.directCameraReadout.workers.Workers.LiveVideoWorkerV3;
+import static fiji.plugin.imaging_fcs.directCameraReadout.workers.Workers.LiveVideoWorkerV3Instant;
+import fiji.plugin.imaging_fcs.directCameraReadout.workers.Workers.NonCumulativeACFWorkerV3;
 import static fiji.plugin.imaging_fcs.directCameraReadout.workers.Workers.NonCumulativeACFWorkerV3Instant;
+import fiji.plugin.imaging_fcs.directCameraReadout.workers.Workers.SynchronizerWorker;
+import static fiji.plugin.imaging_fcs.directCameraReadout.workers.Workers.SynchronizerWorkerInstant;
 import static fiji.plugin.imaging_fcs.version.VERSION.DCR_VERSION;
 import static fiji.plugin.imaging_fcs.version.VERSION.PVCAMSDK4_VERSION;
-import static fiji.plugin.imaging_fcs.directCameraReadout.gui.cameraConstant.Common_Photometrics;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.process.ShortProcessor;
 
 public class Photometrics_PVCAM_SDK {
 
@@ -713,7 +722,7 @@ public class Photometrics_PVCAM_SDK {
     private static void writeLibraryFile(File Directory, String LibName, Boolean DeleteOnExit) {
         try {
             //NOTE: include package name, which becomes the folder name in .jar file.'
-            InputStream in = ClassLoader.class.getResourceAsStream("/libs/camera_readout/pvcam/" + LibName);
+            InputStream in = Photometrics_PVCAM_SDK.class.getResourceAsStream("/libs/camera_readout/pvcam/" + LibName);
             if (in == null) {
                 throw new FileNotFoundException("Library " + LibName + " is not available");
             }
