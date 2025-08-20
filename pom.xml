@@ -81,6 +81,12 @@
             <artifactId>snakeyaml</artifactId>
             <version>2.2</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.microsoft.onnxruntime</groupId>
+            <artifactId>onnxruntime_gpu</artifactId>
+            <version>1.21.0</version>
+        </dependency>
     </dependencies>
 
     <!-- This part is used to create the header file and/or compile the C++/CUDA libraries if needed -->
