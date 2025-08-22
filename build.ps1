@@ -54,20 +54,3 @@ if (-not $?) {
     Write-Host "`nMaven build failed! Aborting script." -ForegroundColor Red
     exit 1
 }
-
-
-# --- DEPLOYMENT ---
-Write-Host "`n===================================================" -ForegroundColor Green
-Write-Host " Copying JAR file to Fiji plugins..." -ForegroundColor Green
-Write-Host "===================================================" -ForegroundColor Green
-
-$sourceJar = "target\ImagingFCS-2_0.jar"
-$destinationDir = "C:\Users\User\Downloads\fiji-latest-win64-jdk\Fiji\plugins" # IMPORTANT: Verify this path is correct
-
-if (Test-Path $sourceJar) {
-    Write-Host "Copying $sourceJar to $destinationDir"
-    Copy-Item -Path $sourceJar -Destination $destinationDir -Force
-    Write-Host "`nScript finished successfully." -ForegroundColor Green
-} else {
-    Write-Host "`nERROR: The source JAR file was not found at $sourceJar" -ForegroundColor Red
-}
