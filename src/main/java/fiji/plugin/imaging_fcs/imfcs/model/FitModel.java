@@ -412,12 +412,16 @@ public class FitModel {
         if (pixelModel.isFitted()) {
             // Update thresholds for the main PixelModel
             updateParameterThreshold(pixelModel, Function.identity());
+        }
 
-            // Update thresholds for ACF1 and ACF2 if they exist
-            if (pixelModel.getAcf1PixelModel() != null) {
-                updateParameterThreshold(pixelModel.getAcf1PixelModel(), FilteringModel::getAcfThreshold);
-                updateParameterThreshold(pixelModel.getAcf2PixelModel(), FilteringModel::getAcfThreshold);
-            }
+        // Update thresholds for ACF1 and ACF2 if they exist
+        PixelModel acf1 = pixelModel.getAcf1PixelModel();
+        if (acf1 != null && acf1.isFitted()) {
+            updateParameterThreshold(acf1, FilteringModel::getAcfThreshold);
+        }
+        PixelModel acf2 = pixelModel.getAcf2PixelModel();
+        if (acf2 != null && acf2.isFitted()) {
+            updateParameterThreshold(acf2, FilteringModel::getAcfThreshold);
         }
     }
 

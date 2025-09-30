@@ -22,7 +22,7 @@
                         <configuration>
                             <transformers>
                                 <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>fiji.plugin.imaging_fcs.imfcs.ImagingFCS</mainClass>
                                 </transformer>
                             </transformers>
@@ -44,13 +44,52 @@
                 </configuration>
             </plugin>
         </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/cpp/build/gpufit/Release</directory>
+                <targetPath>libs/gpufit</targetPath>
+                <includes>
+                    <include>agpufit.dll</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/cpp/build/cameras/sdk2/Release</directory>
+                <targetPath>libs/camera_readout/sdk2</targetPath>
+                <includes>
+                    <include>JNIAndorSDK2v3.dll</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/cpp/build/cameras/sdk3/Release</directory>
+                <targetPath>libs/camera_readout/sdk3</targetPath>
+                <includes>
+                    <include>JNIAndorSDK3v2.dll</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/cpp/build/cameras/dcam/Release</directory>
+                <targetPath>libs/camera_readout/dcam</targetPath>
+                <includes>
+                    <include>JNIHamamatsuDCAMsdk4.dll</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/cpp/build/cameras/pvcam/Release</directory>
+                <targetPath>libs/camera_readout/pvcam</targetPath>
+                <includes>
+                    <include>JNIPhotometricsPVCAMsdk.dll</include>
+                </includes>
+            </resource>
+        </resources>
     </build>
 
     <properties>
         <java.version>1.8</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <!-- Skip tests if necessary, but consider enabling and writing tests for better software quality -->
         <maven.test.skip>true</maven.test.skip>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -220,7 +259,6 @@
 
         <profile>
             <id>compile_libs</id>
-            <!-- This profile activates when compile_libs is true -->
             <activation>
                 <property>
                     <name>compileLibs</name>
@@ -245,25 +283,11 @@
                                     <workingDirectory>${project.basedir}/src/main/cpp</workingDirectory>
                                     <arguments>
                                         <argument>-Bbuild</argument>
+                                        <argument>-G</argument>
+                                        <argument>Visual Studio 17 2022</argument>
+                                        <argument>-A</argument>
+                                        <argument>x64</argument>
                                         <argument>-DCMAKE_BUILD_TYPE=Release</argument>
-                                    </arguments>
-                                </configuration>
-                            </execution>
-
-                            <execution>
-                                <id>cmake-build</id>
-                                <phase>compile</phase>
-                                <goals>
-                                    <goal>exec</goal>
-                                </goals>
-                                <configuration>
-                                    <executable>cmake</executable>
-                                    <workingDirectory>${project.basedir}/src/main/cpp/build</workingDirectory>
-                                    <arguments>
-                                        <argument>--build</argument>
-                                        <argument>.</argument>
-                                        <argument>--config</argument>
-                                        <argument>Release</argument>
                                     </arguments>
                                 </configuration>
                             </execution>

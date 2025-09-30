@@ -713,7 +713,7 @@ public class Photometrics_PVCAM_SDK {
     private static void writeLibraryFile(File Directory, String LibName, Boolean DeleteOnExit) {
         try {
             //NOTE: include package name, which becomes the folder name in .jar file.'
-            InputStream in = ClassLoader.class.getResourceAsStream("/libs/camera_readout/pvcam/" + LibName);
+            InputStream in = Photometrics_PVCAM_SDK.class.getResourceAsStream("/libs/camera_readout/pvcam/" + LibName);
             if (in == null) {
                 throw new FileNotFoundException("Library " + LibName + " is not available");
             }

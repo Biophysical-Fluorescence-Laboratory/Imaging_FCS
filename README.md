@@ -36,6 +36,8 @@ Please tick both `Image Science` and `ImagingFCS`. Then close the
 `Manage update site` window and click `Apply Changes` in the `ImageJ Updater`
 window.
 
+Any bugs found through this method should be reported under Github Issues.
+
 ### Manual installation
 
 #### Download on [Github Releases](https://github.com/Biophysical-Fluorescence-Laboratory/Imaging_FCS/releases/latest)
@@ -45,24 +47,11 @@ the file in `fiji_root/plugins/` (here `fiji_root` is the location of your fiji
 root). It will work on Windows, Linux and MacOS without additional features
 (GPU and camera readout).
 
-If you want to add these features, follow these steps:
-  - Linux: Download `linux-libs.zip` from the
-  [last release](https://github.com/Biophysical-Fluorescence-Laboratory/Imaging_FCS/releases/latest).
-  In this archive, you can find the file `libagpufit.so` that you can move in
-  `fiji_root/jars/gpufitImFCS-cublas` to support GPU operations. The camera
-  readout features are not compatible with Linux.
-
-  - Windows: For the camera readout features, you can download
-  `windows-libs.zip` from the
-  [last release](https://github.com/Biophysical-Fluorescence-Laboratory/Imaging_FCS/releases/latest)
-  and move the `.dll` file to `fiji_root/jars/liveImFCS-SDK`. For the GPU
-  operations you have to compile the library yourself and move it to
-  `fiji_root/jars/gpufitImFCS-cublas`.
-
-  - MacOS: MacOS does not support camera readout or GPU features.
+To enable these additional features, you will need to compile the plugin manually
+to ensure proper linking.
 
 #### Manual compilation
-
+##### Plugin-only (No GPU fitting or Camera SDKs)
 To compile the `.jar` file, you need to have *Maven* and *JDK 8* installed and
 then you can simply run from the root of the project:
 
@@ -73,20 +62,124 @@ mvn clean package
 You can then find the `.jar` file in the `target` folder and move it to
 `fiji_root/plugins`.
 
-If you need to compile the libs, you have to install *CMake* and *CUDA Toolkit*
-(only to compile gpufit). If the CMake doesn't find CUDA it will not run this
-part. Moreover, if you're not on Windows, it will not compile the camera
-readout part.
+By default, this compilation method does not bundle in GPU fitting or 
+live readout functionality. To include this functionality, see below.
 
-If everything is installed on your side, you can run:
+##### Including Pre-built Libraries
+This method allows you to skip the C++ and CUDA compilation steps, but
+it does not guarantee a plugin build that supports all features right
+out-of-the-box.
 
-```sh
-mvn clean package -DcompileLibs=true
+Depending on your operating system, you can download the corresponding
+compiled libraries from Github releases, i.e. either `linux-libs.zip`
+or `windows-libs.zip`.
+
+After extracting these files, include them in the corresponding
+`resources` folder. During the Java compilation step, any files
+and folders in the `resources` folder will be bundled into the JAR 
+file, and be accessible at runtime.
+
+The expected filepaths are as follows:
+
+```
+# GPU fitting libraries
+src/main/resources/libs/gpufit/agpufit.dll         # Windows DLL binary
+src/main/resources/libs/gpufit/libagpufit.so       # Linux .so binary
+
+# Camera SDK libraries for Live Readout
+src/main/resources/libs/camera_readout/dcam/JNIHamamatsuDCAMsdk4.dll
+src/main/resources/libs/camera_readout/pvcam/JNIPhotometricsPVCAMsdk.dll
+src/main/resources/libs/camera_readout/sdk2/JNIAndorSDK2v3.dll
+src/main/resources/libs/camera_readout/sdk3/JNIAndorSDK3v2.dll
 ```
 
-It will build the libraries and output it in `src/main/cpp/build`. You can find
-your library files there and move them to `fiji_root/jars/gpufitImFCS-cublas`
-and `fiji_root/jars/liveImFCS-SDK`.
+Note that these exact filepaths will still be expected even when doing
+manual compilation as described below.
+
+Also, live camera readout functionality has dependencies on additional 
+DLL files that must be included in the resources folder as well. In
+other words, simply including these DLL files **is not sufficient to**
+**enable live readout functionality**.
+
+See below for more details.
+
+##### Compiling on Linux
+On Linux, the plugin can be compiled with GPU support.
+
+This requires [Cmake](https://cmake.org/cmake/help/latest/index.html) and
+[CUDA Toolkit](https://developer.nvidia.com/cuda-12-6-0-download-archive?target_os=Linux&target_arch=x86_64) to be installed.
+
+We can then execute the C compilation steps using the following:
+```
+cmake -B ./src/main/cpp/build -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc -DCMAKE_BUILD_TYPE=Release -S ./src/main/cpp
+cmake --build ./src/main/cpp/build --config Release
+```
+
+If the compilation succeeds, you can find the compiled `libagpufit.so` binary
+in the `./src/main/cpp/build/Release` folder. You can move the files to the 
+expected location in the `resources` folder to bundle it into the JAR compilation
+step.
+
+Note the specific version 12.6 for CUDA toolkit specified here. Any version
+post-12.6 removes support for pre-Pascal GPUs, which is something we 
+prefer to avoid at this stage.
+
+##### Compiling on Windows
+To compile the libraries on Windows, you **must install Visual Studio** and the
+**C++ build tools**. You can find them using the links below:
+- [Visual Studio](https://visualstudio.microsoft.com/)
+- [Visual Studio C++ Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
+
+Once both are installed, search your Start Menu for **Visual Studio Build Tools**.
+Then, install the **Desktop development with C++** option.
+
+You can then run the build chain using the following commands. It is recommended
+to run these from within the "Powershell for Visual Studio" prompt window, which
+you can find in your Start Menu under the Visual Studio folder.
+```
+cmake -S src/main/cpp -B src/main/cpp/build -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
+cmake --build $buildDir --config Release
+```
+
+If the compilation succeeds, you can find the compiled `libagpufit.so` binary
+in the `./src/main/cpp/build/Release` folder. You can move the files to the 
+expected location in the `resources` folder to bundle it into the JAR compilation
+step.
+
+##### Packaging the Plugin for Fiji Repositories
+**Windows and Linux Libraries must both be included for public publishing**.
+
+**CUDA Support for BOTH WINDOWS AND LINUX must be included.**
+
+When packaging the plugin for Fiji repositories, i.e. publishing the plugin for
+public access, **manual compilation is strongly recommended**. In other words,
+**DO NOT RELY ON THE GITHUB RELEASE BUILDS**!!
+
+This is due to hardware support. We aim to retain backwards compatibility where
+possible, and using more recent C++ and CUDA build tools might result in older
+systems being locked out.
+
+For example:
+- CUDA Toolkit versions above 12.6 remove support for Nvidia GPUs pre-Pascal.
+- More recent `gcc` or `g++` versions may remove support for old `glibc` versions.
+
+As such, manual compilation should be used.
+
+Furthermore, **REMEMBER THAT ADDITIONAL DLL FILES ARE REQUIRED FOR THE CAMERA**
+**SDKS TO WORK FULLY**. The compiled binaries have separate dependencies. These
+files should be included in the `resources` folder using the following paths:
+
+To confirm the paths required, you can check the code of each camera
+manufacturer's Java code. For example:
+```
+src/main/java/fiji/plugin/imaging_fcs/directCameraReadout/andorsdk2v3
+src/main/java/fiji/plugin/imaging_fcs/directCameraReadout/andorsdk3v2/AndorSDK3v2.java
+src/main/java/fiji/plugin/imaging_fcs/directCameraReadout/hamadcamsdk4/Hamamatsu_DCAM_SDK4.java
+src/main/java/fiji/plugin/imaging_fcs/directCameraReadout/pvcamsdk/Photometrics_PVCAM_SDK.java
+```
+
+In the current codebase, these binaries **must be included in the JAR file**,
+and cannot be discovered at runtime or via the System PATH variable.
 
 ## Updating the codebase
 
@@ -114,6 +207,10 @@ the same way as before.
 This version includes ImFCSNet and FCSNet inference. ImFCSNet predicts
 diffusion coefficient directly from intensity traces. FCSNet predicts diffusion
 coefficient from autocorrelation function.
+
+v2.0.4 fixes some compatibility issues with the latest Java 21 versions of Fiji.
+GPU fitting in end-of-life Linux distributions like CentOS 7 and Ubuntu 18.04 is
+no longer supported.
 
 ## ImFCS documentation 1_62.pdf
 

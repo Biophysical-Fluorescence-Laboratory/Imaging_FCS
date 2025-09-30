@@ -954,7 +954,7 @@ public class AndorSDK2v3 {
     private static void writeLibraryFile(File Directory, String LibName, Boolean DeleteOnExit) {
         try {
             //NOTE: include package name, which becomes the folder name in .jar file.'
-            InputStream in = ClassLoader.class
+            InputStream in = AndorSDK2v3.class
                     .getResourceAsStream("/libs/camera_readout/sdk2/" + LibName);
             if (in == null) {
                 throw new FileNotFoundException("Library " + LibName + " is not available");

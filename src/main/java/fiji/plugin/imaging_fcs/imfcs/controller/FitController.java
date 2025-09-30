@@ -3,6 +3,7 @@ package fiji.plugin.imaging_fcs.imfcs.controller;
 import fiji.plugin.imaging_fcs.imfcs.enums.FitFunctions;
 import fiji.plugin.imaging_fcs.imfcs.model.ExpSettingsModel;
 import fiji.plugin.imaging_fcs.imfcs.model.FitModel;
+import fiji.plugin.imaging_fcs.imfcs.model.OptionsModel;
 import fiji.plugin.imaging_fcs.imfcs.model.PixelModel;
 import fiji.plugin.imaging_fcs.imfcs.model.correlations.Correlator;
 import fiji.plugin.imaging_fcs.imfcs.utils.Pair;
@@ -28,6 +29,7 @@ public class FitController {
     private final FitView view;
     private final Correlator correlator;
     private final ExpSettingsModel settings;
+    private final OptionsModel options;
     private final Runnable updateSettingsField;
 
     /**
@@ -36,10 +38,11 @@ public class FitController {
      * @param model The FitModel instance.
      */
     public FitController(FitModel model, Correlator correlator, ExpSettingsModel settings,
-                         Runnable updateSettingsField) {
+                         OptionsModel options, Runnable updateSettingsField) {
         this.model = model;
         this.correlator = correlator;
         this.settings = settings;
+        this.options = options;
         this.updateSettingsField = updateSettingsField;
 
         this.view = new FitView(this, model);
@@ -232,6 +235,12 @@ public class FitController {
 
                         // If the model is not DC_FCCS_2D, deactivate FCCSDisp
                         boolean isDCFCCS = fitModel == FitFunctions.DC_FCCS_2D;
+
+                        if (fitModel == FitFunctions.DC_FCCS_2D && options.isUseGpu()) {
+                            IJ.showMessage("Warning",
+                                "DC-FCCS is not supported on GPU, fitting will run on CPU.");
+                        }
+
                         settings.setFCCSDisp(isDCFCCS);
                         // update the threshold fields depending on the model used.
                         setAllAcfsThreshold(isDCFCCS);

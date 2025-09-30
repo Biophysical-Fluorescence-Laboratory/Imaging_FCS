@@ -729,7 +729,7 @@ public class Hamamatsu_DCAM_SDK4 {
     private static void writeLibraryFile(File Directory, String LibName, Boolean DeleteOnExit) {
         try {
             //NOTE: include package name, which becomes the folder name in .jar file.'
-            InputStream in = ClassLoader.class.getResourceAsStream("/libs/camera_readout/dcam/" + LibName);
+            InputStream in = Hamamatsu_DCAM_SDK4.class.getResourceAsStream("/libs/camera_readout/dcam/" + LibName);
             if (in == null) {
                 throw new FileNotFoundException("Library " + LibName + " is not available");
             }

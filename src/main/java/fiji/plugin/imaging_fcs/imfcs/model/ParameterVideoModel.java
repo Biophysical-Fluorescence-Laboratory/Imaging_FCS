@@ -126,7 +126,7 @@ public class ParameterVideoModel {
                             correlator.getRegularizedCovarianceMatrix());
 
                     Point binningPoint = settings.convertPointToBinning(new Point(x, y));
-                    if (currentPixelModel.isFitted() &&
+                    if (currentPixelModel.isAtLeastOneFitted() &&
                             !currentPixelModel.toFilter(fitModel, binningPoint.x, binningPoint.y)) {
                         img = Plots.setParameterMaps(img, currentPixelModel, binningPoint, convertedDimension,
                                 settings.isFCCSDisp());

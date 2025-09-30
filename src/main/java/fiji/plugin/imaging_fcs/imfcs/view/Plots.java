@@ -572,22 +572,44 @@ public class Plots {
     /**
      * Plots the residuals for a given pixel.
      *
-     * @param residuals The residual values.
-     * @param lagTimes  The lag times corresponding to the residual values.
-     * @param p         The point representing the pixel.
+     * @param pixelModel The pixel model with the residuals value.
+     * @param lagTimes   The lag times corresponding to the residual values.
+     * @param p          The point representing the pixel.
+     * @param FCCSDisp    Boolean indicating if FCCS models are displayed.
      */
-    public static void plotResiduals(double[] residuals, double[] lagTimes, Point p) {
-        Pair<Double, Double> minMax = findAdjustedMinMax(residuals);
+    public static void plotResiduals(PixelModel pixelModel, double[] lagTimes, Point p, boolean FCCSDisp) {
+        Plot plot = new Plot("Residuals", "time [s]", "Res");
+        plot.setFrameSize(RESIDUALS_DIMENSION.width, RESIDUALS_DIMENSION.height);
+        plot.setLogScaleX();
+
+        Pair<Double, Double> minMax = new Pair<Double,Double>(Double.MAX_VALUE, -Double.MAX_VALUE);
+
+        if (pixelModel.isFitted()) {
+            minMax = selectMinMax(minMax,
+                plotLineResiduals(plot, pixelModel.getResiduals(), lagTimes, Color.BLUE));
+        }
+
+        // plot the acf1 and acf2 pixel models if they are defined
+        if (FCCSDisp) {
+            PixelModel acf1 = pixelModel.getAcf1PixelModel();
+            if (acf1 != null && acf1.isFitted()) {
+                minMax = selectMinMax(minMax,
+                    plotLineResiduals(plot, acf1.getResiduals(), lagTimes, Color.GREEN));
+            }
+
+            PixelModel acf2 = pixelModel.getAcf2PixelModel(); 
+            if (acf2 != null && acf2.isFitted()) {
+                minMax = selectMinMax(minMax,
+                    plotLineResiduals(plot, acf2.getResiduals(), lagTimes, Color.RED));
+            }
+        }
+
         double min = minMax.getLeft();
         double max = minMax.getRight();
 
-        Plot plot = new Plot("Residuals", "time [s]", "Res");
-        plot.setFrameSize(RESIDUALS_DIMENSION.width, RESIDUALS_DIMENSION.height);
-        plot.setLimits(lagTimes[1], lagTimes[lagTimes.length - 1], min, max);
-        plot.setLogScaleX();
         plot.setColor(Color.BLUE);
-        plot.addPoints(lagTimes, residuals, Plot.LINE);
         plot.setJustification(Plot.CENTER);
+        plot.setLimits(lagTimes[1], lagTimes[lagTimes.length - 1], min, max);
         plot.addLabel(0.5, 0, String.format(" Residuals (%d, %d)", p.x, p.y));
         plot.draw();
 
@@ -595,9 +617,25 @@ public class Plots {
     }
 
     /**
+     * Plots a line representing residuals for a pixel model.
+     *
+     * @param plot      The Plot object for displaying the residual.
+     * @param residuals Array of residuals values.
+     * @param lagTimes  Array of lag times corresponding to the values.
+     * @param color     Color for plotting the line.
+     * @return Pair of min and max values for the residual scale.
+     */
+    private static Pair<Double, Double> plotLineResiduals(Plot plot, double[] residuals, double[] lagTimes, Color color) {
+        plot.setColor(color);
+        plot.addPoints(lagTimes, residuals, Plot.LINE);
+
+        return findAdjustedMinMax(residuals);
+    }
+
+    /**
      * Sets all pixel values in the given image to NaN.
      *
-     * @param img The ImagePlus object representing the image.
+     * @param img       The ImagePlus object representing the image.
      */
     public static void setAllPixelToNaN(ImagePlus img) {
         for (int slice = 1; slice <= img.getStackSize(); slice++) {
@@ -719,15 +757,24 @@ public class Plots {
      */
     private static void updateParameterMapsValue(ImagePlus img, Point p, PixelModel pixelModel, boolean initImg,
                                                  boolean FCCSDisp) {
-        int pLength = pixelModel.getParams().length;
+        int pLength = PixelModel.paramsName.length;
 
         if (FCCSDisp && pixelModel.getAcf1PixelModel() != null) {
-            addParamsValues(img, p, pixelModel.getAcf1PixelModel().getParams(), pLength, initImg, "ACF1-");
-            addParamsValues(img, p, pixelModel.getAcf2PixelModel().getParams(), pLength * 2, initImg, "ACF2-");
+            PixelModel acf1 = pixelModel.getAcf1PixelModel();
+            PixelModel acf2 = pixelModel.getAcf2PixelModel();
+
+            if (acf1.isFitted()) {
+                addParamsValues(img, p, acf1.getParams(), pLength, initImg, "ACF1-");
+            }
+            if (acf2.isFitted()) {
+                addParamsValues(img, p, acf2.getParams(), pLength * 2, initImg, "ACF2-");
+            }
         }
 
         // Enter value from the end to be on the first slice on output
-        addParamsValues(img, p, pixelModel.getParams(), 0, initImg, "");
+        if (pixelModel.isFitted()) {
+            addParamsValues(img, p, pixelModel.getParams(), 0, initImg, "");
+        }
     }
 
     /**
@@ -743,12 +790,11 @@ public class Plots {
      */
     public static void plotParameterMaps(PixelModel pixelModel, Point p, Dimension dimension,
                                          MouseListener mouseListener, boolean FCCSDisp) {
-        Pair<String, Double>[] params = pixelModel.getParams();
-
         boolean initImg = false;
         if (imgParam == null || !imgParam.isVisible()) {
             initImg = true;
-            imgParam = initParameterMaps(dimension, params.length, mouseListener, FCCSDisp);
+            imgParam = initParameterMaps(dimension, PixelModel.paramsName.length, mouseListener,
+                    FCCSDisp);
         }
 
         updateParameterMapsValue(imgParam, p, pixelModel, initImg, FCCSDisp);
@@ -816,7 +862,7 @@ public class Plots {
                     PixelModel currentPixelModel = pixelModels[x][y];
                     Point binningPoint = convertPointToBinning.apply(new Point(x, y));
 
-                    if (currentPixelModel != null && currentPixelModel.isFitted() &&
+                    if (currentPixelModel != null && currentPixelModel.isAtLeastOneFitted() &&
                             !fitController.needToFilter(currentPixelModel, binningPoint.x, binningPoint.y)) {
                         updateParameterMapsValue(imgParam, binningPoint, currentPixelModel, initImg, FCCSDisp);
                         initImg = false;

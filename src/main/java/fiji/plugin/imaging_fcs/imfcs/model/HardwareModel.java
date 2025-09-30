@@ -48,7 +48,11 @@ public final class HardwareModel {
     private boolean loadIfCudaAvailable() {
         try {
             loadGpuLibraries();
-            return isCudaAvailable();
+            boolean available = isCudaAvailable();
+            if (!available) {
+                cudaMessage = "CUDA is not available.";
+            }
+            return available;
         } catch (UnsatisfiedLinkError | Exception e) {
             cudaMessage = e.getMessage();
         }

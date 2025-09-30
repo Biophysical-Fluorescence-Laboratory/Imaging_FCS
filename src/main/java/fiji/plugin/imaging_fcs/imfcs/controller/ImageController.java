@@ -251,7 +251,7 @@ public final class ImageController {
         fitController.fit(pixelModel, settings.getFitModel(), correlator.getLagTimes(),
                 correlator.getRegularizedCovarianceMatrix(), x, y);
 
-        if (pixelModel.isFitted()) {
+        if (pixelModel.isAtLeastOneFitted()) {
             fitController.updateThresholds(pixelModel);
             refreshThresholdView.run();
         }
@@ -370,7 +370,8 @@ public final class ImageController {
             return;
         }
 
-        if (options.isUseGpu()) {
+        // GPU fitting is not supported for DC-FCCS_2D model
+        if (options.isUseGpu() && settings.getFitModel() != FitFunctions.DC_FCCS_2D) {
             GpuCorrelator gpuCorrelator =
                     new GpuCorrelator(settings, bleachCorrectionModel, imageModel, fitController.getModel(), false,
                             correlator, xRange, yRange);
@@ -401,7 +402,7 @@ public final class ImageController {
 
                             SwingUtilities.invokeLater(() -> plotFittedParams(points));
                         }
-                    } catch (Exception e) {
+                   } catch (Exception e) {
                         IJ.log(String.format("Fail to correlate points for x=%d, y=%d with error: %s", x, y,
                                 e.getMessage()));
                     }
@@ -471,10 +472,17 @@ public final class ImageController {
 
         if (options.isPlotIntensityCurves() && isImageLoaded()) {
             Point p2 = cursorPositions[1];
-            bleachCorrectionModel.calcIntensityTrace(imageModel.getImage(), p.x, p.y, p2.x, p2.y,
+
+            BleachCorrectionModel tmpBleachCorrectionModel = new BleachCorrectionModel(settings, bleachCorrectionModel);
+            tmpBleachCorrectionModel.calcIntensityTrace(imageModel.getImage(), p.x, p.y, p2.x, p2.y,
                     settings.getFirstFrame(), settings.getLastFrame());
-            Plots.plotIntensityTrace(bleachCorrectionModel.getIntensityTrace1(),
-                    bleachCorrectionModel.getIntensityTrace2(), bleachCorrectionModel.getIntensityTime(),
+            tmpBleachCorrectionModel.getIntensity(imageModel.getImage(), p.x, p.y, 1, settings.getFirstFrame(),
+                    settings.getLastFrame());
+            tmpBleachCorrectionModel.getIntensity(imageModel.getImage(), p2.x, p2.y, 2, settings.getFirstFrame(),
+                    settings.getLastFrame());
+
+            Plots.plotIntensityTrace(tmpBleachCorrectionModel.getIntensityTrace1(),
+                    tmpBleachCorrectionModel.getIntensityTrace2(), tmpBleachCorrectionModel.getIntensityTime(),
                     cursorPositions);
 
         }
@@ -492,8 +500,8 @@ public final class ImageController {
                     settings.isFCCSDisp());
         }
 
-        if (options.isPlotResCurves() && pixelModel.isFitted() && pixelModel.getResiduals() != null) {
-            Plots.plotResiduals(pixelModel.getResiduals(), correlator.getLagTimes(), p);
+        if (options.isPlotResCurves() && pixelModel.isAtLeastOneFitted()) {
+            Plots.plotResiduals(pixelModel, correlator.getLagTimes(), p, settings.isFCCSDisp());
         }
     }
 
@@ -513,7 +521,7 @@ public final class ImageController {
 
         Point binningPoint = settings.convertPointToBinning(p);
 
-        if (pixelModel.isFitted() && !fitController.needToFilter(pixelModel, binningPoint.x, binningPoint.y)) {
+        if (pixelModel.isAtLeastOneFitted() && !fitController.needToFilter(pixelModel, binningPoint.x, binningPoint.y)) {
 
             Plots.plotParameterMaps(pixelModel, binningPoint, settings.getConvertedImageDimension(getImageDimension()),
                     imageParamClicked(), settings.isFCCSDisp());
@@ -639,11 +647,6 @@ public final class ImageController {
 
                     int x = canvas.offScreenX(event.getX());
                     int y = canvas.offScreenY(event.getY());
-
-                    // The pixel is not correlated on this pixel
-                    if (Double.isNaN(img.getStack().getProcessor(1).getPixelValue(x, y))) {
-                        return;
-                    }
 
                     Point pixelBinning = settings.getPixelBinning();
                     Point minimumPosition = settings.getMinCursorPosition();

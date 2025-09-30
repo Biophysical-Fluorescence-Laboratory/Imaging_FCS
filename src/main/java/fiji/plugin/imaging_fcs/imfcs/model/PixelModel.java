@@ -156,7 +156,7 @@ public class PixelModel {
     public static boolean anyPixelFit(PixelModel[][] pixelModels) {
         for (PixelModel[] pixelModelsRow : pixelModels) {
             for (PixelModel pixelModel : pixelModelsRow) {
-                if (pixelModel != null && pixelModel.isFitted()) {
+                if (pixelModel != null && pixelModel.isAtLeastOneFitted()) {
                     return true;
                 }
             }
@@ -372,6 +372,17 @@ public class PixelModel {
 
     public boolean isFitted() {
         return fitted;
+    }
+
+    /**
+     * Check if at least one of the pixel model (main pixel model, acf1 pixel model,
+     * acf2 pixel model) is fitted
+     * @return true if at least one is fitted
+     */
+    public boolean isAtLeastOneFitted() {
+        boolean acf1fitted = acf1PixelModel != null ? acf1PixelModel.fitted : false;
+        boolean acf2fitted = acf2PixelModel != null ? acf2PixelModel.fitted : false;
+        return fitted || acf1fitted || acf2fitted;
     }
 
     public void setFitted(boolean fitted) {

@@ -182,7 +182,7 @@ public class Correlator {
             correlateFCCS(img, pixelModel, x, y, x2, y2, initialFrame, finalFrame);
         }
 
-        correlatePixelModel(pixelModel, img, x, y, x2, y2, initialFrame, finalFrame);
+        correlatePixelModel(pixelModel, img, x, y, x2, y2, initialFrame, finalFrame, false);
     }
 
     /**
@@ -204,8 +204,8 @@ public class Correlator {
         pixelModel.setAcf2PixelModel(new PixelModel());
 
         // Perform correlation for both FCCS pixel models
-        correlatePixelModel(pixelModel.getAcf1PixelModel(), img, x, y, x, y, initialFrame, finalFrame);
-        correlatePixelModel(pixelModel.getAcf2PixelModel(), img, x2, y2, x2, y2, initialFrame, finalFrame);
+        correlatePixelModel(pixelModel.getAcf1PixelModel(), img, x, y, x, y, initialFrame, finalFrame, false);
+        correlatePixelModel(pixelModel.getAcf2PixelModel(), img, x2, y2, x2, y2, initialFrame, finalFrame, true);
     }
 
     /**
@@ -222,16 +222,34 @@ public class Correlator {
      */
     public void correlatePixelModel(PixelModel pixelModel, ImagePlus img, int x, int y, int x2, int y2,
                                     int initialFrame, int finalFrame) {
+       correlatePixelModel(pixelModel, img, x, y, x2, y2, initialFrame, finalFrame, false);
+    }
+
+    /**
+     * Correlates the specified PixelModel using the given image, pixel coordinates, and frame range.
+     *
+     * @param pixelModel   The PixelModel to be correlated.
+     * @param img          The image.
+     * @param x            The x-coordinate of the first pixel.
+     * @param y            The y-coordinate of the first pixel.
+     * @param x2           The x-coordinate of the second pixel.
+     * @param y2           The y-coordinate of the second pixel.
+     * @param initialFrame The initial frame number.
+     * @param finalFrame   The final frame number.
+     * @param secondPixel  Indicates whether this is the second pixel in a FCCS correlation.
+     */
+    private void correlatePixelModel(PixelModel pixelModel, ImagePlus img, int x, int y, int x2, int y2,
+                                    int initialFrame, int finalFrame, boolean secondPixel) {
         // calculate the intensity trace beforehand since it will be needed to perform the correlation
         bleachCorrectionModel.calcIntensityTrace(img, x, y, x2, y2, initialFrame, finalFrame);
 
         correlatorQ = settings.getCorrelatorQ();
 
         if (settings.getBleachCorrection() == BleachCorrectionMethod.SLIDING_WINDOW) {
-            handleSlidingWindowCorrelation(img, pixelModel, x, y, x2, y2, initialFrame, finalFrame);
+            handleSlidingWindowCorrelation(img, pixelModel, x, y, x2, y2, initialFrame, finalFrame, secondPixel);
         } else {
             // if sliding window is not selected, correlate the full intensity trace
-            handleFullTraceCorrelation(img, pixelModel, x, y, x2, y2, initialFrame, finalFrame);
+            handleFullTraceCorrelation(img, pixelModel, x, y, x2, y2, initialFrame, finalFrame, secondPixel);
         }
     }
 
@@ -246,11 +264,14 @@ public class Correlator {
      * @param y2           The y-coordinate of the second pixel.
      * @param initialFrame The initial frame number.
      * @param finalFrame   The final frame number.
+     * @param secondPixel  Indicates whether this is the second pixel in a FCCS correlation.
      */
     private void handleSlidingWindowCorrelation(ImagePlus img, PixelModel pixelModel, int x, int y, int x2, int y2,
-                                                int initialFrame, int finalFrame) {
+                                                int initialFrame, int finalFrame, boolean secondPixel) {
         int numFrames = finalFrame - initialFrame + 1;
         int numSlidingWindow = numFrames / settings.getSlidingWindowLength();
+
+        int mode = secondPixel ? 2 : 1;
 
         // allow smaller correlator Q value as minimum but not larger
         correlatorQ = Math.min(correlatorQ, settings.getLagGroupNumber());
@@ -262,7 +283,7 @@ public class Correlator {
             int slidingWindowFinalFrame = (i + 1) * settings.getSlidingWindowLength() + initialFrame - 1;
 
             double[][] intensityBlock =
-                    getIntensityBlock(img, x, y, x2, y2, slidingWindowInitialFrame, slidingWindowFinalFrame, 1);
+                    getIntensityBlock(img, x, y, x2, y2, slidingWindowInitialFrame, slidingWindowFinalFrame, mode);
 
             blockTransform(pixelModel, deepCopy(intensityBlock), settings.getSlidingWindowLength());
             calculateCorrelationFunction(tmpSlidingWindowModel, deepCopy(intensityBlock),
@@ -283,12 +304,13 @@ public class Correlator {
      * @param y2           The y-coordinate of the second pixel.
      * @param initialFrame The initial frame number.
      * @param finalFrame   The final frame number.
+     * @param secondPixel  Indicates whether this is the second pixel in a FCCS correlation.
      */
     private void handleFullTraceCorrelation(ImagePlus img, PixelModel pixelModel, int x, int y, int x2, int y2,
-                                            int initialFrame, int finalFrame) {
+                                            int initialFrame, int finalFrame, boolean secondPixel) {
         int numFrames = finalFrame - initialFrame + 1;
 
-        int mode = settings.getFitModel() == FitFunctions.DC_FCCS_2D ? 2 : 1;
+        int mode = secondPixel ? 2 : 1;
         double[][] intensityBlock = getIntensityBlock(img, x, y, x2, y2, initialFrame, finalFrame, mode);
 
         blockTransform(pixelModel, deepCopy(intensityBlock), numFrames);

@@ -98,7 +98,7 @@ public final class MainPanelController {
         this.backgroundSubtractionController = new BackgroundSubtractionController(imageModel, this::askResetResults);
         this.bleachCorrectionModel = new BleachCorrectionModel(settings, imageModel);
         this.correlator = new Correlator(settings, bleachCorrectionModel, fitModel);
-        this.fitController = new FitController(fitModel, correlator, settings, this::updateSettingsField);
+        this.fitController = new FitController(fitModel, correlator, settings, optionsModel, this::updateSettingsField);
         this.imageController =
                 new ImageController(imageModel, backgroundSubtractionController, fitController, bleachCorrectionModel,
                         correlator, settings, optionsModel, this::setLastFrame);
