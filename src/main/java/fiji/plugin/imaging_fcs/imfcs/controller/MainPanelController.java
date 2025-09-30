@@ -194,7 +194,7 @@ public final class MainPanelController {
         if (reloadImage == null) {
             IJ.log(String.format("Fail to load '%s' from saved Excel file",
                     expSettingsMap.get("Image path").toString()));
-            reloadImage = IJ.openImage();
+            reloadImage = ImageLoader.openImagePlusWithDialog();
         }
 
         if (reloadImage != null) {
@@ -487,7 +487,7 @@ public final class MainPanelController {
      */
     public ActionListener btnLoadNewPressed() {
         return (ActionEvent ev) -> {
-            ImagePlus image = IJ.openImage();
+            ImagePlus image = ImageLoader.openImagePlusWithDialog();
             if (image != null) {
                 try {
                     imageController.loadImage(image, null);

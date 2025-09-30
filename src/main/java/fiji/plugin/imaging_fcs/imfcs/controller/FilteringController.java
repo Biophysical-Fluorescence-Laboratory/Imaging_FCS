@@ -4,6 +4,7 @@ import fiji.plugin.imaging_fcs.imfcs.enums.FitFunctions;
 import fiji.plugin.imaging_fcs.imfcs.model.*;
 import fiji.plugin.imaging_fcs.imfcs.model.correlations.Correlator;
 import fiji.plugin.imaging_fcs.imfcs.model.correlations.SelectedPixel;
+import fiji.plugin.imaging_fcs.imfcs.utils.ImageLoader;
 import fiji.plugin.imaging_fcs.imfcs.view.FilteringView;
 import fiji.plugin.imaging_fcs.imfcs.view.Plots;
 import ij.IJ;
@@ -73,7 +74,7 @@ public class FilteringController {
      * @throws IllegalArgumentException if the filtering image does not match the size of the parameter map.
      */
     private ImagePlus loadBinaryFilteringImage(int width, int height) {
-        ImagePlus filteringImg = IJ.openImage();
+        ImagePlus filteringImg = ImageLoader.openImagePlusWithDialog();
         if (filteringImg != null && (filteringImg.getWidth() != width || filteringImg.getHeight() != height)) {
             throw new IllegalArgumentException("Filtering image must be the same size as the parameter map.");
         }

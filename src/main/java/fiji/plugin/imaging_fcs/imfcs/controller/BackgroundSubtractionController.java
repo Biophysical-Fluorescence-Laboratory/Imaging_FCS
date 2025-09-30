@@ -3,6 +3,7 @@ package fiji.plugin.imaging_fcs.imfcs.controller;
 import fiji.plugin.imaging_fcs.imfcs.enums.BackgroundMode;
 import fiji.plugin.imaging_fcs.imfcs.model.BackgroundModel;
 import fiji.plugin.imaging_fcs.imfcs.model.ImageModel;
+import fiji.plugin.imaging_fcs.imfcs.utils.ImageLoader;
 import fiji.plugin.imaging_fcs.imfcs.view.BackgroundSubtractionView;
 import ij.IJ;
 
@@ -78,7 +79,7 @@ public class BackgroundSubtractionController {
                     // loaded
                     boolean loaded = false;
                     try {
-                        loaded = imageModel.loadBackgroundImage(IJ.openImage());
+                        loaded = imageModel.loadBackgroundImage(ImageLoader.openImagePlusWithDialog());
                     } catch (RuntimeException e) {
                         IJ.showMessage(e.getMessage());
                     }
