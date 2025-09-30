@@ -2,6 +2,8 @@
 package fiji.plugin.imaging_fcs.imfcs.controller;
 
 import java.awt.Dimension;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,9 +16,11 @@ import fiji.plugin.imaging_fcs.imfcs.constants.Constants;
 import fiji.plugin.imaging_fcs.imfcs.model.ExpSettingsModel;
 import fiji.plugin.imaging_fcs.imfcs.model.ImageModel;
 import fiji.plugin.imaging_fcs.imfcs.model.OnnxInferenceModel;
+import fiji.plugin.imaging_fcs.imfcs.model.onnx.OnnxBatchModel;
 import fiji.plugin.imaging_fcs.imfcs.model.onnx.OnnxRuntimeStatus;
 import fiji.plugin.imaging_fcs.imfcs.utils.ApplyCustomLUT;
 import fiji.plugin.imaging_fcs.imfcs.view.OnnxInferenceView;
+import fiji.plugin.imaging_fcs.imfcs.view.OnnxBatchView;
 import fiji.plugin.imaging_fcs.imfcs.model.OnnxInferenceWorker;
 import ij.IJ;
 import ij.ImagePlus;
@@ -33,6 +37,9 @@ public class OnnxInferenceController {
     private final OnnxInferenceView view;
     private final ImageModel imageModel;
     private ExpSettingsModel expSettingsModel;
+    private OnnxBatchView batchView;
+    private OnnxBatchModel batchModel;
+    private OnnxBatchController batchController;
 
     // Keep track of window positions globally or pass state if needed
     private static int nextX = 50;
@@ -49,6 +56,9 @@ public class OnnxInferenceController {
     public OnnxInferenceController(OnnxInferenceModel model, ImageModel imageModel, ExpSettingsModel expSettingsModel) {
         this.model = model;
         this.view = new OnnxInferenceView(this, model);
+        this.batchModel = new OnnxBatchModel();
+        this.batchController = new OnnxBatchController(this.batchModel);
+        this.batchView = this.batchController.getView();
 
         // Initialize stride values based on the view defaults.
         this.model.setStrideX(this.view.getStrideX());
@@ -126,10 +136,32 @@ public class OnnxInferenceController {
         this.view.disableRunInferenceButton();
 
         // 3. Perform inference and conversion within a try-catch block
+        int batchSize = this.batchModel.isBatchingEnabled()
+                ? this.batchModel.getBatchSize()
+                : 1;
+
+        // If batching is disabled, we force workers to 0/1 regardless of the field
+        // value.
+        int numPrefetchWorkers = this.batchModel.isBatchingEnabled()
+                ? this.batchModel.getNumPrefetchWorkers()
+                : 0;
+
+        System.out.printf("Inference initiated with Batch Size: %d, Prefetch Workers: %d\n",
+                batchSize, numPrefetchWorkers);
+        // ---------------------------------------
+
+        // Disable the RunInference button.
+        this.view.disableRunInferenceButton();
+
+        // 3. Perform inference and conversion within a try-catch block
         try {
             // --- Run Inference ---
-            // This might throw OrtException or potentially others
-            Map<String, float[][][]> modelOutsArray = model.runInference(this.imageModel, this.expSettingsModel);
+            // Pass the dynamically retrieved parameters
+            Map<String, float[][][]> modelOutsArray = model.runInference(
+                    this.imageModel,
+                    this.expSettingsModel,
+                    batchSize,
+                    numPrefetchWorkers);
 
             // --- Optional: Debug Printing (Consider removing or making conditional for
             // production) ---
@@ -412,5 +444,17 @@ public class OnnxInferenceController {
 
             IJ.saveAsTiff(imp, path + "_onnx" + title + ".tiff");
         }
+    }
+
+    /**
+     * Handles the press of the 'Batch Settings' button, typically opening a
+     * separate configuration window.
+     */
+    public ItemListener tbBatchSettingsPressed() {
+        return (ItemEvent ev) -> {
+            boolean selected = (ev.getStateChange() == ItemEvent.SELECTED);
+            this.batchView.setVisible(selected);
+            this.batchView.toFront();
+        };
     }
 }

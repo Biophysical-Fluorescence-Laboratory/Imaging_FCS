@@ -81,12 +81,27 @@ public class OnnxInferenceModel {
         return true;
     }
 
-    public Map<String, float[][][]> runInference(ImageModel imageModel, ExpSettingsModel expSettingsModel)
+    public Map<String, float[][][]> runInference(ImageModel imageModel, ExpSettingsModel expSettingsModel,
+            int batchSize, int numPrefetchWorkers)
             throws OrtException {
         if (this.currentStatus != OnnxRuntimeStatus.READY) {
             IJ.error("ONNX Model needs to be loaded for inference.");
             throw new Error("ONNX Model is not loaded.");
         }
+
+        if (numPrefetchWorkers > 1) {
+            throw new UnsupportedOperationException("Feature incomplete. Contact assistance.");
+        } else if (numPrefetchWorkers >= 0) {
+            return runInferenceSynchronous(imageModel, expSettingsModel, batchSize);
+        } else {
+            throw new IllegalArgumentException("Invalid numPrefectchWorkers, must be > 0.");
+        }
+    }
+
+    public Map<String, float[][][]> runInferenceSynchronous(
+            ImageModel imageModel,
+            ExpSettingsModel expSettingsModel,
+            int batchSize) throws OrtException {
         try {
             this.currentStatus = OnnxRuntimeStatus.PROCESSING;
             ImagePlus imp = imageModel.getImage();
@@ -99,39 +114,43 @@ public class OnnxInferenceModel {
                     strideX, strideY, strideFrames,
                     expSettingsModel.getFirstFrame(), expSettingsModel.getLastFrame());
 
-            System.out.println("Processing Complete. Results:");
-            for (Map.Entry<String, float[][][]> entry : resultsMap.entrySet()) {
-                String outputName = entry.getKey();
-                float[][][] resultArray = entry.getValue(); // Get the specific result array for this output
-
-                System.out.println("\n=== Output Name: " + outputName + " ===");
-
-                // Defensive check if the array dimensions are valid before trying to access
-                // elements
-                if (resultArray == null || resultArray.length == 0 || resultArray[0].length == 0
-                        || resultArray[0][0].length == 0) {
-                    System.out.println(" (Result array is null or empty for this output)");
-                    continue; // Skip to the next output name
-                }
-
-                System.out.println("Result Array Dimensions: [" + resultArray.length + "][" + resultArray[0].length
-                        + "][" + resultArray[0][0].length + "]");
-                System.out.println("--------------------------");
-
-                // Print the contents of this specific resultArray
-                // (Using the original printing logic, now applied per output)
-                for (int x = 0; x < resultArray.length; x++) {
-                    for (int y = 0; y < resultArray[0].length; y++) {
-                        System.out.print("  ["); // Indent slightly for readability
-                        for (int frame = 0; frame < resultArray[0][0].length; frame++) {
-                            System.out.print(
-                                    resultArray[x][y][frame] + (frame < resultArray[0][0].length - 1 ? ", " : ""));
-                        }
-                        System.out.print("] ");
-                    }
-                    System.out.println(); // Newline after each row (all y values for a given x)
-                }
-            }
+            // System.out.println("Processing Complete. Results:");
+            // for (Map.Entry<String, float[][][]> entry : resultsMap.entrySet()) {
+            // String outputName = entry.getKey();
+            // float[][][] resultArray = entry.getValue(); // Get the specific result array
+            // for this output
+            //
+            // System.out.println("\n=== Output Name: " + outputName + " ===");
+            //
+            // // Defensive check if the array dimensions are valid before trying to access
+            // // elements
+            // if (resultArray == null || resultArray.length == 0 || resultArray[0].length
+            // == 0
+            // || resultArray[0][0].length == 0) {
+            // System.out.println(" (Result array is null or empty for this output)");
+            // continue; // Skip to the next output name
+            // }
+            //
+            // System.out.println("Result Array Dimensions: [" + resultArray.length + "][" +
+            // resultArray[0].length
+            // + "][" + resultArray[0][0].length + "]");
+            // System.out.println("--------------------------");
+            //
+            // // Print the contents of this specific resultArray
+            // // (Using the original printing logic, now applied per output)
+            // for (int x = 0; x < resultArray.length; x++) {
+            // for (int y = 0; y < resultArray[0].length; y++) {
+            // System.out.print(" ["); // Indent slightly for readability
+            // for (int frame = 0; frame < resultArray[0][0].length; frame++) {
+            // System.out.print(
+            // resultArray[x][y][frame] + (frame < resultArray[0][0].length - 1 ? ", " :
+            // ""));
+            // }
+            // System.out.print("] ");
+            // }
+            // System.out.println(); // Newline after each row (all y values for a given x)
+            // }
+            // }
             this.currentStatus = OnnxRuntimeStatus.READY;
             return resultsMap;
         } catch (OrtException e) {
@@ -140,7 +159,7 @@ public class OnnxInferenceModel {
             e.printStackTrace();
             // Instead of System.exit, re-throw the exception (or wrap it)
             throw e; // Let the caller handle the OrtException
-        } 
+        }
     }
 
     /**

@@ -1,10 +1,10 @@
 package fiji.plugin.imaging_fcs.imfcs.model.onnx;
 
 public class InputMetadata {
-    long modelInputX;       // Corresponds to Width
-    long modelInputY;       // Corresponds to Height
-    long modelInputFrames;  // Corresponds to Frames
-    
+    long modelInputX; // Corresponds to Width
+    long modelInputY; // Corresponds to Height
+    long modelInputFrames; // Corresponds to Frames
+
     public InputMetadata(long modelInputX, long modelInputY, long modelInputFrames) {
         this.modelInputX = modelInputX;
         this.modelInputY = modelInputY;
@@ -15,22 +15,21 @@ public class InputMetadata {
     @Override
     public String toString() {
         return "InputMetadata{" +
-               "modelInputX=" + modelInputX +
-               ", modelInputY=" + modelInputY +
-               ", modelInputFrames=" + modelInputFrames +
-               '}';
+                "modelInputX=" + modelInputX +
+                ", modelInputY=" + modelInputY +
+                ", modelInputFrames=" + modelInputFrames +
+                '}';
     }
 
-	public String getX() {
+    public String getX() {
         return String.valueOf(this.modelInputX);
-	}
+    }
 
-	public String getY() {
+    public String getY() {
         return String.valueOf(this.modelInputY);
-	}
+    }
 
-	public String getFrames() {
+    public String getFrames() {
         return String.valueOf(this.modelInputFrames);
-	}
+    }
 }
-

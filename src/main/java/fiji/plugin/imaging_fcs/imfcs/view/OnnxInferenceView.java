@@ -12,9 +12,11 @@ import ai.onnxruntime.OrtException;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemListener;
 
 import static fiji.plugin.imaging_fcs.imfcs.controller.FieldListenerFactory.createFocusListener;
 import static fiji.plugin.imaging_fcs.imfcs.view.ButtonFactory.createJButton;
+import static fiji.plugin.imaging_fcs.imfcs.view.ButtonFactory.createJToggleButton;
 import static fiji.plugin.imaging_fcs.imfcs.view.TextFieldFactory.createTextField;
 import static fiji.plugin.imaging_fcs.imfcs.view.UIUtils.createJLabel;
 import static fiji.plugin.imaging_fcs.imfcs.view.TextFieldFactory.setText;
@@ -53,6 +55,7 @@ public final class OnnxInferenceView extends BaseView {
     private JCheckBox cbUseGpu;
     private JButton btnRunInference;
     private JLabel lblStatus;
+    private JToggleButton tbBatchSettings; 
 
     enum Status {
         NO_MODEL_LOADED,
@@ -138,6 +141,9 @@ public final class OnnxInferenceView extends BaseView {
         btnInitOnnx = createJButton("Init Model", "Start the ONNX environment for inference", null, 
             (ActionListener) e -> controller.startOnnxSession());
 
+        tbBatchSettings = createJToggleButton("Batch Settings", "Configure advanced batching parameters.", null,
+                controller.tbBatchSettingsPressed()); 
+
         // Inference Button
         btnRunInference = createJButton("Run Inference", "Process the current image using the specified settings", null,
             (ActionListener) e -> {
@@ -190,7 +196,7 @@ public final class OnnxInferenceView extends BaseView {
 
         // Row 6: GPU Option
         add(cbUseGpu);
-        add(createJLabel("", "")); // Spacer
+        add(tbBatchSettings);
         add(createJLabel("", "")); // Spacer
         add(createJLabel("", "")); // Spacer
 
@@ -263,6 +269,7 @@ public final class OnnxInferenceView extends BaseView {
             // Disable input fields and buttons while running
             tfOnnxModelPath.setEnabled(!running);
             btnBrowseOnnx.setEnabled(!running);
+            btnInitOnnx.setEnabled(!running);
             tfInputX.setEnabled(!running);
             tfInputY.setEnabled(!running);
             tfInputFrames.setEnabled(!running);
