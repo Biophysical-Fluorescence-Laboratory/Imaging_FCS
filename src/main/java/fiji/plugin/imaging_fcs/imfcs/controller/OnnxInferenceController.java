@@ -99,7 +99,7 @@ public class OnnxInferenceController {
         this.view.updateStatus(this.model.getCurrentStatus().getDisplayLabel());
         // Only enable the inference button once model is loaded.
         this.view.enableRunInferenceButton();
-
+        this.view.updateDevice(this.model.getGpu() ? "GPU" : "CPU");
     }
 
     private void updateModelPath(String filePath) {
@@ -463,6 +463,15 @@ public class OnnxInferenceController {
             boolean selected = (ev.getStateChange() == ItemEvent.SELECTED);
             this.batchView.setVisible(selected);
             this.batchView.toFront();
+        };
+    }
+
+    public ItemListener cbUseGpuToggled() { 
+        return (ItemEvent ev) -> {
+            // Check if a model is actually loaded before flagging for re-initialization
+            if (this.model.getCurrentStatus() != OnnxRuntimeStatus.NO_MODEL_LOADED) {
+                this.view.updateDevice("Click Init Model to apply change");
+            }
         };
     }
 }

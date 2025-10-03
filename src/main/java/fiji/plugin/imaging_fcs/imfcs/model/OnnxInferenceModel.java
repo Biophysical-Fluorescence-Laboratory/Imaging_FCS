@@ -347,4 +347,9 @@ public class OnnxInferenceModel {
     public boolean getGpu() {
         return this.useGpu;
     }
+
+
+    public void setCurrentStatus(OnnxRuntimeStatus status) {
+        this.currentStatus = status;
+    }
 }

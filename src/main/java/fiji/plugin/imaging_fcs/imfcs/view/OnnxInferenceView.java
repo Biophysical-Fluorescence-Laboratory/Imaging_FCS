@@ -56,6 +56,7 @@ public final class OnnxInferenceView extends BaseView {
     private JButton btnRunInference;
     private JLabel lblStatus;
     private JToggleButton tbBatchSettings; 
+    private JLabel lblDevice;
 
     enum Status {
         NO_MODEL_LOADED,
@@ -123,9 +124,11 @@ public final class OnnxInferenceView extends BaseView {
         // GPU Option
         cbUseGpu = new JCheckBox("Use GPU (if available)");
         cbUseGpu.setToolTipText("Attempt to use CUDA for inference if supported");
+        cbUseGpu.addItemListener(controller.cbUseGpuToggled());
 
         // Status Label
         lblStatus = createJLabel("Status: No Model Loaded", "Displays current operation status");
+        lblDevice = createJLabel("Device: CPU", "Displays current ONNX device.");
     }
 
     @Override
@@ -203,11 +206,12 @@ public final class OnnxInferenceView extends BaseView {
         // Row 6: GPU Option
         add(cbUseGpu);
         add(tbBatchSettings);
-        add(createJLabel("", "")); // Spacer
-        add(createJLabel("", "")); // Spacer
+        add(createJLabel("", ""));
+        add(createJLabel("", ""));
 
         // Row 7: Spacer Row (Optional)
-        add(createJLabel("", ""));
+        add(lblDevice); // Here, replace spacer with the lblDevice.
+        // add(createJLabel("", ""));
         add(createJLabel("", ""));
         add(createJLabel("", ""));
         add(createJLabel("", ""));
@@ -225,41 +229,28 @@ public final class OnnxInferenceView extends BaseView {
         gbc.gridwidth = 3; // Span 3 columns
         gbc.fill = GridBagConstraints.HORIZONTAL;
         add(lblStatus, gbc);
-        // Note: Adding components with GridBagConstraints directly might conflict
-        // if BaseView strictly uses the GridLayout set earlier.
-        // A simpler approach if GridBag isn't needed is just:
-        // add(lblStatus);
-        // add(createJLabel("", "")); // Spacer
-        // add(createJLabel("", "")); // Spacer
-        // Let's stick to the simpler grid layout adding for now:
-        // Remove the GBC code above and uncomment below:
-        // add(lblStatus);
-        // add(createJLabel("", "")); // Spacer
-        // add(createJLabel("", "")); // Spacer
-        // --- Re-evaluate layout for status ---
-        // Let's just put status label in col 2
-        // add(createJLabel("Status:", "Current operation status")); // Already added in
-        // prev row
-        // add(lblStatus);
-        // add(createJLabel("", "")); // Spacer
-        // add(createJLabel("", "")); // Spacer
-        // Let's try putting Status label and text on the last row:
         add(lblStatus); // Occupies the last cell
-
     }
-
-    // --- Placeholder methods for Controller interaction ---
 
     /**
      * Updates the status message displayed to the user.
-     * (To be called by the Controller).
      * 
      * @param message The status message to display.
      */
     public void updateStatus(String message) {
-        // Ensure UI updates happen on the Event Dispatch Thread
         SwingUtilities.invokeLater(() -> {
             lblStatus.setText(message);
+        });
+    }
+
+    /**
+     * Updates the device displayed to the user.
+     * 
+     * @param message The status message to display.
+     */
+    public void updateDevice(String message) {
+        SwingUtilities.invokeLater(() -> {
+            lblDevice.setText(message);
         });
     }
 
