@@ -405,9 +405,10 @@ public class OnnxInferenceController {
         System.out.println("Finished displaying/updating windows.");
     }
 
-    public void startOnnxSession() {
-        this.model.startOnnxSession();
-        this.view.enableRunInferenceButton();
+    public void startOnnxSession() throws OrtException {
+        // this.model.startOnnxSession();
+        // this.view.enableRunInferenceButton();
+        this.loadModel();
     }
 
     public boolean canDoInference() {

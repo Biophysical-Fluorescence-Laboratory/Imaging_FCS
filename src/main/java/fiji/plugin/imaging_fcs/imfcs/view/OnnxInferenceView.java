@@ -139,8 +139,14 @@ public final class OnnxInferenceView extends BaseView {
             }
         });
         btnInitOnnx = createJButton("Init Model", "Start the ONNX environment for inference", null, 
-            (ActionListener) e -> controller.startOnnxSession());
-
+            (ActionListener) e ->  {
+            try {
+                controller.startOnnxSession();
+            } catch (OrtException e1) {
+                IJ.log(e1.getStackTrace().toString());
+                IJ.error(e1.getMessage());
+            }
+        });
         tbBatchSettings = createJToggleButton("Batch Settings", "Configure advanced batching parameters.", null,
                 controller.tbBatchSettingsPressed()); 
 
