@@ -60,7 +60,7 @@ public class OnnxInferenceModel {
         return true;
     }
 
-    public boolean loadOnnxModel(boolean useGpu) throws OrtException {
+    public void loadOnnxModel(boolean useGpu) throws OrtException {
         // File validation
         if (!validateModelPath(this.modelPath)) {
             this.currentStatus = OnnxRuntimeStatus.ERROR_LOADING;
@@ -77,8 +77,6 @@ public class OnnxInferenceModel {
         // Update internal state.
         this.useGpu = useGpu;
         this.currentStatus = OnnxRuntimeStatus.READY;
-
-        return true;
     }
 
     public Map<String, float[][][]> runInference(ImageModel imageModel, ExpSettingsModel expSettingsModel,
