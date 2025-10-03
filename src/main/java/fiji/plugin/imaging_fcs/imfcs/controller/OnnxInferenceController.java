@@ -84,6 +84,12 @@ public class OnnxInferenceController {
             System.out.println("Selected ONNX model file: " + filePath);
             this.updateModelPath(filePath);
         }
+        
+        loadModel();
+    }
+
+    private void loadModel() throws OrtException {
+        this.teardownOnnxSession();
 
         // Load the model
         this.model.loadOnnxModel(this.view.getUseGPU());
@@ -93,6 +99,7 @@ public class OnnxInferenceController {
         this.view.updateStatus(this.model.getCurrentStatus().getDisplayLabel());
         // Only enable the inference button once model is loaded.
         this.view.enableRunInferenceButton();
+
     }
 
     private void updateModelPath(String filePath) {
