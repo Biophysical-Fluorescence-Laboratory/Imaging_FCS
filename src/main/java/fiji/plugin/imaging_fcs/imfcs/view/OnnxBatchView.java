@@ -73,7 +73,7 @@ public final class OnnxBatchView extends BaseView {
         // tfStrideX = createTextField("1", "Stride in X dimension (pixels)",
         // createFocusListener(model::setStrideX));
         // Batch Size
-        tfBatchSize = createTextField("1", "Maximum number of input windows to process simultaneously in a batch.",
+        tfBatchSize = createTextField("64", "Maximum number of input windows to process simultaneously in a batch.",
                 createFocusListener(model::setBatchSize));
 
         // Prefetch Workers (Optional setting for async loading)
@@ -159,7 +159,8 @@ public final class OnnxBatchView extends BaseView {
 
     public void setInputsEnabled(boolean enabled) {
         tfBatchSize.setEnabled(enabled);
-        tfPrefetchWorkers.setEnabled(enabled);
+        // For now, since prefetching is not implemented, disable this.
+        // tfPrefetchWorkers.setEnabled(enabled);
     }
 
     public boolean getBatchEnabledStatus() {

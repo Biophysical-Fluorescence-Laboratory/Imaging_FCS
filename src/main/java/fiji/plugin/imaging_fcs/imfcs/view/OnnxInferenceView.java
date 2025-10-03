@@ -31,7 +31,7 @@ public final class OnnxInferenceView extends BaseView {
 
     // --- Constants for Layout and Appearance (Adjust as needed) ---
     // Increased rows to accommodate more fields + button + status
-    private static final GridLayout VIEW_LAYOUT = new GridLayout(9, 4, 5, 5); // Rows, Cols, Hgap, Vgap
+    // private static final GridLayout VIEW_LAYOUT = new GridLayout(9, 4, 5, 5); // Rows, Cols, Hgap, Vgap
     // Adjust location and size based on where you want it relative to other plugin
     // windows
     private static final Point VIEW_LOCATION = new Point(Constants.MAIN_PANEL_POS.x,
@@ -88,11 +88,11 @@ public final class OnnxInferenceView extends BaseView {
     protected void configureWindow() {
         super.configureWindow(); // Call parent setup
 
-        setLayout(VIEW_LAYOUT);
+        // setLayout(VIEW_LAYOUT);
+        setLayout(new GridBagLayout());
         setLocation(VIEW_LOCATION);
         setSize(VIEW_DIMENSION);
-        // setResizable(false); // Optional: prevent resizing
-
+        setResizable(true);
         setVisible(false); // Keep it hidden until explicitly shown
     }
 
@@ -165,12 +165,135 @@ public final class OnnxInferenceView extends BaseView {
 
     }
 
+    @Override
+    protected void addComponentsToFrame() {
+        // 1. Initialize GridBagConstraints
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL; // Components fill their cell width
+        gbc.insets = new Insets(5, 5, 5, 5); // Use the original hgap/vgap (5, 5) as padding
+        
+        // We want input fields to stretch more than labels or buttons
+        gbc.weightx = 1.0; // Default weight for components that span 1 column
+
+        int row = 0; // Start row counter
+
+        // --- Row 1: ONNX Model Path ---
+        
+        // Col 0: Label
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.weightx = 0; // Labels typically don't stretch
+        gbc.gridwidth = 1;
+        add(createJLabel("ONNX Model:", "Path to the ONNX model file (.onnx)"), gbc);
+
+        // Col 1: Text Field (Give it more stretch capacity)
+        gbc.gridx = 1;
+        gbc.weightx = 1.0; 
+        add(tfOnnxModelPath, gbc);
+
+        // Col 2: Browse Button
+        gbc.gridx = 2;
+        gbc.weightx = 1.0;
+        add(btnBrowseOnnx, gbc);
+
+        // Col 3: Init Button
+        gbc.gridx = 3;
+        gbc.weightx = 1.0;
+        add(btnInitOnnx, gbc);
+
+        row++;
+        // Reset weightx for standard fields
+        gbc.weightx = 0.5; 
+
+        // --- Row 2: Input Dimensions (X, Y) ---
+        gbc.gridy = row;
+        gbc.gridx = 0; add(createJLabel("Input X:", "..."), gbc);
+        gbc.gridx = 1; add(tfInputX, gbc);
+        gbc.gridx = 2; add(createJLabel("Input Y:", "..."), gbc);
+        gbc.gridx = 3; add(tfInputY, gbc);
+
+        row++;
+
+        // --- Row 3: Input Dimensions (Frames) ---
+        gbc.gridy = row;
+        gbc.gridx = 0; add(createJLabel("Input Frames:", "..."), gbc);
+        gbc.gridx = 1; add(tfInputFrames, gbc);
+        gbc.gridx = 2; add(createJLabel("", ""), gbc); // Spacer
+        gbc.gridx = 3; add(createJLabel("", ""), gbc); // Spacer
+
+        row++;
+
+        // --- Row 4: Stride (X, Y) ---
+        gbc.gridy = row;
+        gbc.gridx = 0; add(createJLabel("Stride X:", "..."), gbc);
+        gbc.gridx = 1; add(tfStrideX, gbc);
+        gbc.gridx = 2; add(createJLabel("Stride Y:", "..."), gbc);
+        gbc.gridx = 3; add(tfStrideY, gbc);
+
+        row++;
+
+        // --- Row 5: Stride (Frames) ---
+        gbc.gridy = row;
+        gbc.gridx = 0; add(createJLabel("Stride Frames:", "..."), gbc);
+        gbc.gridx = 1; add(tfStrideFrames, gbc);
+        gbc.gridx = 2; add(createJLabel("", ""), gbc); // Spacer
+        gbc.gridx = 3; add(createJLabel("", ""), gbc); // Spacer
+
+        row++;
+
+        // --- Row 6: GPU Option / Batch Settings ---
+        gbc.gridy = row;
+        gbc.gridx = 0; add(cbUseGpu, gbc);
+        gbc.gridx = 1; add(tbBatchSettings, gbc);
+        gbc.gridx = 2; add(createJLabel("", ""), gbc);
+        gbc.gridx = 3; add(createJLabel("", ""), gbc);
+
+        row++;
+        
+        // --- Row 7: DEVICE LABEL (The Target) ---
+        // Make the label span all 4 columns.
+        gbc.gridy = row;
+        gbc.gridx = 0; // Start at column 0
+        gbc.gridwidth = 4; // Span four columns
+        gbc.weightx = 1.0; // Ensure it stretches fully across the row
+        
+        add(lblDevice, gbc);
+        
+        // Reset constraints for subsequent rows
+        gbc.gridwidth = 1;
+        gbc.weightx = 0.5; 
+        
+        row++;
+
+        // --- Row 8: Run Button ---
+        gbc.gridy = row;
+        gbc.gridx = 0; add(btnRunInference, gbc);
+        gbc.gridx = 1; add(createJLabel("", ""), gbc); // Spacer
+        gbc.gridx = 2; add(createJLabel("", ""), gbc); // Spacer
+        gbc.gridx = 3; add(createJLabel("", ""), gbc); // Spacer
+
+        row++;
+
+        // --- Row 9: Status Label ---
+        gbc.gridy = row;
+        
+        // Col 0: Label "Status:"
+        gbc.gridx = 0;
+        gbc.weightx = 0; // Don't let this label stretch
+        add(createJLabel("Status:", "Current operation status"), gbc);
+        
+        // Col 1-3: Status Message Field (Span 3 columns)
+        gbc.gridx = 1; 
+        gbc.gridwidth = 3; // Span the remaining 3 columns
+        gbc.weightx = 1.0; // Let the status message stretch fully
+        add(lblStatus, gbc);
+    }
+
     /**
      * Adds the initialized UI components (labels, text fields, buttons, checkbox)
      * to the view's frame according to the defined layout.
      */
-    @Override
-    protected void addComponentsToFrame() {
+    protected void _addComponentsToFrame() {
         // Row 1: ONNX Model Path
         add(createJLabel("ONNX Model:", "Path to the ONNX model file (.onnx)"));
         add(tfOnnxModelPath);
