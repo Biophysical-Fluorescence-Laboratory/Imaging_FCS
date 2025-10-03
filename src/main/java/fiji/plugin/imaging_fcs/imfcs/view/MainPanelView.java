@@ -59,7 +59,7 @@ public final class MainPanelView extends BaseView {
             btnParamVideo, btnOptions, btnAve, btnParaCor, btnPSF, btnAll, btnROI, btnMore, btnCancel, btnBringToFront,
             btnNB;
     private JToggleButton tbExpSettings, tbFit, tbOverlap, tbBackground, tbFiltering, tbBleachCorStride, tbDL, tbSim,
-            tbMSD;
+            tbMSD, tbOnnxInference;
 
     // Extended panel for additional features
     private JPanel extendedPanel;
@@ -266,6 +266,8 @@ public final class MainPanelView extends BaseView {
         // set the button MSD based on the settings value
         tbMSD = createOnOffToggleButton("MSD", settings.isMSD(),
                 "Switches Mean Square Displacement calculation and " + "plot on/off.", null, controller.tbMSDPressed());
+
+        tbOnnxInference = createJToggleButton("ONNX Inference", "Show window for ONNX Model Inference", null, controller.tbOnnxInferencePressed());
     }
 
     /**
@@ -398,6 +400,9 @@ public final class MainPanelView extends BaseView {
         addRow(extendedPanel, btnPSF, tbDL, tbMSD, tbSim);
         addRow(extendedPanel, btnBringToFront);
         addRow(extendedPanel, btnCancel);
+
+        // ONNX Model section
+        addRow(extendedPanel, createJLabel("ONNX MODELS", "", BOLD_FONT), tbOnnxInference);
     }
 
     /**

@@ -53,6 +53,8 @@ public class BatchView extends GenericDialog {
         out.put("Save excel", getNextBoolean());
         out.put("Save plot windows", getNextBoolean());
 
+        out.put("ONNX Inference", getNextBoolean());
+
         return out;
     }
 
@@ -81,6 +83,7 @@ public class BatchView extends GenericDialog {
 
         addCheckbox("Save excel", true);
         addCheckbox("Save plot windows", false);
+        addCheckbox("ONNX Inference", false);
 
         showDialog();
 
