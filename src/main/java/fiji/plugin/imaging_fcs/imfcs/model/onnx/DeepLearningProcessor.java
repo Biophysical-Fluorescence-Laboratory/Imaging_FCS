@@ -5,6 +5,7 @@ import ai.onnxruntime.OrtException;
 import ij.IJ;
 import ij.ImagePlus;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -70,6 +71,37 @@ public class DeepLearningProcessor {
         this.onnxModel = new OnnxPredictor(modelPath, this.useGpu);
     }
 
+    public float[] extractAndStackBatch(List<Pair<ChunkIndices, ResultIndices>> batch, int frames, int width,
+            int height) {
+        int batchSize = batch.size();
+        // Default to 1 channel, might need to make this explicit if Dual Color used in
+        // future
+        int channels = 1;
+
+        // Here, flatten batch to match ONNX expected semantics
+        int totalSize = batchSize * channels * frames * width * height;
+        float[] flattenedBatch = new float[totalSize];
+
+        // Populate in loop
+        int index = 0;
+        for (Pair<ChunkIndices, ResultIndices> indexPair : batch) {
+            ChunkIndices chunkIndices = indexPair.getLeft();
+
+            int startX = chunkIndices.startX;
+            int startY = chunkIndices.startY;
+            int startFrame = chunkIndices.startFrame;
+
+            for (int f = 0; f < frames; f++) {
+                for (int x = 0; x < width; x++) {
+                    for (int y = 0; y < height; y++) {
+                        flattenedBatch[index++] = imageArr[startX + x][startY + y][startFrame + f];
+                    }
+                }
+            }
+        }
+        return flattenedBatch;
+    }
+
     /**
      * Processes the loaded image by iterating through chunks, running inference,
      * and aggregating results for each named output of the ONNX model.
@@ -88,7 +120,7 @@ public class DeepLearningProcessor {
      * @throws OrtException If there is an error during ONNX processing.
      */
     public Map<String, float[][][]> processImage(int strideX, int strideY, int strideFrames,
-            int initialFrame, int finalFrame) throws OrtException {
+            int initialFrame, int finalFrame, int batchSize) throws OrtException {
         // Extract model input properties from the metadata.
         InputMetadata inputMetadata = onnxModel.getInputMetadata();
         int modelInputX = (int) inputMetadata.modelInputX;
@@ -111,85 +143,79 @@ public class DeepLearningProcessor {
             resultsMap.put(name, chunker.generateResultArray());
         }
 
-        // Get the chunk iterator
-        Iterator<Pair<float[][][], ResultIndices>> chunkIterator = chunker.getChunkIterator(imageArr);
-        
+        // Initialize chunk index generator.
+        Iterator<Pair<ChunkIndices, ResultIndices>> indexIterator = chunker.getChunkIterator();
+
+        // Batch processing loop
         int currentChunkInd = 0;
         int totalChunks = chunker.getTotalChunks();
+        List<Pair<ChunkIndices, ResultIndices>> batch = new ArrayList<>(batchSize);
 
-        // Process each chunk
-        while (chunkIterator.hasNext()) {
-            ++currentChunkInd;
-            Pair<float[][][], ResultIndices> pair = chunkIterator.next();
-            float[][][] chunk = pair.getLeft();
-            ResultIndices resultIndices = pair.getRight();
+        while (indexIterator.hasNext() || !batch.isEmpty()) {
+            while (indexIterator.hasNext() && batch.size() < batchSize) {
+                batch.add(indexIterator.next());
+            }
 
-            // Add channel dimension for ONNX model (Batch=1, Channel=1)
-            // The shape should be [Batch, Channel, Frames, X, Y]
-            // chunk dimensions are [Frames][X][Y]
-            // Shape for createTensor should match model input spec: [1, 1,
-            // modelInputFrames, modelInputX, modelInputY]
-            long[] inputShape = new long[] { 1, 1, modelInputFrames, modelInputX, modelInputY };
+            if (batch.isEmpty()) {
+                break;
+            }
+
+            int actualBatchSize = batch.size();
+
+            long[] inputShape = new long[] {
+                actualBatchSize,
+                1, // channel dimension, assumed 1 for now, might change.
+                modelInputFrames,
+                modelInputX,
+                modelInputY,
+            };
+
+            float[] flattenedBatchData = extractAndStackBatch(batch, modelInputFrames, modelInputX, modelInputY);
+
+            Map<String, float[]> batchedOutputData;
 
             // Prepare input tensor within a try-with-resources block for auto-closing
             try (OnnxTensor onnxTensor = OnnxTensor.createTensor(
                     onnxModel.getEnvironment(),
-                    FloatBuffer.wrap(flattenChunk(chunk)), // Use a specific flatten for the chunk
+                    FloatBuffer.wrap(flattenedBatchData),
                     inputShape)) {
+                    
                 Map<String, OnnxTensor> inputMap = new HashMap<>();
-                inputMap.put(onnxModel.getInputNames(), onnxTensor); // Assuming only one input
+                inputMap.put(onnxModel.getInputNames(), onnxTensor);
+                
+                // ONNX inference.
+                batchedOutputData = onnxModel.runInferenceBatched(inputMap);
 
-                // Run inference - This now returns Map<String, Float>
-                // ONNX resources related to output are managed within runInference
-                Map<String, Float> chunkOutputData = onnxModel.runInference(inputMap);
+                // Result processing and populating result map
+                for (int i = 0; i < actualBatchSize; i++) {
+                    ResultIndices resultIndices = batch.get(i).getRight();
 
-                // Process results and fill in the appropriate result array in the map
-                for (Map.Entry<String, Float> entry : chunkOutputData.entrySet()) {
-                    String outputName = entry.getKey();
-                    float predictionValue = entry.getValue();
+                    for (Map.Entry<String, float[]> entry : batchedOutputData.entrySet()) {
+                        String outputName = entry.getKey();
+                        float[] predictionBatch = entry.getValue();
 
-                    // Get the correct result array from the map based on the output name
-                    float[][][] targetArray = resultsMap.get(outputName);
+                        float predictionValue = predictionBatch[i];
+                        float[][][] targetArray = resultsMap.get(outputName);
 
-                    // Defensive check (should not happen if initialized correctly based on model
-                    // metadata)
-                    if (targetArray == null) {
-                        System.err.println("Warning: No result array found in resultsMap for output name: " + outputName
-                                + ". Skipping.");
-                        continue; // Skip this output if structure wasn't pre-allocated
+                        if (targetArray == null) {
+                            continue;
+                        }
+
+                        targetArray[resultIndices.resultX][resultIndices.resultY][resultIndices.resultFrame] = predictionValue;
                     }
-
-                    // Fill the specific result array at the calculated indices
-                    targetArray[resultIndices.resultX][resultIndices.resultY][resultIndices.resultFrame] = predictionValue;
+                    currentChunkInd++;
                 }
-                // input 'onnxTensor' is closed automatically by try-with-resources
-
-            } // End try-with-resources for input onnxTensor
-            // Update ImageJ progress bar
+            } catch (OrtException e) {
+                IJ.error("ONNX Runtime Error during batch inference: " + e.getMessage());
+                throw e; 
+            }
+            
+            batch.clear();
             IJ.showProgress((double) currentChunkInd / (double) totalChunks);
-        } // End while loop over chunks
+        }
 
         // Return the map containing all aggregated result arrays
         return resultsMap;
-    }
-
-    // Helper function specifically to flatten a 3D float chunk [Frames][X][Y]
-    // into the order expected by the FloatBuffer for shape [1, 1, Frames, X, Y]
-    private static float[] flattenChunk(float[][][] chunk) {
-        int dimFrames = chunk.length;
-        int dimX = chunk[0].length;
-        int dimY = chunk[0][0].length;
-        float[] flattened = new float[dimFrames * dimX * dimY];
-        int index = 0;
-        // Order: Frames, X, Y (matches typical memory layout for this structure)
-        for (int f = 0; f < dimFrames; f++) {
-            for (int x = 0; x < dimX; x++) {
-                for (int y = 0; y < dimY; y++) {
-                    flattened[index++] = chunk[f][x][y];
-                }
-            }
-        }
-        return flattened;
     }
 
     // Close methods to prevent resource leaks
@@ -208,7 +234,7 @@ public class DeepLearningProcessor {
     public InputMetadata getInputMetadata() {
         return this.onnxModel.getInputMetadata();
     }
-    
+
     public OnnxPredictor getOnnxPredictor() {
         return this.onnxModel;
     }

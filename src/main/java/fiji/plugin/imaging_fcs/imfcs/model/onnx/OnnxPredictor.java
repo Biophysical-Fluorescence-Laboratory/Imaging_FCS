@@ -9,6 +9,7 @@ import ai.onnxruntime.OrtSession.SessionOptions;
 import ai.onnxruntime.TensorInfo;
 import ai.onnxruntime.OrtSession.SessionOptions.OptLevel;
 
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -204,6 +205,43 @@ public class OnnxPredictor implements AutoCloseable {
             }
 
         } // 'results' and all contained tensors are closed here.
+
+        return outputDataMap;
+    }
+
+    /**
+     * Runs inference using a batched input tensor map (Batch size B > 0).
+     * Extracts the entire flattened output array for each output tensor.
+     * Manages the lifecycle of the session result and output tensors internally.
+     *
+     * @param input Map where keys are input tensor names and values are the
+     *              OnnxTensor inputs.
+     * @return A Map where keys are the output tensor names and values are the
+     *         flattened float array containing B predictions.
+     * @throws OrtException If there is an error during inference or tensor
+     *                      processing.
+     */
+    public Map<String, float[]> runInferenceBatched(Map<String, OnnxTensor> input) throws OrtException {
+        Map<String, float[]> outputDataMap = new HashMap<>();
+
+        // Use try-with-resources for OrtSession.Result to ensure automatic cleanup
+        try (OrtSession.Result results = session.run(input)) {
+
+            // Iterate through the known output names
+            for (Map.Entry<String, NodeInfo> entry : session.getOutputInfo().entrySet()) {
+                String outputName = entry.getKey();
+
+                OnnxTensor tensor = (OnnxTensor) results.get(outputName).get(); 
+                FloatBuffer floatBuffer = tensor.getFloatBuffer();
+                
+                // Determine the total size of the output data (B * K)
+                int bufferSize = floatBuffer.remaining();
+                float[] predictionArray = new float[bufferSize];
+                
+                floatBuffer.get(predictionArray);
+                outputDataMap.put(outputName, predictionArray);
+            }
+        }
 
         return outputDataMap;
     }

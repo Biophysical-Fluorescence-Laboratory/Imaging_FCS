@@ -112,7 +112,7 @@ public class OnnxInferenceModel {
             // Process the image - This now returns a Map
             Map<String, float[][][]> resultsMap = this.deepLearningProcessor.processImage(
                     strideX, strideY, strideFrames,
-                    expSettingsModel.getFirstFrame(), expSettingsModel.getLastFrame());
+                    expSettingsModel.getFirstFrame(), expSettingsModel.getLastFrame(), batchSize);
 
             // System.out.println("Processing Complete. Results:");
             // for (Map.Entry<String, float[][][]> entry : resultsMap.entrySet()) {

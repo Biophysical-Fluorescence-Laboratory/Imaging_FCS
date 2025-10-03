@@ -20,8 +20,8 @@ public class ChunkGenerator {
     private int totalChunks;
 
     public ChunkGenerator(int imageDimX, int imageDimY, int imageDimFrames,
-                   int modelInputX, int modelInputY, int modelInputFrames,
-                   int strideX, int strideY, int strideFrames) {
+            int modelInputX, int modelInputY, int modelInputFrames,
+            int strideX, int strideY, int strideFrames) {
 
         this.imageDimX = imageDimX;
         this.imageDimY = imageDimY;
@@ -32,7 +32,7 @@ public class ChunkGenerator {
         this.strideX = strideX;
         this.strideY = strideY;
         this.strideFrames = strideFrames;
-        this.totalChunks = 0;       // Calculated dynamically.
+        this.totalChunks = 0; // Calculated dynamically.
     }
 
     public List<ChunkIndices> generateChunkIndicesList() {
@@ -52,7 +52,6 @@ public class ChunkGenerator {
         return indicesList;
     }
 
-
     public ResultIndices mapChunkIndicesToResultIndices(ChunkIndices chunkIndices) {
         int resultX = chunkIndices.startX / strideX;
         int resultY = chunkIndices.startY / strideY;
@@ -67,51 +66,50 @@ public class ChunkGenerator {
 
         return new float[resultDimX][resultDimY][resultDimFrames];
     }
-    
-    public Iterator<Pair<float[][][], ResultIndices>> getChunkIterator(float[][][] imageArr) {
-      return new ChunkIterator(imageArr, this.modelInputX, this.modelInputY, this.modelInputFrames);
+
+    public Iterator<Pair<ChunkIndices, ResultIndices>> getChunkIterator() {
+        return new ChunkIterator();
     }
 
-    private class ChunkIterator implements Iterator<Pair<float[][][], ResultIndices>> {
-      private final Iterator<ChunkIndices> indicesIterator;
-      private final float[][][] imageArr;
-      private final int modelInputX;
-      private final int modelInputY;
-      private final int modelInputFrames;
+    private class ChunkIterator implements Iterator<Pair<ChunkIndices, ResultIndices>> {
+        private final Iterator<ChunkIndices> indicesIterator;
+        // private final int modelInputX;
+        // private final int modelInputY;
+        // private final int modelInputFrames;
 
-      public ChunkIterator(float[][][] imageArr, int modelInputX, int modelInputY, int modelInputFrames) {
-          this.indicesIterator = generateChunkIndicesList().iterator();
-          this.imageArr = imageArr;
-          this.modelInputX = modelInputX;
-          this.modelInputY = modelInputY;
-          this.modelInputFrames = modelInputFrames;
-      }
+        public ChunkIterator() {
+            this.indicesIterator = generateChunkIndicesList().iterator();
+            // this.modelInputX = modelInputX;
+            // this.modelInputY = modelInputY;
+            // this.modelInputFrames = modelInputFrames;
+        }
 
-      @Override
-      public boolean hasNext() {
-          return indicesIterator.hasNext();
-      }
+        @Override
+        public boolean hasNext() {
+            return indicesIterator.hasNext();
+        }
 
-      @Override
-      public Pair<float[][][], ResultIndices> next() {
-          if (!hasNext()) {
-              throw new NoSuchElementException();
-          }
+        @Override
+        public Pair<ChunkIndices, ResultIndices> next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
 
-          ChunkIndices chunkIndices = indicesIterator.next();
-          ResultIndices resultIndices = mapChunkIndicesToResultIndices(chunkIndices);
+            ChunkIndices chunkIndices = indicesIterator.next();
+            ResultIndices resultIndices = mapChunkIndicesToResultIndices(chunkIndices);
 
-          // Extract the chunk
-          float[][][] chunk = new float[this.modelInputFrames][this.modelInputX][this.modelInputY];
-          for (int x = 0; x < this.modelInputX; x++) {
-              for (int y = 0; y < this.modelInputY; y++) {
-                  for (int frame = 0; frame < this.modelInputFrames; frame++) {
-                      chunk[frame][x][y] = imageArr[chunkIndices.startX + x][chunkIndices.startY + y][chunkIndices.startFrame + frame];
-                  }
-              }
-          }
+            // Extract the chunk
+            // float[][][] chunk = new float[this.modelInputFrames][this.modelInputX][this.modelInputY];
+            // for (int x = 0; x < this.modelInputX; x++) {
+            //     for (int y = 0; y < this.modelInputY; y++) {
+            //         for (int frame = 0; frame < this.modelInputFrames; frame++) {
+            //             chunk[frame][x][y] = imageArr[chunkIndices.startX + x][chunkIndices.startY
+            //                     + y][chunkIndices.startFrame + frame];
+            //         }
+            //     }
+            // }
 
-          return new Pair<>(chunk, resultIndices); // Return chunk and ResultIndices
+            return new Pair<>(chunkIndices, resultIndices); // Return chunk and ResultIndices
         }
     }
 
